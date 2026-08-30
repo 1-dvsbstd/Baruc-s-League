@@ -127,10 +127,38 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // Render Overall Standings Table
+            // Render Monthly / Period Breakdowns First
+            if (data.monthly && data.monthly.length > 0) {
+                html += `<h3 style="color: var(--primary-color); text-align: center; margin: 0 0 12px 0;">Periods & Monthly</h3>`;
+                
+                data.monthly.forEach(period => {
+                    // Clean up title by removing "Period X " if it follows the "Period X (GW...)" pattern
+                    let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
+
+                    html += `
+                        <div class="card">
+                            <h4 style="margin-top: 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${cleanTitle}</h4>
+                            <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
+                                ${period.scores.map(s => `
+                                    <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02);">
+                                        <span>${s.name}</span>
+                                        <span style="font-weight: bold; color: var(--primary-color);">${s.score}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
+                                <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Overall Standings Table at the Bottom
             if (data.overall && data.overall.rows) {
                 html += `
-                    <div class="card">
+                    <div class="card" style="margin-top: 24px;">
                         <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;">Overall Standings</h3>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
@@ -150,32 +178,6 @@
                         </div>
                     </div>
                 `;
-            }
-
-            // Render Monthly / Period Breakdowns
-            if (data.monthly && data.monthly.length > 0) {
-                html += `<h3 style="color: var(--primary-color); text-align: center; margin: 24px 0 12px 0;">Periods & Monthly</h3>`;
-                
-                data.monthly.forEach(period => {
-                    html += `
-                        <div class="card">
-                            <h4 style="margin-top: 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${period.title}</h4>
-                            <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
-                                ${period.scores.map(s => `
-                                    <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02);">
-                                        <span>${s.name}</span>
-                                        <span style="font-weight: bold; color: var(--primary-color);">${s.score}</span>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
-                                <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
-                                <div>💩 <strong>Last Place:</strong> ${period.lastScorer}</div>
-                            </div>
-                        </div>
-                    `;
-                });
             }
 
             // Last Updated Timestamp
