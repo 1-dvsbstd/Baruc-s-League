@@ -114,7 +114,7 @@
                 document.getElementById('app').innerHTML = `
                     <div class="card">
                         <p style="color: #ff6b6b; text-align: center;">Unable to load data. Please check your connection.</p>
-                    </div>`;
+                    `;
             } finally {
                 // Dismiss splash screen smoothly once loaded
                 const splash = document.getElementById('splash-screen');
@@ -149,6 +149,7 @@
                             <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
                                 <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
                                 <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
+                                ${period.lastScorer ? `<div>💩 <strong>Last Place:</strong> ${period.lastScorer}</div>` : ''}
                             </div>
                         </div>
                     `;
