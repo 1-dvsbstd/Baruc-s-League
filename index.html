@@ -135,9 +135,7 @@
 
     <h1>FPL Side Pot Tracker</h1>
     
-    <div id="app">
-        <p style="text-align:center;">Loading standings...</p>
-    </div>
+    <div id="app"></div>
 
     <div id="updated" class="updated-time"></div>
 
@@ -205,7 +203,7 @@
                 splash.classList.add("fade-out");
                 setTimeout(function() {
                     splash.style.display = "none";
-                }, 500); // Matches the 0.5s CSS transition
+                }, 500);
             }
         }
 
@@ -235,7 +233,6 @@
                     document.getElementById("updated").innerText = "Last updated: " + data.updated;
                 }
                 
-                // Keep the splash screen visible for at least 1 extra second so it lingers nicely
                 setTimeout(hideSplashScreen, 1000);
             })
             .catch(err => {
