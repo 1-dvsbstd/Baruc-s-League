@@ -155,7 +155,6 @@
                         <p style="color: #ff4b4b; text-align: center;">Unable to load data. Please check your connection.</p>
                     </div>`;
             } finally {
-                // Dismiss splash screen smoothly once loaded
                 const splash = document.getElementById('splash-screen');
                 splash.classList.add('fade-out');
                 setTimeout(() => splash.remove(), 500);
@@ -166,14 +165,13 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // Render Monthly / Period Breakdowns as a Horizontal Carousel
+            // 1. Render Monthly / Period Breakdowns Carousel
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => period.scores && period.scores.length > 0);
 
                 if (activePeriods.length > 0) {
                     html += `<h3 style="color: var(--primary-color); text-align: center; margin: 0 0 8px 0;">Periods & Monthly</h3>`;
                     
-                    // Dots indicator
                     html += `<div class="carousel-dots" id="carousel-dots">`;
                     activePeriods.forEach((_, index) => {
                         const isActive = index === activePeriods.length - 1 ? 'active' : '';
@@ -181,7 +179,6 @@
                     });
                     html += `</div>`;
 
-                    // Carousel track
                     html += `<div class="carousel-container" id="period-carousel">`;
                     
                     activePeriods.forEach(period => {
@@ -192,7 +189,6 @@
                                 <h4 style="margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
                                     ${period.scores.map((s, idx, arr) => {
-                                        // If it's the last item in the array, append the poop emoji if not already present
                                         let scoreDisplay = s.score;
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
                                             scoreDisplay += ' 💩';
@@ -217,8 +213,17 @@
                 }
             }
 
-            // Render Overall Standings Table at the Bottom
+            // 2. Render Overall Standings Table (Combining Total Points, Rank, and Medal columns)
             if (data.overall && data.overall.rows) {
+                // Find column indexes based on the header names
+                const headers = data.overall.headers;
+                const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name'));
+                const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
+                const rankIdx = headers.findIndex(h => h.toLowerCase().includes('rank'));
+                const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
+                const weeksIdx = headers.findIndex(h => h.toLowerCase().includes('week') || h.toLowerCase().includes('led'));
+                const prizeIdx = headers.findIndex(h => h.toLowerCase().includes('prize'));
+
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;">Overall Standings</h3>
@@ -226,15 +231,30 @@
                             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color);">
-                                        ${data.overall.headers.map(h => `<th style="padding: 8px 4px;">${h}</th>`).join('')}
+                                        <th style="padding: 8px 4px;">Player</th>
+                                        <th style="padding: 8px 4px;">Total Points</th>
+                                        <th style="padding: 8px 4px;">Weeks Led</th>
+                                        <th style="padding: 8px 4px;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.overall.rows.map(row => `
-                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                            ${row.map(cell => `<td style="padding: 10px 4px;">${cell}</td>`).join('')}
-                                        </tr>
-                                    `).join('')}
+                                    ${data.overall.rows.map(row => {
+                                        const playerName = row[playerIdx !== -1 ? playerIdx : 0];
+                                        const points = row[pointsIdx !== -1 ? pointsIdx : 1];
+                                        // Pull the medal emoji string directly from the row data
+                                        const medal = medalIdx !== -1 ? row[medalIdx] : '';
+                                        const weeksLed = row[weeksIdx !== -1 ? weeksIdx : 4];
+                                        const prize = row[prizeIdx !== -1 ? prizeIdx : 5];
+
+                                        return `
+                                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                <td style="padding: 10px 4px;">${playerName}</td>
+                                                <td style="padding: 10px 4px; font-weight: bold; color: var(--primary-color);">${points} ${medal}</td>
+                                                <td style="padding: 10px 4px;">${weeksLed}</td>
+                                                <td style="padding: 10px 4px;">${prize}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -254,7 +274,6 @@
             if (carousel) {
                 carousel.scrollLeft = carousel.scrollWidth;
 
-                // Update active dot on scroll
                 carousel.addEventListener('scroll', () => {
                     const cardWidth = carousel.querySelector('.carousel-card').offsetWidth + 16;
                     const currentIndex = Math.round(carousel.scrollLeft / cardWidth);
@@ -270,12 +289,10 @@
             }
         }
 
-        // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             loadTrackerData();
         });
 
-        // Register Service Worker for PWA functionality if available
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
         }
