@@ -7,7 +7,7 @@
     
     <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -102,7 +102,6 @@
     </div>
 
     <script>
-        // Replace with your actual Google Apps Script Web App URL
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec';
 
         async function loadTrackerData() {
@@ -126,12 +125,65 @@
 
         function renderApp(data) {
             const appDiv = document.getElementById('app');
-            // Basic rendering placeholder - customize based on your JSON structure
-            appDiv.innerHTML = `
-                <div class="card">
-                    <h3>Tracker Active</h3>
-                    <p>Connected to backend successfully.</p>
-                </div>`;
+            let html = '';
+
+            // Render Overall Standings Table
+            if (data.overall && data.overall.rows) {
+                html += `
+                    <div class="card">
+                        <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;">Overall Standings</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
+                                        ${data.overall.headers.map(h => `<th style="padding: 8px 4px;">${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.overall.rows.map(row => `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            ${row.map(cell => `<td style="padding: 10px 4px;">${cell}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render Monthly / Period Breakdowns
+            if (data.monthly && data.monthly.length > 0) {
+                html += `<h3 style="color: var(--primary-color); text-align: center; margin: 24px 0 12px 0;">Periods & Monthly</h3>`;
+                
+                data.monthly.forEach(period => {
+                    html += `
+                        <div class="card">
+                            <h4 style="margin-top: 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${period.title}</h4>
+                            <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
+                                ${period.scores.map(s => `
+                                    <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02);">
+                                        <span>${s.name}</span>
+                                        <span style="font-weight: bold; color: var(--primary-color);">${s.score}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
+                                <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
+                                <div>💩 <strong>Last Place:</strong> ${period.lastScorer}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Last Updated Timestamp
+            if (data.updated) {
+                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 20px;">Last synced: ${data.updated}</p>`;
+            }
+
+            appDiv.innerHTML = html;
         }
 
         // Initialize on load
