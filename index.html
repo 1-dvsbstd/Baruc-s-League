@@ -5,25 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
+    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#00ff87">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
     <style>
         :root {
-            --bg-color: #121212;
-            --surface-color: #1e1e1e;
-            --primary-color: #d4af37;
-            --text-color: #e0e0e0;
-            --text-muted: #888888;
-            --border-color: #333333;
+            --bg-color: #01fc7a;
+            --surface-color: #37003c;
+            --primary-color: #00ff87;
+            --accent-color: #02efff;
+            --text-color: #ffffff;
+            --text-muted: #b1b1b1;
+            --border-color: #53005a;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--surface-color);
             color: var(--text-color);
             margin: 0;
             padding: 16px;
@@ -35,6 +37,7 @@
             color: var(--primary-color);
             font-size: 1.5rem;
             margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         /* Splash Screen Styling */
@@ -44,7 +47,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--bg-color);
+            background-color: var(--surface-color);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -73,11 +76,12 @@
         }
 
         .card {
-            background-color: var(--surface-color);
+            background-color: #28002d;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         /* Carousel Styling */
@@ -125,6 +129,7 @@
 </head>
 <body>
 
+    <!-- Splash Screen Overlay -->
     <div id="splash-screen">
         <img src="splash-bg.png" alt="Loading">
     </div>
@@ -147,8 +152,128 @@
                 console.error('Error fetching data:', error);
                 document.getElementById('app').innerHTML = `
                     <div class="card">
-                        <p style="color: #ff6b6b; text-align: center;">Unable to load data. Please check your connection.</p>
+                        <p style="color: #ff4b4b; text-align: center;">Unable to load data. Please check your connection.</p>
                     </div>`;
             } finally {
                 // Dismiss splash screen smoothly once loaded
-                const splash = document.getElementById('splash-screen
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('fade-out');
+                setTimeout(() => splash.remove(), 500);
+            }
+        }
+
+        function renderApp(data) {
+            const appDiv = document.getElementById('app');
+            let html = '';
+
+            // Render Monthly / Period Breakdowns as a Horizontal Carousel
+            if (data.monthly && data.monthly.length > 0) {
+                // Filter out periods that haven't happened yet (i.e., empty scores or missing data)
+                const activePeriods = data.monthly.filter(period => period.scores && period.scores.length > 0);
+
+                if (activePeriods.length > 0) {
+                    html += `<h3 style="color: var(--primary-color); text-align: center; margin: 0 0 8px 0;">Periods & Monthly</h3>`;
+                    
+                    // Dots indicator
+                    html += `<div class="carousel-dots" id="carousel-dots">`;
+                    activePeriods.forEach((_, index) => {
+                        const isActive = index === activePeriods.length - 1 ? 'active' : '';
+                        html += `<div class="dot ${isActive}" data-index="${index}"></div>`;
+                    });
+                    html += `</div>`;
+
+                    // Carousel track
+                    html += `<div class="carousel-container" id="period-carousel">`;
+                    
+                    activePeriods.forEach(period => {
+                        let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
+
+                        html += `
+                            <div class="card carousel-card">
+                                <h4 style="margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${cleanTitle}</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
+                                    ${period.scores.map(s => `
+                                        <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <span>${s.name}</span>
+                                            <span style="font-weight: bold; color: var(--primary-color);">${s.score}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                    <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
+                                    <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
+                                    ${period.lastScorer ? `<div>💩 <strong>Last Place:</strong> ${period.lastScorer}</div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+                }
+            }
+
+            // Render Overall Standings Table at the Bottom
+            if (data.overall && data.overall.rows) {
+                html += `
+                    <div class="card" style="margin-top: 24px;">
+                        <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;">Overall Standings</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color);">
+                                        ${data.overall.headers.map(h => `<th style="padding: 8px 4px;">${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.overall.rows.map(row => `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            ${row.map(cell => `<td style="padding: 10px 4px;">${cell}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Last Updated Timestamp
+            if (data.updated) {
+                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 20px;">Last synced: ${data.updated}</p>`;
+            }
+
+            appDiv.innerHTML = html;
+
+            // Automatically scroll carousel to the most recent active period on load
+            const carousel = document.getElementById('period-carousel');
+            if (carousel) {
+                carousel.scrollLeft = carousel.scrollWidth;
+
+                // Update active dot on scroll
+                carousel.addEventListener('scroll', () => {
+                    const cardWidth = carousel.querySelector('.carousel-card').offsetWidth + 16;
+                    const currentIndex = Math.round(carousel.scrollLeft / cardWidth);
+                    const dots = document.querySelectorAll('.dot');
+                    dots.forEach((dot, idx) => {
+                        if (idx === currentIndex) {
+                            dot.classList.add('active');
+                        } else {
+                            dot.classList.remove('active');
+                        }
+                    });
+                });
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTrackerData();
+        });
+
+        // Register Service Worker for PWA functionality if available
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
