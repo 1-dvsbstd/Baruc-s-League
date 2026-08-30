@@ -1,74 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baruc’s League</title>
-    
-    <!-- App Icons & PWA Meta Tags -->
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FPL Tracker">
-
-    <style>
-        body{margin:0;background:#f4f6f9;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2d3d;}
-        .page{max-width:600px;margin:0 auto;padding:16px;}
-        h1{font-size:22px;margin:8px 0 0;color:#1f4e78;}
-        .updated{font-size:12px;color:#8a97a8;margin:2px 0 16px;}
-        .section-title{font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:#5b6b7f;margin:0 0 8px;}
-        .empty{color:#8a97a8;font-size:14px;}
-        .carousel-wrap{overflow:hidden;margin:0 -16px;padding:0 16px;}
-        .carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:12px;padding-bottom:4px;}
-        .period-card{flex:0 0 100%;min-width:100%;scroll-snap-align:start;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:14px 16px;box-sizing:border-box;}
-        .period-title{font-size:16px;font-weight:700;color:#1f4e78;margin-bottom:12px;border-bottom:2px solid #1f4e78;padding-bottom:6px;}
-        .period-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:14px;}
-        .period-row .label{color:#5b6b7f;font-weight:500;white-space:nowrap;}
-        .period-row .value{text-align:right;white-space:nowrap;font-weight:600;color:#1f2d3d;}
-        .winner-highlight{color:#1f2d3d;}
-        .divider{height:1px;background:#eef1f4;margin:12px 0 8px;}
-        .swipe-hint{text-align:center;font-size:12px;color:#8a97a8;margin:8px 0 24px;}
-        .card{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:14px 16px;margin-bottom:20px;overflow-x:auto;}
-        table{border-collapse:collapse;width:100%;}
-        th{background:#1f4e78;color:#fff;text-align:left;padding:8px 10px;font-size:13px;white-space:nowrap;}
-        td{padding:8px 10px;font-size:14px;border-bottom:1px solid #eef1f4;white-space:nowrap;color:#1f2d3d;}
-        tr:last-child td{border-bottom:none;}
-        tr:nth-child(even) td{background:#f8fafc;}
-        @media (max-width:480px){
-            table,thead,tbody,th,td,tr{display:block;}
-            thead{display:none;}
-            tr{margin-bottom:10px;border:1px solid #e3e8ee;border-radius:8px;overflow:hidden;}
-            tr:nth-child(even) td{background:#fff;}
-            td{border-bottom:1px solid #eef1f4;position:relative;padding-left:48%;text-align:right;min-height:20px;white-space:normal;word-break:break-word;color:#1f2d3d;}
-            td:last-child{border-bottom:none;}
-            td:before{content:attr(data-label);position:absolute;left:10px;width:44%;text-align:left;font-weight:600;color:#5b6b7f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        }
-    </style>
-</head>
-<body>
-    <div class="page">
-        <h1>Baruc’s League</h1>
-        <p class="updated" id="updated">Loading...</p>
-        <h2 class="section-title">Monthly Side Pot</h2>
-        <div id="monthly-container"><p class="empty">Loading...</p></div>
-        <p class="swipe-hint" id="swipe-hint" style="display:none;"></p>
-        <h2 class="section-title">Overall Standings</h2>
-        <div id="overall-container"><p class="empty">Loading...</p></div>
-    </div>
-
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec";
-
-        function escapeHtml(v){ return String(v || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\'/g,"&#039;"); }
-
-        function renderPeriodCard(card){
+function renderPeriodCard(card){
             var html = "<div class=\"period-card\">";
             html += "<div class=\"period-title\">" + escapeHtml(card.title) + "</div>";
             
             card.scores.forEach(function(item){
                 var displayScore = item.score;
-                if (item.name === card.lastScorer && displayScore.indexOf("💩") === -1 && displayScore.indexOf("🥇") === -1 && displayScore.indexOf("🥈") === -1 && displayScore.indexOf("🥉") === -1) {
+                // If this player is the last scorer and doesn't already have a poop emoji, add it
+                if (item.name === card.lastScorer && displayScore.indexOf("💩") === -1) {
                     displayScore += " 💩";
                 }
                 html += "<div class=\"period-row\"><span class=\"label\">" + escapeHtml(item.name) + "</span><span class=\"value\">" + escapeHtml(displayScore) + "</span></div>";
@@ -88,59 +25,3 @@
             html += "</div>";
             return html;
         }
-
-        function renderOverallTable(table){
-            let headerHtml = "<tr>";
-            table.headers.forEach(function(h){ headerHtml += "<th>" + escapeHtml(h) + "</th>"; });
-            headerHtml += "</tr>";
-            let bodyHtml = "";
-            table.rows.forEach(function(row){
-                bodyHtml += "<tr>";
-                row.forEach(function(cell, i){
-                    var label = table.headers[i] || "";
-                    bodyHtml += "<td data-label=\"" + escapeHtml(label) + "\">" + escapeHtml(cell) + "</td>";
-                });
-                bodyHtml += "</tr>";
-            });
-            return "<section class=\"card\"><table id=\"overall-table\"><thead>" + headerHtml + "</thead><tbody>" + bodyHtml + "</tbody></table></section>";
-        }
-
-        function applyData(data){
-            if(!data || data.error) return;
-            if(data.monthly && data.monthly.length){
-                var cardsHtml = "";
-                data.monthly.forEach(function(card){ cardsHtml += renderPeriodCard(card); });
-                document.getElementById("monthly-container").innerHTML = "<div class=\"carousel-wrap\"><div class=\"carousel\" id=\"monthly-carousel\">" + cardsHtml + "</div></div>";
-                
-                var hint = document.getElementById("swipe-hint");
-                if (data.monthly.length > 1) {
-                    hint.style.display = "block";
-                    hint.innerHTML = "swipe for previous periods &rsaquo;";
-                } else {
-                    hint.style.display = "none";
-                }
-            } else {
-                document.getElementById("monthly-container").innerHTML = "<p class=\"empty\">No gameweeks played yet.</p>";
-            }
-            if(data.overall){
-                document.getElementById("overall-container").innerHTML = renderOverallTable(data.overall);
-            } else {
-                document.getElementById("overall-container").innerHTML = "<p class=\"empty\">Overall standings not found.</p>";
-            }
-            document.getElementById("updated").textContent = "Updated " + (data.updated || "");
-        }
-
-        function fetchData(){
-            fetch(API_URL)
-                .then(response => response.json())
-                .then(data => applyData(data))
-                .catch(err => console.warn("Fetch failed:", err));
-        }
-
-        window.addEventListener("load", function(){
-            fetchData();
-            setInterval(fetchData, 60000);
-        });
-    </script>
-</body>
-</html>
