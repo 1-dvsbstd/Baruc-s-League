@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,37 +7,44 @@
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00ff87">
+    <meta name="theme-color" content="#190df5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --bg-color: #01fc7a;
-            --surface-color: #37003c;
+            --surface-color: #1a0524;
+            --card-bg: #2b083b;
             --primary-color: #00ff87;
-            --accent-color: #02efff;
+            --accent-color: #01efff;
             --text-color: #ffffff;
-            --text-muted: #b1b1b1;
-            --border-color: #53005a;
+            --text-muted: #a0a0a0;
+            --border-color: #4a155f;
+            --border-subtle: rgba(255, 255, 255, 0.08);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--surface-color);
             color: var(--text-color);
             margin: 0;
-            padding: 16px;
+            padding: 20px 16px;
             -webkit-font-smoothing: antialiased;
         }
 
         h1 {
             text-align: center;
             color: var(--primary-color);
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            text-shadow: 0 2px 8px rgba(0,255,135,0.2);
         }
 
         /* Splash Screen Styling */
@@ -51,7 +59,7 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.5s ease-out;
+            transition: opacity 0.4s ease-out;
         }
 
         #splash-screen img {
@@ -75,12 +83,23 @@
         }
 
         .card {
-            background-color: #28002d;
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Section Headings */
+        .section-title {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin: 0 0 12px 0;
         }
 
         /* Carousel Styling */
@@ -109,13 +128,15 @@
             margin-bottom: 16px;
         }
         .dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background-color: var(--border-color);
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
         .dot.active {
+            width: 20px;
+            border-radius: 4px;
             background-color: var(--primary-color);
         }
 
@@ -123,6 +144,7 @@
             text-align: center;
             color: var(--text-muted);
             margin-top: 40px;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -158,12 +180,12 @@
                 console.error('Error fetching data:', error);
                 document.getElementById('app').innerHTML = `
                     <div class="card">
-                        <p style="color: #ff4b4b; text-align: center;">Unable to load data. Please check your connection.</p>
+                        <p style="color: #ff4b4b; text-align: center; font-weight: 500;">Unable to load data. Please check your connection.</p>
                     </div>`;
             } finally {
                 const splash = document.getElementById('splash-screen');
                 splash.classList.add('fade-out');
-                setTimeout(() => splash.remove(), 500);
+                setTimeout(() => splash.remove(), 400);
             }
         }
 
@@ -171,12 +193,12 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // 1. Render Monthly / Period Breakdowns Carousel with Team Names
+            // 1. Render Manager of the Month Carousel with Team Names
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => period.scores && period.scores.length > 0);
 
                 if (activePeriods.length > 0) {
-                    html += `<h3 style="color: var(--primary-color); text-align: center; margin: 0 0 8px 0;">Periods & Monthly</h3>`;
+                    html += `<div class="section-title">Manager of the Month</div>`;
                     
                     html += `<div class="carousel-dots" id="carousel-dots">`;
                     activePeriods.forEach((_, index) => {
@@ -192,8 +214,8 @@
 
                         html += `
                             <div class="card carousel-card">
-                                <h4 style="margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${cleanTitle}</h4>
-                                <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
+                                <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
                                     ${period.scores.map((s, idx, arr) => {
                                         let scoreDisplay = s.score;
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
@@ -201,19 +223,19 @@
                                         }
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         return `
-                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
                                                 <div>
-                                                    <div style="font-weight: 500; font-size: 0.95rem;">${s.name}</div>
-                                                    ${teamName ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${teamName}</div>` : ''}
+                                                    <div style="font-weight: 600; font-size: 0.95rem; color: #ffffff;">${s.name}</div>
+                                                    ${teamName ? `<div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${teamName}</div>` : ''}
                                                 </div>
-                                                <span style="font-weight: bold; font-size: 1rem; color: var(--primary-color);">${scoreDisplay}</span>
+                                                <span style="font-weight: 700; font-size: 1.05rem; color: var(--primary-color);">${scoreDisplay}</span>
                                             </li>
                                         `;
                                     }).join('')}
                                 </ul>
-                                <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                    <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
-                                    <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${period.winnerPrize})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${period.runnerPrize})</span></div>
                                 </div>
                             </div>
                         `;
@@ -234,15 +256,15 @@
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
-                        <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;">Overall Standings</h3>
+                        <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color);">
-                                        <th style="padding: 8px 4px;">Manager</th>
-                                        <th style="padding: 8px 4px;">Total Points</th>
-                                        <th style="padding: 8px 4px;">Weeks Led</th>
-                                        <th style="padding: 8px 4px;">Prize</th>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Total Points</th>
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Weeks Led</th>
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -254,11 +276,11 @@
                                         const prize = row[prizeIdx !== -1 ? prizeIdx : 5];
 
                                         return `
-                                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                                <td style="padding: 10px 4px;">${playerName}</td>
-                                                <td style="padding: 10px 4px; font-weight: bold; color: var(--primary-color);">${points} ${medal}</td>
-                                                <td style="padding: 10px 4px;">${weeksLed}</td>
-                                                <td style="padding: 10px 4px;">${prize}</td>
+                                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                                <td style="padding: 12px 8px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
+                                                <td style="padding: 12px 8px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
+                                                <td style="padding: 12px 8px 12px 4px; color: var(--text-muted); font-weight: 500;">${weeksLed}</td>
+                                                <td style="padding: 12px 8px 12px 4px; color: var(--text-color); font-weight: 500;">${prize}</td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -271,7 +293,7 @@
 
             // Last Updated Timestamp
             if (data.updated) {
-                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 25px;">Last synced: ${data.updated}</p>`;
+                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 24px; font-weight: 500;">Last synced: ${data.updated}</p>`;
             }
 
             appDiv.innerHTML = html;
@@ -306,3 +328,5 @@
     </script>
 </body>
 </html>
+
+```
