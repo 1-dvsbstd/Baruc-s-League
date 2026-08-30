@@ -1,61 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Baruc's League</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baruc’s League - FPL Tracker</title>
+    
+    <!-- iOS & Android App Icons -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    
+    <!-- Web App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FPL Tracker">
 
-  <!-- iOS home screen icon + behaviour -->
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Baruc's League">
-
-  <!-- Android / Chrome home screen icon + behaviour -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <meta name="theme-color" content="#1f4e78">
-
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0d1b2a;
-      font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: #fff;
-      text-align: center;
-    }
-    a.button {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 12px 22px;
-      background: #1f4e78;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-    }
-  </style>
-
-  <script>
-    // Change this to your Apps Script Web App URL (the one ending in /exec)
-    var DESTINATION_URL = "https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec";
-
-    window.onload = function () {
-      window.location.replace(DESTINATION_URL);
-    };
-  </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f4f6f9;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-  <div>
-    <p>Loading Baruc's League…</p>
-    <a class="button" id="fallback-link" href="#">Tap here if it doesn't open</a>
-  </div>
-  <script>
-    document.getElementById('fallback-link').href = DESTINATION_URL;
-  </script>
+
+    <!-- Replace the URL below with your actual deployed Google Apps Script Web App URL -->
+    <iframe src="https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec"></iframe>
+
 </body>
 </html>
