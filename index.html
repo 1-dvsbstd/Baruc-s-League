@@ -1,27 +1,166 @@
-function renderPeriodCard(card){
-            var html = "<div class=\"period-card\">";
-            html += "<div class=\"period-title\">" + escapeHtml(card.title) + "</div>";
-            
-            card.scores.forEach(function(item){
-                var displayScore = item.score;
-                // If this player is the last scorer and doesn't already have a poop emoji, add it
-                if (item.name === card.lastScorer && displayScore.indexOf("💩") === -1) {
-                    displayScore += " 💩";
-                }
-                html += "<div class=\"period-row\"><span class=\"label\">" + escapeHtml(item.name) + "</span><span class=\"value\">" + escapeHtml(displayScore) + "</span></div>";
-            });
-            
-            if(card.topScorer || card.runnerName){
-                html += "<div class=\"divider\"></div>";
-                if(card.topScorer){
-                    var winnerDisplay = card.topScorer + (card.winnerPrize ? " (" + card.winnerPrize + ")" : "");
-                    html += "<div class=\"period-row\"><span class=\"label\">Top Scorer</span><span class=\"value winner-highlight\">" + escapeHtml(winnerDisplay) + "</span></div>";
-                }
-                if(card.runnerName){
-                    var runnerDisplay = card.runnerName + (card.runnerPrize ? " (" + card.runnerPrize + ")" : "");
-                    html += "<div class=\"period-row\"><span class=\"label\">Runner-Up</span><span class=\"value\">" + escapeHtml(runnerDisplay) + "</span></div>";
-                }
-            }
-            html += "</div>";
-            return html;
+/**
+ * FPL Tracker — serves JSON backend for GitHub PWA, including dynamic poop emoji injection.
+ */
+
+const P_SHEET_NAME = 'Side Pot';
+const M_TITLE = 'Monthly Side Pot';       
+const O_TITLE = 'Overall Standings';      
+
+function doGet(e) {
+  const data = getPublicData();
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getPublicData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(P_SHEET_NAME);
+  if (!sheet) {
+    return { error: 'Could not find the "' + P_SHEET_NAME + '" tab.' };
+  }
+
+  const monthly = extractMonthlyData(sheet);
+  const overall = extractTableWithPoop(sheet, O_TITLE);
+
+  return {
+    monthly: monthly,
+    overall: overall,
+    updated: new Date().toLocaleString()
+  };
+}
+
+function extractMonthlyData(sheet) {
+  const rawTable = extractTable(sheet, M_TITLE);
+  if (!rawTable || !rawTable.rows.length) return null;
+
+  const playerNames = ['Nathan', 'Mike', 'Carl', 'Charlie'];
+  const playerIndices = [2, 3, 4, 5];
+  const cards = [];
+
+  rawTable.rows.forEach(function (row) {
+    const periodNum = (row[0] || '').toString().trim();
+    const gwRange = (row[1] || '').toString().trim();
+    
+    if (!periodNum || isNaN(periodNum)) return; 
+
+    const scores = [];
+    let hasScores = false;
+
+    for (let p = 0; p < playerIndices.length; p++) {
+      const colIdx = playerIndices[p];
+      const name = playerNames[p];
+      const val = (row[colIdx] || '').toString().trim();
+      const cleanVal = val.replace(/[^\d]/g, '');
+      
+      if (cleanVal !== '' && parseInt(cleanVal, 10) > 0) {
+        hasScores = true;
+        scores.push({ name: name, score: val, num: parseInt(cleanVal, 10) });
+      } else {
+        if (val !== '' && val !== '0' && val !== '-') {
+          hasScores = true;
+          scores.push({ name: name, score: val, num: 0 });
         }
+      }
+    }
+
+    if (!hasScores) return;
+
+    const sortedScores = scores.slice().sort(function(a, b) {
+      return b.num - a.num;
+    });
+
+    const topScorer = sortedScores.length > 0 ? sortedScores[0].name : '';
+    const runnerName = sortedScores.length > 1 ? sortedScores[1].name : '';
+    const lastScorer = sortedScores.length > 3 ? sortedScores[sortedScores.length - 1].name : (sortedScores.length === 3 ? sortedScores[2].name : '');
+
+    cards.push({
+      title: gwRange ? ('Period ' + periodNum + ' (' + gwRange + ')') : ('Period ' + periodNum),
+      scores: scores,
+      topScorer: topScorer,
+      winnerPrize: '£15',
+      runnerName: runnerName,
+      runnerPrize: '£5',
+      lastScorer: lastScorer
+    });
+  });
+
+  return cards;
+}
+
+function extractTableWithPoop(sheet, titleStartsWith) {
+  const table = extractTable(sheet, titleStartsWith);
+  if (!table || !table.rows || !table.rows.length) return table;
+
+  let pointsIdx = -1;
+  let medalIdx = -1;
+
+  table.headers.forEach(function(h, i) {
+    const lower = h.toLowerCase();
+    if (lower.indexOf('point') !== -1) pointsIdx = i;
+    if (lower.indexOf('medal') !== -1) medalIdx = i;
+  });
+
+  if (pointsIdx === -1 && table.rows[0].length > 1) pointsIdx = 1;
+  if (medalIdx === -1 && table.rows[0].length > 3) medalIdx = 3;
+
+  if (pointsIdx !== -1) {
+    let minPoints = Infinity;
+    let lowestRowIdx = -1;
+
+    table.rows.forEach(function(row, idx) {
+      const val = parseInt((row[pointsIdx] || '').toString().replace(/[^\d]/g, ''), 10);
+      if (!isNaN(val) && val < minPoints) {
+        minPoints = val;
+        lowestRowIdx = idx;
+      }
+    });
+
+    if (lowestRowIdx !== -1 && medalIdx !== -1) {
+      let currentMedal = (table.rows[lowestRowIdx][medalIdx] || '').toString().trim();
+      if (currentMedal.indexOf('💩') === -1) {
+        table.rows[lowestRowIdx][medalIdx] = currentMedal ? (currentMedal + ' 💩') : '💩';
+      }
+    }
+  }
+
+  return table;
+}
+
+function extractTable(sheet, titleStartsWith) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow === 0) return null;
+
+  const colA = sheet.getRange(1, 1, lastRow, 1).getValues();
+  let titleRow = -1;
+  for (let r = 0; r < colA.length; r++) {
+    const val = (colA[r][0] || '').toString();
+    if (val.indexOf(titleStartsWith) === 0) {
+      titleRow = r + 1;
+      break;
+    }
+  }
+  if (titleRow === -1) return null;
+
+  const headerRow = titleRow + 1;
+  const lastCol = sheet.getLastColumn();
+  if (lastCol === 0) return null;
+
+  const headerValues = sheet.getRange(headerRow, 1, 1, lastCol).getValues()[0];
+  let width = headerValues.length;
+  while (width > 0 && (headerValues[width - 1] === '' || headerValues[width - 1] === null)) {
+    width--;
+  }
+  const headers = headerValues.slice(0, width);
+
+  const rows = [];
+  let r = headerRow + 1;
+  while (r <= lastRow) {
+    const rowValues = sheet.getRange(r, 1, 1, width).getDisplayValues()[0];
+    const firstCell = (rowValues[0] || '').toString().trim();
+    if (firstCell === '') break;
+    rows.push(rowValues);
+    r++;
+  }
+
+  return { headers: headers, rows: rows };
+}
