@@ -2,18 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPL Side Pot Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Baruc's League - FPL Side Pot Tracker</title>
+    
+    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
     <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #d4af37;
+            --text-color: #e0e0e0;
+            --text-muted: #888888;
+            --border-color: #333333;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 16px;
+            -webkit-font-smoothing: antialiased;
         }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
         /* Splash Screen Styling */
         #splash-screen {
             position: fixed;
@@ -21,14 +45,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #37003c; /* FPL purple theme */
+            background-color: var(--bg-color);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             z-index: 9999;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease-out;
         }
+
         #splash-screen img {
             width: 100%;
             height: 100%;
@@ -37,92 +61,30 @@
             margin-bottom: 0;
             animation: none;
         }
-        #splash-screen p {
-            color: #00ff87;
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.08); opacity: 1; }
-        }
+
         .fade-out {
             opacity: 0;
             pointer-events: none;
         }
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+
+        /* App Container */
+        #app {
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .period-card {
-            background: #fff;
+
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .period-title {
-            font-weight: bold;
-            font-size: 1.1rem;
             margin-bottom: 12px;
-            color: #00ff87;
-            background: #37003c;
-            padding: 8px 12px;
-            border-radius: 8px;
         }
-        .period-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.95rem;
-        }
-        .period-row:last-child {
-            border-bottom: none;
-        }
-        .label {
-            color: #555;
-        }
-        .value {
-            font-weight: 600;
-        }
-        .winner-highlight {
-            color: #008751;
-        }
-        .divider {
-            height: 1px;
-            background: #e0e0e0;
-            margin: 10px 0;
-        }
-        .table-container {
-            background: #fff;
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        th, td {
-            padding: 8px 10px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        th {
-            background: #37003c;
-            color: #fff;
-        }
-        .updated-time {
+
+        .loading-text {
             text-align: center;
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 20px;
+            color: var(--text-muted);
+            margin-top: 40px;
         }
     </style>
 </head>
@@ -130,117 +92,57 @@
 
     <!-- Splash Screen Overlay -->
     <div id="splash-screen">
-        <img src="apple-touch-icon.png" alt="Logo">
-        <p>Loading Baruc's League...</p>
+        <img src="splash-bg.png" alt="Loading">
     </div>
 
-    <h1>FPL Side Pot Tracker</h1>
+    <h1>Baruc's League</h1>
     
-    <div id="app"></div>
-
-    <div id="updated" class="updated-time"></div>
+    <div id="app">
+        <div class="loading-text">Loading tracker data...</div>
+    </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec";
+        // Replace with your actual Google Apps Script Web App URL
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
-        function escapeHtml(str) {
-            if (!str) return "";
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        function renderPeriodCard(card){
-            var html = "<div class=\"period-card\">";
-            html += "<div class=\"period-title\">" + escapeHtml(card.title) + "</div>";
-            
-            card.scores.forEach(function(item){
-                var displayScore = item.score;
-                if (item.name === card.lastScorer && displayScore.indexOf("💩") === -1) {
-                    displayScore += " 💩";
-                }
-                html += "<div class=\"period-row\"><span class=\"label\">" + escapeHtml(item.name) + "</span><span class=\"value\">" + escapeHtml(displayScore) + "</span></div>";
-            });
-            
-            if(card.topScorer || card.runnerName){
-                html += "<div class=\"divider\"></div>";
-                if(card.topScorer){
-                    var winnerDisplay = card.topScorer + (card.winnerPrize ? " (" + card.winnerPrize + ")" : "");
-                    html += "<div class=\"period-row\"><span class=\"label\">Top Scorer</span><span class=\"value winner-highlight\">" + escapeHtml(winnerDisplay) + "</span></div>";
-                }
-                if(card.runnerName){
-                    var runnerDisplay = card.runnerName + (card.runnerPrize ? " (" + card.runnerPrize + ")" : "");
-                    html += "<div class=\"period-row\"><span class=\"label\">Runner-Up</span><span class=\"value\">" + escapeHtml(runnerDisplay) + "</span></div>";
-                }
-            }
-            html += "</div>";
-            return html;
-        }
-
-        function renderOverallTable(overall){
-            if (!overall || !overall.headers) return "";
-            var html = "<div class=\"table-container\">";
-            html += "<div class=\"period-title\">Overall Standings</div>";
-            html += "<table><thead><tr>";
-            overall.headers.forEach(function(h){
-                html += "<th>" + escapeHtml(h) + "</th>";
-            });
-            html += "</tr></thead><tbody>";
-            
-            overall.rows.forEach(function(row){
-                html += "<tr>";
-                row.forEach(function(cell){
-                    html += "<td>" + escapeHtml(cell) + "</td>";
-                });
-                html += "</tr>";
-            });
-            html += "</tbody></table></div>";
-            return html;
-        }
-
-        function hideSplashScreen() {
-            var splash = document.getElementById("splash-screen");
-            if (splash) {
-                splash.classList.add("fade-out");
-                setTimeout(function() {
-                    splash.style.display = "none";
-                }, 500);
+        async function loadTrackerData() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                renderApp(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('app').innerHTML = `
+                    <div class="card">
+                        <p style="color: #ff6b6b; text-align: center;">Unable to load data. Please check your connection.</p>
+                    </div>`;
+            } finally {
+                // Dismiss splash screen smoothly once loaded
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('fade-out');
+                setTimeout(() => splash.remove(), 500);
             }
         }
 
-        fetch(WEB_APP_URL)
-            .then(response => response.json())
-            .then(data => {
-                var appDiv = document.getElementById("app");
-                if (data.error) {
-                    appDiv.innerHTML = "<p style=\"color:red; text-align:center;\">" + escapeHtml(data.error) + "</p>";
-                    hideSplashScreen();
-                    return;
-                }
+        function renderApp(data) {
+            const appDiv = document.getElementById('app');
+            // Basic rendering placeholder - customize based on your JSON structure
+            appDiv.innerHTML = `
+                <div class="card">
+                    <h3>Tracker Active</h3>
+                    <p>Connected to backend successfully.</p>
+                </div>`;
+        }
 
-                var htmlContent = "";
-                if (data.monthly && data.monthly.length > 0) {
-                    data.monthly.forEach(card => {
-                        htmlContent += renderPeriodCard(card);
-                    });
-                }
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTrackerData();
+        });
 
-                if (data.overall) {
-                    htmlContent += renderOverallTable(data.overall);
-                }
-
-                appDiv.innerHTML = htmlContent;
-                if (data.updated) {
-                    document.getElementById("updated").innerText = "Last updated: " + data.updated;
-                }
-                
-                setTimeout(hideSplashScreen, 1000);
-            })
-            .catch(err => {
-                document.getElementById("app").innerHTML = "<p style=\"text-align:center; color:red;\">Failed to load FPL data.</p>";
-                console.error(err);
-                hideSplashScreen();
-            });
+        // Register Service Worker for PWA functionality if available
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
+        }
     </script>
 </body>
 </html>
