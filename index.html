@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FPL Side Pot Tracker</title>
     <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -13,6 +13,42 @@
             color: #333;
             margin: 0;
             padding: 16px;
+        }
+        /* Splash Screen Styling */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #37003c; /* FPL purple theme */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        #splash-screen img {
+            width: 96px;
+            height: 96px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            animation: pulse 1.5s infinite alternate;
+        }
+        #splash-screen p {
+            color: #00ff87;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.08); opacity: 1; }
+        }
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
         }
         h1 {
             text-align: center;
@@ -91,6 +127,12 @@
 </head>
 <body>
 
+    <!-- Splash Screen Overlay -->
+    <div id="splash-screen">
+        <img src="apple-touch-icon.png" alt="Logo">
+        <p>Loading Baruc's League...</p>
+    </div>
+
     <h1>FPL Side Pot Tracker</h1>
     
     <div id="app">
@@ -100,7 +142,6 @@
     <div id="updated" class="updated-time"></div>
 
     <script>
-        // REPLACE THIS URL WITH YOUR ACTUAL GOOGLE APPS SCRIPT WEB APP URL
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec";
 
         function escapeHtml(str) {
@@ -158,12 +199,23 @@
             return html;
         }
 
+        function hideSplashScreen() {
+            var splash = document.getElementById("splash-screen");
+            if (splash) {
+                splash.classList.add("fade-out");
+                setTimeout(function() {
+                    splash.style.display = "none";
+                }, 500); // Matches the 0.5s CSS transition
+            }
+        }
+
         fetch(WEB_APP_URL)
             .then(response => response.json())
             .then(data => {
                 var appDiv = document.getElementById("app");
                 if (data.error) {
                     appDiv.innerHTML = "<p style=\"color:red; text-align:center;\">" + escapeHtml(data.error) + "</p>";
+                    hideSplashScreen();
                     return;
                 }
 
@@ -182,10 +234,14 @@
                 if (data.updated) {
                     document.getElementById("updated").innerText = "Last updated: " + data.updated;
                 }
+                
+                // Keep the splash screen visible for at least 1 extra second so it lingers nicely
+                setTimeout(hideSplashScreen, 1000);
             })
             .catch(err => {
                 document.getElementById("app").innerHTML = "<p style=\"text-align:center; color:red;\">Failed to load FPL data.</p>";
                 console.error(err);
+                hideSplashScreen();
             });
     </script>
 </body>
