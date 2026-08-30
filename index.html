@@ -168,7 +168,6 @@
 
             // Render Monthly / Period Breakdowns as a Horizontal Carousel
             if (data.monthly && data.monthly.length > 0) {
-                // Filter out periods that haven't happened yet (i.e., empty scores or missing data)
                 const activePeriods = data.monthly.filter(period => period.scores && period.scores.length > 0);
 
                 if (activePeriods.length > 0) {
@@ -202,7 +201,6 @@
                                 <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
                                     <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
                                     <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
-                                    ${period.lastScorer ? `<div>💩 <strong>Last Place:</strong> ${period.lastScorer}</div>` : ''}
                                 </div>
                             </div>
                         `;
