@@ -191,12 +191,19 @@
                             <div class="card carousel-card">
                                 <h4 style="margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
-                                    ${period.scores.map(s => `
-                                        <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                            <span>${s.name}</span>
-                                            <span style="font-weight: bold; color: var(--primary-color);">${s.score}</span>
-                                        </li>
-                                    `).join('')}
+                                    ${period.scores.map((s, idx, arr) => {
+                                        // If it's the last item in the array, append the poop emoji if not already present
+                                        let scoreDisplay = s.score;
+                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
+                                            scoreDisplay += ' 💩';
+                                        }
+                                        return `
+                                            <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                <span>${s.name}</span>
+                                                <span style="font-weight: bold; color: var(--primary-color);">${scoreDisplay}</span>
+                                            </li>
+                                        `;
+                                    }).join('')}
                                 </ul>
                                 <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
                                     <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
