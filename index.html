@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
-    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -81,6 +80,42 @@
             margin-bottom: 12px;
         }
 
+        /* Carousel Styling */
+        .carousel-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 16px;
+            padding-bottom: 8px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .carousel-container::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+        .carousel-card {
+            min-width: 100%;
+            box-sizing: border-box;
+            scroll-snap-align: start;
+        }
+
+        /* Carousel Indicator Dots */
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            transition: background-color 0.3s;
+        }
+        .dot.active {
+            background-color: var(--primary-color);
+        }
+
         .loading-text {
             text-align: center;
             color: var(--text-muted);
@@ -90,7 +125,6 @@
 </head>
 <body>
 
-    <!-- Splash Screen Overlay -->
     <div id="splash-screen">
         <img src="splash-bg.png" alt="Loading">
     </div>
@@ -114,90 +148,7 @@
                 document.getElementById('app').innerHTML = `
                     <div class="card">
                         <p style="color: #ff6b6b; text-align: center;">Unable to load data. Please check your connection.</p>
-                    `;
+                    </div>`;
             } finally {
                 // Dismiss splash screen smoothly once loaded
-                const splash = document.getElementById('splash-screen');
-                splash.classList.add('fade-out');
-                setTimeout(() => splash.remove(), 500);
-            }
-        }
-
-        function renderApp(data) {
-            const appDiv = document.getElementById('app');
-            let html = '';
-
-            // Render Monthly / Period Breakdowns First
-            if (data.monthly && data.monthly.length > 0) {
-                html += `<h3 style="color: var(--primary-color); text-align: center; margin: 0 0 12px 0;">Periods & Monthly</h3>`;
-                
-                data.monthly.forEach(period => {
-                    // Clean up title by removing "Period X " if it follows the "Period X (GW...)" pattern
-                    let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
-
-                    html += `
-                        <div class="card">
-                            <h4 style="margin-top: 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">${cleanTitle}</h4>
-                            <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
-                                ${period.scores.map(s => `
-                                    <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02);">
-                                        <span>${s.name}</span>
-                                        <span style="font-weight: bold; color: var(--primary-color);">${s.score}</span>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
-                                <div>🏆 <strong>Winner:</strong> ${period.topScorer} (${period.winnerPrize})</div>
-                                <div>🥈 <strong>Runner-up:</strong> ${period.runnerName} (${period.runnerPrize})</div>
-                                ${period.lastScorer ? `<div>💩 <strong>Last Place:</strong> ${period.lastScorer}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            // Render Overall Standings Table at the Bottom
-            if (data.overall && data.overall.rows) {
-                html += `
-                    <div class="card" style="margin-top: 24px;">
-                        <h3 style="color: var(--primary-color); margin-top: 0; text-align: center;">Overall Standings</h3>
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
-                                        ${data.overall.headers.map(h => `<th style="padding: 8px 4px;">${h}</th>`).join('')}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${data.overall.rows.map(row => `
-                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                            ${row.map(cell => `<td style="padding: 10px 4px;">${cell}</td>`).join('')}
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Last Updated Timestamp
-            if (data.updated) {
-                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 20px;">Last synced: ${data.updated}</p>`;
-            }
-
-            appDiv.innerHTML = html;
-        }
-
-        // Initialize on load
-        window.addEventListener('DOMContentLoaded', () => {
-            loadTrackerData();
-        });
-
-        // Register Service Worker for PWA functionality if available
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
-        }
-    </script>
-</body>
-</html>
+                const splash = document.getElementById('splash-screen
