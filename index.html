@@ -217,7 +217,7 @@
             if (data.overall && data.overall.rows) {
                 // Find column indexes based on the header names
                 const headers = data.overall.headers;
-                const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name'));
+                const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name') || h.toLowerCase().includes('manager'));
                 const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
                 const rankIdx = headers.findIndex(h => h.toLowerCase().includes('rank'));
                 const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
@@ -231,7 +231,7 @@
                             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color);">
-                                        <th style="padding: 8px 4px;">Player</th>
+                                        <th style="padding: 8px 4px;">Manager</th>
                                         <th style="padding: 8px 4px;">Total Points</th>
                                         <th style="padding: 8px 4px;">Weeks Led</th>
                                         <th style="padding: 8px 4px;">Prize</th>
