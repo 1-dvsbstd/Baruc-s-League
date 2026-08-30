@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
-    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00ff87">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -129,7 +128,6 @@
 </head>
 <body>
 
-    <!-- Splash Screen Overlay -->
     <div id="splash-screen">
         <img src="splash-bg.png" alt="Loading">
     </div>
@@ -142,6 +140,14 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec';
+
+        // Hardcoded team name mapping based on A9:D12 data
+        const TEAM_NAMES = {
+            "Nathan": "nr xi",
+            "Mike": "mikes marauders",
+            "Carl": "Ginger Ninjas",
+            "Charlie": "Oakley1"
+        };
 
         async function loadTrackerData() {
             try {
@@ -165,7 +171,7 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // 1. Render Monthly / Period Breakdowns Carousel
+            // 1. Render Monthly / Period Breakdowns Carousel with Team Names
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => period.scores && period.scores.length > 0);
 
@@ -193,10 +199,14 @@
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
                                             scoreDisplay += ' 💩';
                                         }
+                                        const teamName = TEAM_NAMES[s.name] || '';
                                         return `
-                                            <li style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                                <span>${s.name}</span>
-                                                <span style="font-weight: bold; color: var(--primary-color);">${scoreDisplay}</span>
+                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                <div>
+                                                    <div style="font-weight: 500; font-size: 0.95rem;">${s.name}</div>
+                                                    ${teamName ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${teamName}</div>` : ''}
+                                                </div>
+                                                <span style="font-weight: bold; font-size: 1rem; color: var(--primary-color);">${scoreDisplay}</span>
                                             </li>
                                         `;
                                     }).join('')}
@@ -213,13 +223,11 @@
                 }
             }
 
-            // 2. Render Overall Standings Table (Combining Total Points, Rank, and Medal columns)
+            // 2. Render Overall Standings Table
             if (data.overall && data.overall.rows) {
-                // Find column indexes based on the header names
                 const headers = data.overall.headers;
                 const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name') || h.toLowerCase().includes('manager'));
                 const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
-                const rankIdx = headers.findIndex(h => h.toLowerCase().includes('rank'));
                 const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
                 const weeksIdx = headers.findIndex(h => h.toLowerCase().includes('week') || h.toLowerCase().includes('led'));
                 const prizeIdx = headers.findIndex(h => h.toLowerCase().includes('prize'));
@@ -241,7 +249,6 @@
                                     ${data.overall.rows.map(row => {
                                         const playerName = row[playerIdx !== -1 ? playerIdx : 0];
                                         const points = row[pointsIdx !== -1 ? pointsIdx : 1];
-                                        // Pull the medal emoji string directly from the row data
                                         const medal = medalIdx !== -1 ? row[medalIdx] : '';
                                         const weeksLed = row[weeksIdx !== -1 ? weeksIdx : 4];
                                         const prize = row[prizeIdx !== -1 ? prizeIdx : 5];
