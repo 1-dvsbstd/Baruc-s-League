@@ -1,166 +1,190 @@
-/**
- * FPL Tracker — serves JSON backend for GitHub PWA, including dynamic poop emoji injection.
- */
-
-const P_SHEET_NAME = 'Side Pot';
-const M_TITLE = 'Monthly Side Pot';       
-const O_TITLE = 'Overall Standings';      
-
-function doGet(e) {
-  const data = getPublicData();
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function getPublicData() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(P_SHEET_NAME);
-  if (!sheet) {
-    return { error: 'Could not find the "' + P_SHEET_NAME + '" tab.' };
-  }
-
-  const monthly = extractMonthlyData(sheet);
-  const overall = extractTableWithPoop(sheet, O_TITLE);
-
-  return {
-    monthly: monthly,
-    overall: overall,
-    updated: new Date().toLocaleString()
-  };
-}
-
-function extractMonthlyData(sheet) {
-  const rawTable = extractTable(sheet, M_TITLE);
-  if (!rawTable || !rawTable.rows.length) return null;
-
-  const playerNames = ['Nathan', 'Mike', 'Carl', 'Charlie'];
-  const playerIndices = [2, 3, 4, 5];
-  const cards = [];
-
-  rawTable.rows.forEach(function (row) {
-    const periodNum = (row[0] || '').toString().trim();
-    const gwRange = (row[1] || '').toString().trim();
-    
-    if (!periodNum || isNaN(periodNum)) return; 
-
-    const scores = [];
-    let hasScores = false;
-
-    for (let p = 0; p < playerIndices.length; p++) {
-      const colIdx = playerIndices[p];
-      const name = playerNames[p];
-      const val = (row[colIdx] || '').toString().trim();
-      const cleanVal = val.replace(/[^\d]/g, '');
-      
-      if (cleanVal !== '' && parseInt(cleanVal, 10) > 0) {
-        hasScores = true;
-        scores.push({ name: name, score: val, num: parseInt(cleanVal, 10) });
-      } else {
-        if (val !== '' && val !== '0' && val !== '-') {
-          hasScores = true;
-          scores.push({ name: name, score: val, num: 0 });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Side Pot Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 16px;
         }
-      }
-    }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .period-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .period-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #00ff87;
+            background: #37003c;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .period-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95rem;
+        }
+        .period-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            color: #555;
+        }
+        .value {
+            font-weight: 600;
+        }
+        .winner-highlight {
+            color: #008751;
+        }
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 10px 0;
+        }
+        .table-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #37003c;
+            color: #fff;
+        }
+        .updated-time {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
 
-    if (!hasScores) return;
+    <h1>FPL Side Pot Tracker</h1>
+    
+    <div id="app">
+        <p style="text-align:center;">Loading standings...</p>
+    </div>
 
-    const sortedScores = scores.slice().sort(function(a, b) {
-      return b.num - a.num;
-    });
+    <div id="updated" class="updated-time"></div>
 
-    const topScorer = sortedScores.length > 0 ? sortedScores[0].name : '';
-    const runnerName = sortedScores.length > 1 ? sortedScores[1].name : '';
-    const lastScorer = sortedScores.length > 3 ? sortedScores[sortedScores.length - 1].name : (sortedScores.length === 3 ? sortedScores[2].name : '');
+    <script>
+        // REPLACE THIS URL WITH YOUR ACTUAL GOOGLE APPS SCRIPT WEB APP URL
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec";
 
-    cards.push({
-      title: gwRange ? ('Period ' + periodNum + ' (' + gwRange + ')') : ('Period ' + periodNum),
-      scores: scores,
-      topScorer: topScorer,
-      winnerPrize: '£15',
-      runnerName: runnerName,
-      runnerPrize: '£5',
-      lastScorer: lastScorer
-    });
-  });
+        function escapeHtml(str) {
+            if (!str) return "";
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
 
-  return cards;
-}
+        function renderPeriodCard(card){
+            var html = "<div class=\"period-card\">";
+            html += "<div class=\"period-title\">" + escapeHtml(card.title) + "</div>";
+            
+            card.scores.forEach(function(item){
+                var displayScore = item.score;
+                if (item.name === card.lastScorer && displayScore.indexOf("💩") === -1) {
+                    displayScore += " 💩";
+                }
+                html += "<div class=\"period-row\"><span class=\"label\">" + escapeHtml(item.name) + "</span><span class=\"value\">" + escapeHtml(displayScore) + "</span></div>";
+            });
+            
+            if(card.topScorer || card.runnerName){
+                html += "<div class=\"divider\"></div>";
+                if(card.topScorer){
+                    var winnerDisplay = card.topScorer + (card.winnerPrize ? " (" + card.winnerPrize + ")" : "");
+                    html += "<div class=\"period-row\"><span class=\"label\">Top Scorer</span><span class=\"value winner-highlight\">" + escapeHtml(winnerDisplay) + "</span></div>";
+                }
+                if(card.runnerName){
+                    var runnerDisplay = card.runnerName + (card.runnerPrize ? " (" + card.runnerPrize + ")" : "");
+                    html += "<div class=\"period-row\"><span class=\"label\">Runner-Up</span><span class=\"value\">" + escapeHtml(runnerDisplay) + "</span></div>";
+                }
+            }
+            html += "</div>";
+            return html;
+        }
 
-function extractTableWithPoop(sheet, titleStartsWith) {
-  const table = extractTable(sheet, titleStartsWith);
-  if (!table || !table.rows || !table.rows.length) return table;
+        function renderOverallTable(overall){
+            if (!overall || !overall.headers) return "";
+            var html = "<div class=\"table-container\">";
+            html += "<div class=\"period-title\">Overall Standings</div>";
+            html += "<table><thead><tr>";
+            overall.headers.forEach(function(h){
+                html += "<th>" + escapeHtml(h) + "</th>";
+            });
+            html += "</tr></thead><tbody>";
+            
+            overall.rows.forEach(function(row){
+                html += "<tr>";
+                row.forEach(function(cell){
+                    html += "<td>" + escapeHtml(cell) + "</td>";
+                });
+                html += "</tr>";
+            });
+            html += "</tbody></table></div>";
+            return html;
+        }
 
-  let pointsIdx = -1;
-  let medalIdx = -1;
+        fetch(WEB_APP_URL)
+            .then(response => response.json())
+            .then(data => {
+                var appDiv = document.getElementById("app");
+                if (data.error) {
+                    appDiv.innerHTML = "<p style=\"color:red; text-align:center;\">" + escapeHtml(data.error) + "</p>";
+                    return;
+                }
 
-  table.headers.forEach(function(h, i) {
-    const lower = h.toLowerCase();
-    if (lower.indexOf('point') !== -1) pointsIdx = i;
-    if (lower.indexOf('medal') !== -1) medalIdx = i;
-  });
+                var htmlContent = "";
+                if (data.monthly && data.monthly.length > 0) {
+                    data.monthly.forEach(card => {
+                        htmlContent += renderPeriodCard(card);
+                    });
+                }
 
-  if (pointsIdx === -1 && table.rows[0].length > 1) pointsIdx = 1;
-  if (medalIdx === -1 && table.rows[0].length > 3) medalIdx = 3;
+                if (data.overall) {
+                    htmlContent += renderOverallTable(data.overall);
+                }
 
-  if (pointsIdx !== -1) {
-    let minPoints = Infinity;
-    let lowestRowIdx = -1;
-
-    table.rows.forEach(function(row, idx) {
-      const val = parseInt((row[pointsIdx] || '').toString().replace(/[^\d]/g, ''), 10);
-      if (!isNaN(val) && val < minPoints) {
-        minPoints = val;
-        lowestRowIdx = idx;
-      }
-    });
-
-    if (lowestRowIdx !== -1 && medalIdx !== -1) {
-      let currentMedal = (table.rows[lowestRowIdx][medalIdx] || '').toString().trim();
-      if (currentMedal.indexOf('💩') === -1) {
-        table.rows[lowestRowIdx][medalIdx] = currentMedal ? (currentMedal + ' 💩') : '💩';
-      }
-    }
-  }
-
-  return table;
-}
-
-function extractTable(sheet, titleStartsWith) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow === 0) return null;
-
-  const colA = sheet.getRange(1, 1, lastRow, 1).getValues();
-  let titleRow = -1;
-  for (let r = 0; r < colA.length; r++) {
-    const val = (colA[r][0] || '').toString();
-    if (val.indexOf(titleStartsWith) === 0) {
-      titleRow = r + 1;
-      break;
-    }
-  }
-  if (titleRow === -1) return null;
-
-  const headerRow = titleRow + 1;
-  const lastCol = sheet.getLastColumn();
-  if (lastCol === 0) return null;
-
-  const headerValues = sheet.getRange(headerRow, 1, 1, lastCol).getValues()[0];
-  let width = headerValues.length;
-  while (width > 0 && (headerValues[width - 1] === '' || headerValues[width - 1] === null)) {
-    width--;
-  }
-  const headers = headerValues.slice(0, width);
-
-  const rows = [];
-  let r = headerRow + 1;
-  while (r <= lastRow) {
-    const rowValues = sheet.getRange(r, 1, 1, width).getDisplayValues()[0];
-    const firstCell = (rowValues[0] || '').toString().trim();
-    if (firstCell === '') break;
-    rows.push(rowValues);
-    r++;
-  }
-
-  return { headers: headers, rows: rows };
-}
+                appDiv.innerHTML = htmlContent;
+                if (data.updated) {
+                    document.getElementById("updated").innerText = "Last updated: " + data.updated;
+                }
+            })
+            .catch(err => {
+                document.getElementById("app").innerHTML = "<p style=\"text-align:center; color:red;\">Failed to load FPL data.</p>";
+                console.error(err);
+            });
+    </script>
+</body>
+</html>
