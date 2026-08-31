@@ -182,6 +182,7 @@
         }
 
         async function loadTrackerData() {
+            // Safety fallback: force the splash screen to drop after 5 seconds no matter what
             const safetyTimer = setTimeout(() => {
                 hideSplash();
             }, 5000);
@@ -259,28 +260,26 @@
                 }
             }
 
-            // 2. Render Overall Standings Table (with Weeks Won & MOTM Awards)
+            // 2. Render Overall Standings Table
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name') || h.toLowerCase().includes('manager'));
                 const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
                 const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
-                const weeksWonIdx = headers.findIndex(h => h.toLowerCase().includes('week') || h.toLowerCase().includes('won'));
-                const motmIdx = headers.findIndex(h => h.toLowerCase().includes('motm') || h.toLowerCase().includes('month'));
+                const weeksIdx = headers.findIndex(h => h.toLowerCase().includes('week') || h.toLowerCase().includes('led'));
                 const prizeIdx = headers.findIndex(h => h.toLowerCase().includes('prize'));
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Manager</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Points</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Weeks Won</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">MOTM</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Prize</th>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Total Points</th>
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Weeks Led</th>
+                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -288,17 +287,15 @@
                                         const playerName = row[playerIdx !== -1 ? playerIdx : 0];
                                         const points = row[pointsIdx !== -1 ? pointsIdx : 1];
                                         const medal = medalIdx !== -1 ? row[medalIdx] : '';
-                                        const weeksWon = row[weeksWonIdx !== -1 ? weeksWonIdx : 2];
-                                        const motm = motmIdx !== -1 ? row[motmIdx] : 0;
+                                        const weeksLed = row[weeksIdx !== -1 ? weeksIdx : 4];
                                         const prize = row[prizeIdx !== -1 ? prizeIdx : 5];
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="padding: 12px 6px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
-                                                <td style="padding: 12px 6px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-muted); font-weight: 500;">${prize}</td>
+                                                <td style="padding: 12px 8px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
+                                                <td style="padding: 12px 8px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
+                                                <td style="padding: 12px 8px 12px 4px; color: var(--text-muted); font-weight: 500;">${weeksLed}</td>
+                                                <td style="padding: 12px 8px 12px 4px; color: var(--text-color); font-weight: 500;">${prize}</td>
                                             </tr>
                                         `;
                                     }).join('')}
