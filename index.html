@@ -104,7 +104,7 @@
             margin: 0 0 12px 0;
         }
 
-        /* FIFA Ultimate Team Card Styles - Gold Only */
+        /* Card Styles */
         .fut-card {
             position: relative;
             cursor: pointer;
@@ -222,7 +222,6 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
-        // Replace with your actual LiveTracker web app URL if hosted independently, or point both to your unified script endpoint
         const LIVE_API_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
 
         const TEAM_NAMES = {
@@ -246,7 +245,6 @@
             }, 5000);
 
             try {
-                // Fetch main tracker data and live tracker data concurrently
                 const [mainResponse, liveResponse] = await Promise.all([
                     fetch(SCRIPT_URL),
                     fetch(LIVE_API_URL).catch(() => null)
@@ -376,7 +374,7 @@
                 }
             }
 
-            // 2. Render Overall Standings Table (with chip inventories included if liveData is available)
+            // 2. Render Overall Standings Table
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const getCol = (name, fallback) => {
@@ -393,7 +391,6 @@
 
                 const totalRows = data.overall.rows.length;
 
-                // Map live chip inventory if available
                 const chipMap = {};
                 if (liveData && liveData.standings) {
                     liveData.standings.forEach(m => {
@@ -433,7 +430,6 @@
                                         const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
                                         const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
 
-                                        // Render chip pills beneath the manager's name if inventory exists
                                         const chips = chipMap[playerName];
                                         let chipsHtml = '';
                                         if (chips) {
@@ -464,7 +460,7 @@
                 `;
             }
 
-            // 3. Render Accolades Card (Computed from backend)
+            // 3. Render Accolades Card
             if (data.accolades) {
                 const acc = data.accolades;
                 const formatAccoladeValue = (item, type) => {
