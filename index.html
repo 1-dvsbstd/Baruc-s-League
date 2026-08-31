@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
+    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#190df5">
     <meta name="mobile-web-app-capable" content="yes">
@@ -12,6 +13,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
+    <!-- Google Fonts for Premier League Look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -150,6 +152,7 @@
 </head>
 <body>
 
+    <!-- Splash Screen Overlay -->
     <div id="splash-screen">
         <img src="splash-bg.png" alt="Loading">
     </div>
@@ -405,14 +408,12 @@
                 html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 24px; font-weight: 500;">Last synced: ${data.updated}</p>`;
             }
 
-.appDiv.innerHTML = html;
+            appDiv.innerHTML = html;
 
             // Automatically scroll carousel to the most recent active period on load
             const carousel = document.getElementById('period-carousel');
             if (carousel) {
                 carousel.scrollLeft = carousel.scrollWidth;
-
-                carousel.carousel-card.addEventListener('scroll', () => { ... }) // (preserved existing scroll logic)
             }
         }
 
