@@ -236,7 +236,6 @@
                     activePeriods.forEach(period => {
                         let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
 
-                        // Ensure prizes have £ symbol if numbers are present
                         const formatPrize = (p) => {
                             if (!p) return '£0';
                             let str = String(p).trim();
@@ -247,11 +246,8 @@
                             <div class="card carousel-card">
                                 <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
-                                    ${period.scores.map((s, idx, arr) => {
+                                    ${period.scores.map((s) => {
                                         let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
-                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
-                                            scoreDisplay += ' 💩';
-                                        }
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         return `
                                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
@@ -276,7 +272,7 @@
                 }
             }
 
-            // 2. Render Overall Standings Table (Even Column Spacing & Medals Restored)
+            // 2. Render Overall Standings Table
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const getCol = (name, fallback) => {
@@ -309,7 +305,6 @@
                                     ${data.overall.rows.map((row, rIdx) => {
                                         const playerName = row[playerIdx] || '';
                                         const points = row[pointsIdx] || '';
-                                        // Fallback medal logic if column isn't mapped cleanly in row index
                                         let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
                                         if (!medal) {
                                             if (rIdx === 0) medal = '🥇';
