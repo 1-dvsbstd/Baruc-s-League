@@ -1,216 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baruc's League - FPL Side Pot Tracker</title>
-    
-    <!-- PWA Manifest & Meta Tags -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#190df5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
-    <!-- Google Fonts for Premier League Look -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --surface-color: #1a0524;
-            --card-bg: #2b083b;
-            --primary-color: #00ff87;
-            --accent-color: #02efff;
-            --text-color: #ffffff;
-            --text-muted: #a0a0a0;
-            --border-color: #4a155f;
-            --border-subtle: rgba(255, 255, 255, 0.08);
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--surface-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px 16px;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 24px;
-            text-shadow: 0 2px 8px rgba(0,255,135,0.2);
-        }
-
-        /* Splash Screen Styling */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--surface-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.4s ease-out;
-        }
-
-        #splash-screen img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 0;
-            margin-bottom: 0;
-            animation: none;
-        }
-
-        .fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* App Container */
-        #app {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Section Headings */
-        .section-title {
-            color: var(--primary-color);
-            text-align: center;
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin: 0 0 12px 0;
-        }
-
-        /* Carousel Styling */
-        .carousel-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 16px;
-            padding-bottom: 8px;
-            scrollbar-width: none; /* Firefox */
-        }
-        .carousel-container::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
-        }
-        .carousel-card {
-            min-width: 100%;
-            box-sizing: border-box;
-            scroll-snap-align: start;
-        }
-
-        /* Carousel Indicator Dots */
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--border-color);
-            transition: all 0.3s ease;
-        }
-        .dot.active {
-            width: 20px;
-            border-radius: 4px;
-            background-color: var(--primary-color);
-        }
-
-        .loading-text {
-            text-align: center;
-            color: var(--text-muted);
-            margin-top: 40px;
-            font-weight: 500;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Splash Screen Overlay -->
-    <div id="splash-screen">
-        <img src="splash-bg.png" alt="Loading">
-    </div>
-
-    <h1>Baruc's League</h1>
-    
-    <div id="app">
-        <div class="loading-text">Loading tracker data...</div>
-    </div>
-
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec';
-
-        // Hardcoded team name mapping based on A9:D12 data
-        const TEAM_NAMES = {
-            "Nathan": "nr xi",
-            "Mike": "mikes marauders",
-            "Carl": "Ginger Ninjas",
-            "Charlie": "Oakley1"
-        };
-
-        function hideSplash() {
-            const splash = document.getElementById('splash-screen');
-            if (splash && !splash.classList.contains('fade-out')) {
-                splash.classList.add('fade-out');
-                setTimeout(() => splash.remove(), 400);
-            }
-        }
-
-        async function loadTrackerData() {
-            // Safety fallback: force the splash screen to drop after 5 seconds no matter what
-            const safetyTimer = setTimeout(() => {
-                hideSplash();
-            }, 5000);
-
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                clearTimeout(safetyTimer);
-                renderApp(data);
-            } catch (error) {
-                clearTimeout(safetyTimer);
-                console.error('Error fetching data:', error);
-                document.getElementById('app').innerHTML = `
-                    <div class="card">
-                        <p style="color: #ff4b4b; text-align: center; font-weight: 500;">Unable to load data. Please check your connection or Apps Script URL.</p>
-                    </div>`;
-            } finally {
-                hideSplash();
-            }
-        }
-
-        function renderApp(data) {
+function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // 1. Render Manager of the Month Carousel with Team Names
+            // 1. Render Manager of the Month Carousel with Team Names (Filtering out malformed or header rows)
             if (data.monthly && data.monthly.length > 0) {
-                const activePeriods = data.monthly.filter(period => period.scores && period.scores.length > 0);
+                const activePeriods = data.monthly.filter(period => {
+                    if (!period.scores || period.scores.length === 0) return false;
+                    if (period.title.toLowerCase().includes('period period') || period.title.toLowerCase().includes('monthly side pot')) return false;
+                    const isMalformed = period.scores.every(s => String(s.score) === s.name);
+                    return !isMalformed;
+                });
 
                 if (activePeriods.length > 0) {
                     html += `<div class="section-title">Manager of the Month</div>`;
@@ -232,7 +31,7 @@
                                 <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
                                     ${period.scores.map((s, idx, arr) => {
-                                        let scoreDisplay = s.score;
+                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
                                             scoreDisplay += ' 💩';
                                         }
@@ -266,20 +65,22 @@
                 const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name') || h.toLowerCase().includes('manager'));
                 const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
                 const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
-                const weeksIdx = headers.findIndex(h => h.toLowerCase().includes('week') || h.toLowerCase().includes('led'));
+                const weeksWonIdx = headers.findIndex(h => h.toLowerCase().includes('won') || h.toLowerCase().includes('week'));
+                const motmIdx = headers.findIndex(h => h.toLowerCase().includes('motm') || h.toLowerCase().includes('award'));
                 const prizeIdx = headers.findIndex(h => h.toLowerCase().includes('prize'));
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Manager</th>
-                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Total Points</th>
-                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Weeks Led</th>
-                                        <th style="padding: 0 8px 10px 4px; font-weight: 700;">Prize</th>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Points</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Weeks Won</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">MOTM</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -287,15 +88,17 @@
                                         const playerName = row[playerIdx !== -1 ? playerIdx : 0];
                                         const points = row[pointsIdx !== -1 ? pointsIdx : 1];
                                         const medal = medalIdx !== -1 ? row[medalIdx] : '';
-                                        const weeksLed = row[weeksIdx !== -1 ? weeksIdx : 4];
-                                        const prize = row[prizeIdx !== -1 ? prizeIdx : 5];
+                                        const weeksWon = row[weeksWonIdx !== -1 ? weeksWonIdx : 4];
+                                        const motm = motmIdx !== -1 ? row[motmIdx] : 5;
+                                        const prize = row[prizeIdx !== -1 ? prizeIdx : 6];
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="padding: 12px 8px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
-                                                <td style="padding: 12px 8px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
-                                                <td style="padding: 12px 8px 12px 4px; color: var(--text-muted); font-weight: 500;">${weeksLed}</td>
-                                                <td style="padding: 12px 8px 12px 4px; color: var(--text-color); font-weight: 500;">${prize}</td>
+                                                <td style="padding: 12px 6px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
+                                                <td style="padding: 12px 6px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-muted); font-weight: 500;">£${prize}</td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -332,14 +135,3 @@
                 });
             }
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadTrackerData();
-        });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
-        }
-    </script>
-</body>
-</html>
