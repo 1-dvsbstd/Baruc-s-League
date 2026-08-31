@@ -214,7 +214,6 @@
                     if (!period.scores || period.scores.length === 0) return false;
                     if (period.title.toLowerCase().includes('period period') || period.title.toLowerCase().includes('monthly side pot')) return false;
                     
-                    // Exclude future/unstarted periods where all scores are 0 or empty
                     const hasStarted = period.scores.some(s => Number(s.score) > 0);
                     if (!hasStarted) return false;
 
@@ -236,6 +235,13 @@
                     
                     activePeriods.forEach(period => {
                         let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
+
+                        // Ensure prizes have £ symbol if numbers are present
+                        const formatPrize = (p) => {
+                            if (!p) return '£0';
+                            let str = String(p).trim();
+                            return str.startsWith('£') ? str : '£' + str;
+                        };
 
                         html += `
                             <div class="card carousel-card">
@@ -259,8 +265,8 @@
                                     }).join('')}
                                 </ul>
                                 <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${period.winnerPrize})</span></div>
-                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${period.runnerPrize})</span></div>
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
                                 </div>
                             </div>
                         `;
@@ -270,7 +276,7 @@
                 }
             }
 
-            // 2. Render Overall Standings Table (Fixed Column Index Alignment)
+            // 2. Render Overall Standings Table (Even Column Spacing & Medals Restored)
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const getCol = (name, fallback) => {
@@ -280,33 +286,48 @@
 
                 const playerIdx = getCol('player', getCol('name', 0));
                 const pointsIdx = getCol('point', getCol('total', 1));
-                const weeksWonIdx = getCol('won', getCol('week', 2));
-                const motmIdx = getCol('motm', getCol('award', 3));
-                const prizeIdx = getCol('prize', 4);
+                const medalIdx = getCol('medal', 2);
+                const weeksWonIdx = getCol('won', getCol('week', 3));
+                const motmIdx = getCol('motm', getCol('award', 4));
+                const prizeIdx = getCol('prize', 5);
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                            <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Manager</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Points</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700; text-align: center;">Weeks Won</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Prize</th>
+                                        <th style="width: 28%; padding: 0 4px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="width: 20%; padding: 0 4px 10px 4px; font-weight: 700;">Points</th>
+                                        <th style="width: 18%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">Won</th>
+                                        <th style="width: 16%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
+                                        <th style="width: 18%; padding: 0 4px 10px 4px; font-weight: 700; text-align: right;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.overall.rows.map(row => {
+                                    ${data.overall.rows.map((row, rIdx) => {
+                                        const playerName = row[playerIdx] || '';
+                                        const points = row[pointsIdx] || '';
+                                        // Fallback medal logic if column isn't mapped cleanly in row index
+                                        let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
+                                        if (!medal) {
+                                            if (rIdx === 0) medal = '🥇';
+                                            else if (rIdx === 1) medal = '🥈';
+                                            else if (rIdx === 2) medal = '🥉';
+                                        }
+                                        const weeksWon = row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0;
+                                        const motm = row[motmIdx] !== undefined ? row[motmIdx] : 0;
+                                        const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
+                                        const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
+
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="padding: 12px 6px 12px 4px; font-weight: 600; color: #fff;">${row[playerIdx] || ''}</td>
-                                                <td style="padding: 12px 6px 12px 4px; font-weight: 700; color: var(--primary-color);">${row[pointsIdx] || ''}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${row[motmIdx] !== undefined ? row[motmIdx] : 0}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-muted); font-weight: 500;">£${row[prizeIdx] !== undefined ? row[prizeIdx] : 0}</td>
+                                                <td style="width: 28%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${playerName}</td>
+                                                <td style="width: 20%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
+                                                <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
+                                                <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
+                                                <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
                                             </tr>
                                         `;
                                     }).join('')}
