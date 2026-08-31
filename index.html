@@ -270,15 +270,19 @@
                 }
             }
 
-            // 2. Render Overall Standings Table
+            // 2. Render Overall Standings Table (Fixed Column Index Alignment)
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
-                const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name') || h.toLowerCase().includes('manager'));
-                const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
-                const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
-                const weeksWonIdx = headers.findIndex(h => h.toLowerCase().includes('won') || h.toLowerCase().includes('week'));
-                const motmIdx = headers.findIndex(h => h.toLowerCase().includes('motm') || h.toLowerCase().includes('award'));
-                const prizeIdx = headers.findIndex(h => h.toLowerCase().includes('prize'));
+                const getCol = (name, fallback) => {
+                    const idx = headers.findIndex(h => h && h.toLowerCase().includes(name));
+                    return idx !== -1 ? idx : fallback;
+                };
+
+                const playerIdx = getCol('player', getCol('name', 0));
+                const pointsIdx = getCol('point', getCol('total', 1));
+                const weeksWonIdx = getCol('won', getCol('week', 2));
+                const motmIdx = getCol('motm', getCol('award', 3));
+                const prizeIdx = getCol('prize', 4);
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
@@ -289,27 +293,20 @@
                                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
                                         <th style="padding: 0 6px 10px 4px; font-weight: 700;">Manager</th>
                                         <th style="padding: 0 6px 10px 4px; font-weight: 700;">Points</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Weeks Won</th>
-                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">MOTM</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700; text-align: center;">Weeks Won</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
                                         <th style="padding: 0 6px 10px 4px; font-weight: 700;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${data.overall.rows.map(row => {
-                                        const playerName = row[playerIdx !== -1 ? playerIdx : 0];
-                                        const points = row[pointsIdx !== -1 ? pointsIdx : 1];
-                                        const medal = medalIdx !== -1 ? row[medalIdx] : '';
-                                        const weeksWon = row[weeksWonIdx !== -1 ? weeksWonIdx : 4];
-                                        const motm = motmIdx !== -1 ? row[motmIdx] : 5;
-                                        const prize = prizeIdx !== -1 ? row[prizeIdx] : 6;
-
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="padding: 12px 6px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
-                                                <td style="padding: 12px 6px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
-                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-muted); font-weight: 500;">£${prize}</td>
+                                                <td style="padding: 12px 6px 12px 4px; font-weight: 600; color: #fff;">${row[playerIdx] || ''}</td>
+                                                <td style="padding: 12px 6px 12px 4px; font-weight: 700; color: var(--primary-color);">${row[pointsIdx] || ''}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${row[motmIdx] !== undefined ? row[motmIdx] : 0}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-muted); font-weight: 500;">£${row[prizeIdx] !== undefined ? row[prizeIdx] : 0}</td>
                                             </tr>
                                         `;
                                     }).join('')}
