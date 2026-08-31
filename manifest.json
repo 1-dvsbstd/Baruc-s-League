@@ -1,7 +1,7 @@
 {
   "name": "Baruc's League",
   "short_name": "Baruc's League",
-  "start_url": "https://script.google.com/macros/s/AKfycbznzAi5EmRvb6uHfp898c4T0eGxWGDWu16AccyUfsXqU7M4e5az-Hwp9szBP1W_J97MPg/exec",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d1b2a",
   "theme_color": "#1f4e78",
