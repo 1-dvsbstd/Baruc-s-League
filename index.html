@@ -221,8 +221,8 @@
     </div>
 
     <script>
+        // Use single endpoint or distinct query parameters if separate functions are used
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
-        const LIVE_API_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
 
         const TEAM_NAMES = {
             "Nathan": "nr xi",
@@ -245,20 +245,11 @@
             }, 5000);
 
             try {
-                const [mainResponse, liveResponse] = await Promise.all([
-                    fetch(SCRIPT_URL),
-                    fetch(LIVE_API_URL).catch(() => null)
-                ]);
-
-                const data = await mainResponse.json();
-                let liveData = null;
-                if (liveResponse && liveResponse.ok) {
-                    try {
-                        liveData = await liveResponse.json();
-                    } catch (e) {
-                        console.warn('Could not parse live tracker payload', e);
-                    }
-                }
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                // If live standings are bundled in main payload or separate property
+                const liveData = data.liveData || data;
 
                 clearTimeout(safetyTimer);
                 renderApp(data, liveData);
@@ -279,7 +270,10 @@
             let html = '';
 
             // 0. Render Live GW Tracker Section if liveData exists
-            if (liveData && liveData.standings) {
+            if (liveData && liveData.standings && liveData.standings.length > 0) {
+                // Ensure standings are sorted highest points to lowest points
+                liveData.standings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
+
                 html += `<div class="section-title">Live GW ${liveData.gameweek} Tracker</div>`;
                 liveData.standings.forEach(mgr => {
                     const hasActiveChip = mgr.activeChip !== null;
@@ -292,15 +286,15 @@
                                 <div>
                                     <span style="font-weight: 700; font-size: 1rem; color: #fff;">${mgr.managerName}</span>
                                     ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Team: ${mgr.teamName}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || ''}</div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color);">${mgr.livePoints} pts ▾</span>
                             </div>
                             
                             <div class="card-dropdown">
-                                <div style="margin-bottom: 5px;">👑 <strong>Captain:</strong> ${mgr.captain.name} (${mgr.captain.points} pts)</div>
-                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${mgr.starPerformer.name} (${mgr.starPerformer.points} pts)</div>
-                                <div style="margin-bottom: 4px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${mgr.worstPerformer.name} (${mgr.worstPerformer.points} pts)</div>
+                                <div style="margin-bottom: 5px;">👑 <strong>Captain:</strong> ${mgr.captain ? mgr.captain.name : 'None'} (${mgr.captain ? mgr.captain.points : 0} pts)</div>
+                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${mgr.starPerformer ? mgr.starPerformer.name : 'None'} (${mgr.starPerformer ? mgr.starPerformer.points : 0} pts)</div>
+                                <div style="margin-bottom: 4px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${mgr.worstPerformer ? mgr.worstPerformer.name : 'None'} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
                             </div>
                         </div>
                     `;
@@ -529,9 +523,20 @@
 
             appDiv.innerHTML = html;
 
+            // Carousel scroll position and dynamic dot highlights
             const carousel = document.getElementById('period-carousel');
-            if (carousel) {
+            const dots = document.querySelectorAll('#carousel-dots .dot');
+
+            if (carousel && dots.length > 0) {
                 carousel.scrollLeft = carousel.scrollWidth;
+                
+                carousel.addEventListener('scroll', () => {
+                    const cardWidth = carousel.querySelector('.carousel-card')?.clientWidth || 1;
+                    const activeIndex = Math.round(carousel.scrollLeft / cardWidth);
+                    dots.forEach((dot, idx) => {
+                        dot.classList.toggle('active', idx === activeIndex);
+                    });
+                });
             }
         }
 
