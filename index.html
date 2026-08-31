@@ -180,6 +180,9 @@
         }
 
         async function loadTrackerData() {
+            // FORCE HIDE SPLASH IMMEDIATELY FOR DEBUGGING
+            hideSplash();
+            
             const safetyTimer = setTimeout(() => {
                 hideSplash();
             }, 5000);
