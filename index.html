@@ -104,6 +104,64 @@
             margin: 0 0 12px 0;
         }
 
+        /* FIFA Ultimate Team Card Styles - Gold Only */
+        .fut-card {
+            position: relative;
+            cursor: pointer;
+            background: #111a16;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .fut-card.glow-gold {
+            border: 2px solid #ffd700 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), inset 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .chip-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            background: #ffd700;
+            color: #1a0524;
+        }
+
+        .card-dropdown {
+            margin-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .fut-card.expanded .card-dropdown {
+            display: block;
+        }
+
+        /* Overall Standings Chip Inventory Pills */
+        .chip-inventory {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .chip-pill {
+            font-size: 0.55rem;
+            padding: 1px 4px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .chip-pill.available {
+            color: #ffd700;
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
         /* Carousel Styling */
         .carousel-container {
             display: flex;
@@ -111,10 +169,10 @@
             scroll-snap-type: x mandatory;
             gap: 16px;
             padding-bottom: 8px;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
         }
         .carousel-container::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
+            display: none;
         }
         .carousel-card {
             min-width: 100%;
@@ -122,7 +180,6 @@
             scroll-snap-align: start;
         }
 
-        /* Carousel Indicator Dots */
         .carousel-dots {
             display: flex;
             justify-content: center;
@@ -165,8 +222,9 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
+        // Replace with your actual LiveTracker web app URL if hosted independently, or point both to your unified script endpoint
+        const LIVE_API_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
 
-        // Hardcoded team name mapping based on setup data
         const TEAM_NAMES = {
             "Nathan": "nr xi",
             "Mike": "mikes marauders",
@@ -188,10 +246,24 @@
             }, 5000);
 
             try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
+                // Fetch main tracker data and live tracker data concurrently
+                const [mainResponse, liveResponse] = await Promise.all([
+                    fetch(SCRIPT_URL),
+                    fetch(LIVE_API_URL).catch(() => null)
+                ]);
+
+                const data = await mainResponse.json();
+                let liveData = null;
+                if (liveResponse && liveResponse.ok) {
+                    try {
+                        liveData = await liveResponse.json();
+                    } catch (e) {
+                        console.warn('Could not parse live tracker payload', e);
+                    }
+                }
+
                 clearTimeout(safetyTimer);
-                renderApp(data);
+                renderApp(data, liveData);
             } catch (error) {
                 clearTimeout(safetyTimer);
                 console.error('Error fetching data:', error);
@@ -204,9 +276,38 @@
             }
         }
 
-        function renderApp(data) {
+        function renderApp(data, liveData) {
             const appDiv = document.getElementById('app');
             let html = '';
+
+            // 0. Render Live GW Tracker Section if liveData exists
+            if (liveData && liveData.standings) {
+                html += `<div class="section-title">Live GW ${liveData.gameweek} Tracker</div>`;
+                liveData.standings.forEach(mgr => {
+                    const hasActiveChip = mgr.activeChip !== null;
+                    const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
+                    const chipLabel = mgr.activeChip ? mgr.activeChip.toUpperCase() : '';
+
+                    html += `
+                        <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <span style="font-weight: 700; font-size: 1rem; color: #fff;">${mgr.managerName}</span>
+                                    ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Team: ${mgr.teamName}</div>
+                                </div>
+                                <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color);">${mgr.livePoints} pts ▾</span>
+                            </div>
+                            
+                            <div class="card-dropdown">
+                                <div style="margin-bottom: 5px;">👑 <strong>Captain:</strong> ${mgr.captain.name} (${mgr.captain.points} pts)</div>
+                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${mgr.starPerformer.name} (${mgr.starPerformer.points} pts)</div>
+                                <div style="margin-bottom: 4px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${mgr.worstPerformer.name} (${mgr.worstPerformer.points} pts)</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
 
             // 1. Render Manager of the Month Carousel with Filter for Unstarted Periods
             if (data.monthly && data.monthly.length > 0) {
@@ -222,7 +323,7 @@
                 });
 
                 if (activePeriods.length > 0) {
-                    html += `<div class="section-title">Manager of the Month</div>`;
+                    html += `<div class="section-title" style="margin-top: 20px;">Manager of the Month</div>`;
                     
                     html += `<div class="carousel-dots" id="carousel-dots">`;
                     activePeriods.forEach((_, index) => {
@@ -275,7 +376,7 @@
                 }
             }
 
-            // 2. Render Overall Standings Table
+            // 2. Render Overall Standings Table (with chip inventories included if liveData is available)
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const getCol = (name, fallback) => {
@@ -291,6 +392,14 @@
                 const prizeIdx = getCol('prize', 5);
 
                 const totalRows = data.overall.rows.length;
+
+                // Map live chip inventory if available
+                const chipMap = {};
+                if (liveData && liveData.standings) {
+                    liveData.standings.forEach(m => {
+                        chipMap[m.managerName] = m.remainingChips;
+                    });
+                }
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
@@ -324,9 +433,23 @@
                                         const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
                                         const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
 
+                                        // Render chip pills beneath the manager's name if inventory exists
+                                        const chips = chipMap[playerName];
+                                        let chipsHtml = '';
+                                        if (chips) {
+                                            chipsHtml = `<div class="chip-inventory">
+                                                ${Object.keys(chips).map(chip => 
+                                                    `<span class="chip-pill ${chips[chip] ? 'available' : ''}">${chip.toUpperCase()}</span>`
+                                                ).join('')}
+                                            </div>`;
+                                        }
+
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 28%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${playerName}</td>
+                                                <td style="width: 28%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff;">
+                                                    <div>${playerName}</div>
+                                                    ${chipsHtml}
+                                                </td>
                                                 <td style="width: 20%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
                                                 <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
                                                 <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
@@ -410,7 +533,6 @@
 
             appDiv.innerHTML = html;
 
-            // Automatically scroll carousel to the most recent active period on load
             const carousel = document.getElementById('period-carousel');
             if (carousel) {
                 carousel.scrollLeft = carousel.scrollWidth;
