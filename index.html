@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
+    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#190df5">
     <meta name="mobile-web-app-capable" content="yes">
@@ -12,6 +13,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
+    <!-- Google Fonts for Premier League Look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -150,6 +152,7 @@
 </head>
 <body>
 
+    <!-- Splash Screen Overlay -->
     <div id="splash-screen">
         <img src="splash-bg.png" alt="Loading">
     </div>
@@ -180,9 +183,7 @@
         }
 
         async function loadTrackerData() {
-            // FORCE HIDE SPLASH IMMEDIATELY FOR DEBUGGING
-            hideSplash();
-            
+            // Temporarily commented out to test rendering if needed, safety timer keeps fallback intact
             const safetyTimer = setTimeout(() => {
                 hideSplash();
             }, 5000);
@@ -229,4 +230,126 @@
 
                     html += `<div class="carousel-container" id="period-carousel">`;
                     
-                    activePeriods.forEach(period =>
+                    activePeriods.forEach(period => {
+                        let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
+
+                        html += `
+                            <div class="card carousel-card">
+                                <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
+                                    ${period.scores.map((s, idx, arr) => {
+                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
+                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
+                                            scoreDisplay += ' 💩';
+                                        }
+                                        const teamName = TEAM_NAMES[s.name] || '';
+                                        return `
+                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
+                                                <div>
+                                                    <div style="font-weight: 600; font-size: 0.95rem; color: #ffffff;">${s.name}</div>
+                                                    ${teamName ? `<div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${teamName}</div>` : ''}
+                                                </div>
+                                                <span style="font-weight: 700; font-size: 1.05rem; color: var(--primary-color);">${scoreDisplay}</span>
+                                            </li>
+                                        `;
+                                    }).join('')}
+                                </ul>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${period.winnerPrize})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${period.runnerPrize})</span></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+                }
+            }
+
+            // 2. Render Overall Standings Table
+            if (data.overall && data.overall.rows) {
+                const headers = data.overall.headers;
+                const playerIdx = headers.findIndex(h => h.toLowerCase().includes('player') || h.toLowerCase().includes('name') || h.toLowerCase().includes('manager'));
+                const pointsIdx = headers.findIndex(h => h.toLowerCase().includes('point') || h.toLowerCase().includes('total'));
+                const medalIdx = headers.findIndex(h => h.toLowerCase().includes('medal'));
+                const weeksWonIdx = headers.findIndex(h => h.toLowerCase().includes('won') || h.toLowerCase().includes('week'));
+                const motmIdx = headers.findIndex(h => h.toLowerCase().includes('motm') || h.toLowerCase().includes('award'));
+                const prizeIdx = headers.findIndex(h => h.toLowerCase().includes('prize'));
+
+                html += `
+                    <div class="card" style="margin-top: 24px;">
+                        <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Points</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Weeks Won</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">MOTM</th>
+                                        <th style="padding: 0 6px 10px 4px; font-weight: 700;">Prize</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.overall.rows.map(row => {
+                                        const playerName = row[playerIdx !== -1 ? playerIdx : 0];
+                                        const points = row[pointsIdx !== -1 ? pointsIdx : 1];
+                                        const medal = medalIdx !== -1 ? row[medalIdx] : '';
+                                        const weeksWon = row[weeksWonIdx !== -1 ? weeksWonIdx : 4];
+                                        const motm = motmIdx !== -1 ? row[motmIdx] : 5;
+                                        const prize = prizeIdx !== -1 ? row[prizeIdx] : 6;
+
+                                        return `
+                                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                                <td style="padding: 12px 6px 12px 4px; font-weight: 600; color: #fff;">${playerName}</td>
+                                                <td style="padding: 12px 6px 12px 4px; font-weight: 700; color: var(--primary-color);">${points} ${medal}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
+                                                <td style="padding: 12px 6px 12px 4px; color: var(--text-muted); font-weight: 500;">£${prize}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Last Updated Timestamp
+            if (data.updated) {
+                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 24px; font-weight: 500;">Last synced: ${data.updated}</p>`;
+            }
+
+            appDiv.innerHTML = html;
+
+            // Automatically scroll carousel to the most recent active period on load
+            const carousel = document.getElementById('period-carousel');
+            if (carousel) {
+                carousel.scrollLeft = carousel.scrollWidth;
+
+                carousel.addEventListener('scroll', () => {
+                    const cardWidth = carousel.querySelector('.carousel-card').offsetWidth + 16;
+                    const currentIndex = Math.round(carousel.scrollLeft / cardWidth);
+                    const dots = document.querySelectorAll('.dot');
+                    dots.forEach((dot, idx) => {
+                        if (idx === currentIndex) {
+                            dot.classList.add('active');
+                        } else {
+                            dot.classList.remove('active');
+                        }
+                    });
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTrackerData();
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>
