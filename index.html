@@ -246,8 +246,11 @@
                             <div class="card carousel-card">
                                 <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
-                                    ${period.scores.map((s) => {
+                                    ${period.scores.map((s, idx, arr) => {
                                         let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
+                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
+                                            scoreDisplay += ' 💩';
+                                        }
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         return `
                                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
@@ -287,6 +290,8 @@
                 const motmIdx = getCol('motm', getCol('award', 4));
                 const prizeIdx = getCol('prize', 5);
 
+                const totalRows = data.overall.rows.length;
+
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
@@ -310,6 +315,9 @@
                                             if (rIdx === 0) medal = '🥇';
                                             else if (rIdx === 1) medal = '🥈';
                                             else if (rIdx === 2) medal = '🥉';
+                                        }
+                                        if (rIdx === totalRows - 1 && !String(medal).includes('💩')) {
+                                            medal += ' 💩';
                                         }
                                         const weeksWon = row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0;
                                         const motm = row[motmIdx] !== undefined ? row[motmIdx] : 0;
