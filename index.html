@@ -104,7 +104,7 @@
             margin: 0 0 12px 0;
         }
 
-        /* Live GW Card Styling (Unified Theme) */
+        /* Live GW Card Styling */
         .fut-card {
             position: relative;
             cursor: pointer;
@@ -149,37 +149,40 @@
             display: block;
         }
 
-        /* Overall Standings Chip Inventory Pills */
+        /* Compact Single-Line Mobile Chips */
         .chip-inventory {
             display: flex;
-            gap: 4px;
+            align-items: center;
+            gap: 3px;
             margin-top: 4px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
         
         .chip-pill {
-            font-size: 0.65rem;
+            font-size: 0.58rem;
             font-weight: 700;
-            padding: 1px 5px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.04);
-            color: #777777;
+            padding: 1px 4px;
+            border-radius: 3px;
+            letter-spacing: 0.2px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.03);
+            color: #888888;
+            line-height: 1.1;
         }
         
         .chip-pill.active {
             color: #ffd700;
             border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.18);
-            box-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
         }
         
         .chip-pill.used {
-            color: #4a4a4a;
-            border-color: rgba(255, 255, 255, 0.05);
+            color: #555555;
+            border-color: rgba(255, 255, 255, 0.04);
+            background: rgba(0, 0, 0, 0.2);
             text-decoration: line-through;
-            opacity: 0.5;
+            opacity: 0.45;
         }
 
         /* Carousel Styling */
@@ -329,7 +332,15 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // Live GW Tracker
+            // Map live points for managers
+            const livePointsMap = {};
+            if (liveData && liveData.standings) {
+                liveData.standings.forEach(m => {
+                    livePointsMap[m.managerName] = m.livePoints || 0;
+                });
+            }
+
+            // 1. Live GW Tracker
             if (liveData && liveData.standings && liveData.standings.length > 0) {
                 liveData.standings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
 
@@ -360,7 +371,7 @@
                 });
             }
 
-            // Manager of the Month Carousel
+            // 2. Manager of the Month Carousel (With Live GW Addition)
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => {
                     if (!period.scores || period.scores.length === 0) return false;
@@ -385,7 +396,7 @@
 
                     html += `<div class="carousel-container" id="period-carousel">`;
                     
-                    activePeriods.forEach(period => {
+                    activePeriods.forEach((period, periodIdx) => {
                         let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
 
                         const formatPrize = (p) => {
@@ -394,13 +405,26 @@
                             return str.startsWith('£') ? str : '£' + str;
                         };
 
+                        const isCurrentActivePeriod = (periodIdx === activePeriods.length - 1);
+
+                        let updatedScores = period.scores.map(s => {
+                            const staticScore = parseInt(s.score) || 0;
+                            const livePts = isCurrentActivePeriod ? (livePointsMap[s.name] || 0) : 0;
+                            return {
+                                name: s.name,
+                                totalScore: staticScore + livePts
+                            };
+                        });
+
+                        updatedScores.sort((a, b) => b.totalScore - a.totalScore);
+
                         html += `
                             <div class="card carousel-card">
                                 <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
-                                    ${period.scores.map((s, idx, arr) => {
-                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
-                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
+                                    ${updatedScores.map((s, idx, arr) => {
+                                        let scoreDisplay = s.totalScore;
+                                        if (idx === arr.length - 1) {
                                             scoreDisplay += ' 💩';
                                         }
                                         const teamName = TEAM_NAMES[s.name] || '';
@@ -416,8 +440,8 @@
                                     }).join('')}
                                 </ul>
                                 <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
-                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Leader:</strong> ${updatedScores[0]?.name || 'N/A'} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">2nd:</strong> ${updatedScores[1]?.name || 'N/A'} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
                                 </div>
                             </div>
                         `;
@@ -427,7 +451,7 @@
                 }
             }
 
-            // Overall Standings Table
+            // 3. Overall Standings Table (With Live GW Addition & Mobile Chip Layout)
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const getCol = (name, fallback) => {
@@ -437,12 +461,9 @@
 
                 const playerIdx = getCol('player', getCol('name', 0));
                 const pointsIdx = getCol('point', getCol('total', 1));
-                const medalIdx = getCol('medal', 2);
                 const weeksWonIdx = getCol('won', getCol('week', 3));
                 const motmIdx = getCol('motm', getCol('award', 4));
                 const prizeIdx = getCol('prize', 5);
-
-                const totalRows = data.overall.rows.length;
 
                 const chipMap = {};
                 const activeChipMap = {};
@@ -453,50 +474,58 @@
                     });
                 }
 
+                const calculatedRows = data.overall.rows.map(row => {
+                    const playerName = row[playerIdx] || '';
+                    const staticPoints = parseInt(row[pointsIdx]) || 0;
+                    const livePts = livePointsMap[playerName] || 0;
+                    return {
+                        rawRow: row,
+                        playerName: playerName,
+                        totalPoints: staticPoints + livePts,
+                        weeksWon: row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0,
+                        motm: row[motmIdx] !== undefined ? row[motmIdx] : 0,
+                        prizeVal: row[prizeIdx] !== undefined ? row[prizeIdx] : 0
+                    };
+                });
+
+                calculatedRows.sort((a, b) => b.totalPoints - a.totalPoints);
+                const totalRows = calculatedRows.length;
+
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <th style="width: 32%; padding: 0 4px 10px 4px; font-weight: 700;">Manager</th>
-                                        <th style="width: 20%; padding: 0 4px 10px 4px; font-weight: 700;">Points</th>
-                                        <th style="width: 16%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">Weeks Won</th>
-                                        <th style="width: 14%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
-                                        <th style="width: 18%; padding: 0 4px 10px 4px; font-weight: 700; text-align: right;">Prize</th>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="width: 38%; padding: 0 4px 10px 0; font-weight: 700;">Manager</th>
+                                        <th style="width: 20%; padding: 0 4px 10px 0; font-weight: 700;">Points</th>
+                                        <th style="width: 14%; padding: 0 2px 10px 0; font-weight: 700; text-align: center;">Won</th>
+                                        <th style="width: 12%; padding: 0 2px 10px 0; font-weight: 700; text-align: center;">MOTM</th>
+                                        <th style="width: 16%; padding: 0 0 10px 0; font-weight: 700; text-align: right;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.overall.rows.map((row, rIdx) => {
-                                        const playerName = row[playerIdx] || '';
-                                        const points = row[pointsIdx] || '';
-                                        let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
-                                        if (!medal) {
-                                            if (rIdx === 0) medal = '🥇';
-                                            else if (rIdx === 1) medal = '🥈';
-                                            else if (rIdx === 2) medal = '🥉';
-                                        }
-                                        if (rIdx === totalRows - 1 && !String(medal).includes('💩')) {
-                                            medal += ' 💩';
-                                        }
-                                        const weeksWon = row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0;
-                                        const motm = row[motmIdx] !== undefined ? row[motmIdx] : 0;
-                                        const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
-                                        const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
+                                    ${calculatedRows.map((item, rIdx) => {
+                                        let medal = '';
+                                        if (rIdx === 0) medal = '🥇';
+                                        else if (rIdx === 1) medal = '🥈';
+                                        else if (rIdx === 2) medal = '🥉';
+                                        if (rIdx === totalRows - 1) medal += ' 💩';
 
-                                        const chipsHtml = renderChipsHtml(chipMap[playerName], activeChipMap[playerName]);
+                                        const prizeStr = String(item.prizeVal).startsWith('£') ? item.prizeVal : '£' + item.prizeVal;
+                                        const chipsHtml = renderChipsHtml(chipMap[item.playerName], activeChipMap[item.playerName]);
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 32%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff;">
-                                                    <div>${playerName}</div>
+                                                <td style="width: 38%; padding: 10px 4px 10px 0; font-weight: 600; color: #fff;">
+                                                    <div style="font-size: 0.9rem;">${item.playerName}</div>
                                                     ${chipsHtml}
                                                 </td>
-                                                <td style="width: 20%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
-                                                <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
-                                                <td style="width: 14%; padding: 12px 4px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
-                                                <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
+                                                <td style="width: 20%; padding: 10px 4px 10px 0; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${item.totalPoints} ${medal}</td>
+                                                <td style="width: 14%; padding: 10px 2px 10px 0; color: var(--text-color); font-weight: 500; text-align: center;">${item.weeksWon}</td>
+                                                <td style="width: 12%; padding: 10px 2px 10px 0; color: var(--accent-color); font-weight: 600; text-align: center;">${item.motm}</td>
+                                                <td style="width: 16%; padding: 10px 0 10px 0; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -507,7 +536,7 @@
                 `;
             }
 
-            // Accolades Card
+            // 4. Accolades Card
             if (data.accolades) {
                 const acc = data.accolades;
                 const formatAccoladeValue = (item, type) => {
