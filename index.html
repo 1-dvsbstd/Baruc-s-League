@@ -183,7 +183,6 @@
         }
 
         async function loadTrackerData() {
-            // Temporarily commented out to test rendering if needed, safety timer keeps fallback intact
             const safetyTimer = setTimeout(() => {
                 hideSplash();
             }, 5000);
@@ -209,11 +208,16 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // 1. Render Manager of the Month Carousel with Team Names
+            // 1. Render Manager of the Month Carousel with Filter for Unstarted Periods
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => {
                     if (!period.scores || period.scores.length === 0) return false;
                     if (period.title.toLowerCase().includes('period period') || period.title.toLowerCase().includes('monthly side pot')) return false;
+                    
+                    // Exclude future/unstarted periods where all scores are 0 or empty
+                    const hasStarted = period.scores.some(s => Number(s.score) > 0);
+                    if (!hasStarted) return false;
+
                     const isMalformed = period.scores.every(s => String(s.score) === s.name);
                     return !isMalformed;
                 });
