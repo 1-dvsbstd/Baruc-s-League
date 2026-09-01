@@ -55,8 +55,16 @@
             font-size: 1.65rem;
             font-weight: 800;
             letter-spacing: -0.5px;
-            margin: 0 0 20px 0;
+            margin: 0 0 4px 0;
             text-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+
+        .update-timestamp {
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            opacity: 0.8;
         }
 
         /* Splash Screen Styling */
@@ -256,6 +264,7 @@
     </div>
 
     <h1>Baruc's League</h1>
+    <div id="timestamp" class="update-timestamp"></div>
     
     <div id="app">
         <div class="loading-text">Loading tracker data...</div>
@@ -342,6 +351,9 @@
                 const data = await response.json();
 
                 clearTimeout(safetyTimer);
+                if (data.updated) {
+                    document.getElementById('timestamp').innerText = `Updated: ${data.updated}`;
+                }
                 renderApp(data);
             } catch (error) {
                 clearTimeout(safetyTimer);
@@ -386,7 +398,7 @@
                     const starDisplayName = `${starName}${isStarCaptain ? ' (C)' : ''}`;
                     const worstDisplayName = `${worstName}${isWorstCaptain ? ' (C)' : ''}`;
 
-                    // Multi-check Transfer properties
+                    // Transfer Formatting
                     let transfersText = 'None';
                     if (mgr.transfers) {
                         if (Array.isArray(mgr.transfers)) {
@@ -485,8 +497,8 @@
                                     }).join('')}
                                 </ul>
                                 <div style="font-size: 0.82rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--gold-color); font-weight: 700;">(${formatPrize(period.winnerPrize)})</span></div>
-                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--silver-color); font-weight: 700;">(${formatPrize(period.runnerPrize)})</span></div>
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer || 'TBD'} <span style="color: var(--gold-color); font-weight: 700;">(${formatPrize(period.winnerPrize)})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName || 'TBD'} <span style="color: var(--silver-color); font-weight: 700;">(${formatPrize(period.runnerPrize)})</span></div>
                                 </div>
                             </div>
                         `;
@@ -519,8 +531,9 @@
                 const activeChipMap = {};
                 if (liveStandings) {
                     liveStandings.forEach(m => {
-                        chipMap[m.managerName] = m.remainingChips;
-                        activeChipMap[m.managerName] = m.activeChip;
+                        const key = (m.managerName || '').trim().toLowerCase();
+                        chipMap[key] = m.remainingChips;
+                        activeChipMap[key] = m.activeChip;
                     });
                 }
 
@@ -563,7 +576,6 @@
                                         const numericPrize = parseFloat(String(prizeVal).replace(/[^0-9.]/g, '')) || 0;
                                         const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
                                         
-                                        // 1st place gold, 2nd place runner-up silver
                                         let prizeColor = 'var(--gold-color)';
                                         if (rIdx === 1) {
                                             prizeColor = 'var(--silver-color)';
@@ -573,7 +585,8 @@
                                             ? `<span style="color: ${prizeColor}; font-weight: 700;">${prizeStr}</span>` 
                                             : `<span style="color: rgba(255,255,255,0.25); font-weight: 500;">£0</span>`;
 
-                                        const chipsHtml = renderChipsHtml(chipMap[playerName], activeChipMap[playerName]);
+                                        const pKey = String(playerName).trim().toLowerCase();
+                                        const chipsHtml = renderChipsHtml(chipMap[pKey], activeChipMap[pKey]);
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
@@ -599,7 +612,7 @@
                 `;
             }
 
-            // Dynamic calculation for Most Weeks Lost
+            // 4. Dynamic Calculation for Most Weeks Lost (Fallback)
             let computedWeeksLostPlayer = null;
             if (data.monthly && data.monthly.length > 0) {
                 const bottomCounts = {};
@@ -631,7 +644,7 @@
                 }
             }
 
-            // 4. Accolades Card (Refined Semantic Colors)
+            // 5. Accolades Card
             if (data.accolades || topWeeksWonPlayer || computedWeeksLostPlayer) {
                 const acc = data.accolades || {};
 
@@ -647,18 +660,9 @@
                 const highestScore = getAccObj(['highestScore']);
                 const lowestScore = getAccObj(['lowestScore']);
                 const mostWeeksWon = getAccObj(['mostWeeksWon', 'weeksWon']) || topWeeksWonPlayer;
-                
-                let mostWeeksLost = computedWeeksLostPlayer || getAccObj(['mostWeeksLost', 'weeksLost', 'mostWeeksLast']);
-                
-                if (!computedWeeksLostPlayer || (mostWeeksLost && (mostWeeksLost.player.includes('Charlie') || Number(mostWeeksLost.val) === 10))) {
-                    mostWeeksLost = {
-                        player: "Mike / Carl",
-                        val: 1
-                    };
-                }
-
-                const mostTransfers = getAccObj(['mostTransfers', 'transfers']);
-                const highestTransferCost = getAccObj(['highestTransferCost', 'highestTotalHit', 'biggestHit']);
+                const mostWeeksLost = getAccObj(['mostWeeksLost', 'mostWeeksLast', 'weeksLost']) || computedWeeksLostPlayer;
+                const mostTransfers = getAccObj(['mostTransfers', 'highestTotalTransfers', 'transfers']);
+                const highestTransferCost = getAccObj(['highestTotalHit', 'biggestHit', 'highestTransferCost']);
 
                 const formatSub = (item) => {
                     if (!item || !item.player) return 'N/A';
