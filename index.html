@@ -395,6 +395,8 @@
             position: relative;
             overflow: hidden;
             border-color: var(--item-accent);
+            padding: 12px 14px;
+            margin-bottom: 8px;
             background:
                 linear-gradient(115deg, rgba(255,255,255,0.035), transparent 30%),
                 linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
@@ -414,26 +416,41 @@
         .manager-item.rank-card-1 {
             --item-accent: rgba(255, 199, 44, 0.5);
             background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+            box-shadow: 0 0 0 1px rgba(255, 199, 44, 0.08), 0 0 26px rgba(255, 199, 44, 0.14), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.rank-card-2 {
             --item-accent: rgba(209, 213, 219, 0.38);
             background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+            box-shadow: 0 0 0 1px rgba(209, 213, 219, 0.06), 0 0 24px rgba(209, 213, 219, 0.09), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.rank-card-3 {
             --item-accent: rgba(201, 130, 69, 0.42);
             background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+            box-shadow: 0 0 0 1px rgba(201, 130, 69, 0.06), 0 0 24px rgba(201, 130, 69, 0.1), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.rank-card-4 {
             --item-accent: rgba(184, 91, 160, 0.28);
             background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+            box-shadow: 0 0 0 1px rgba(184, 91, 160, 0.05), 0 0 22px rgba(184, 91, 160, 0.08), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.has-hit {
-            border-right: 3px solid var(--danger-color);
+            box-shadow: 0 0 30px rgba(255, 75, 75, 0.14), 0 10px 24px rgba(0, 0, 0, 0.24);
+        }
+
+        .manager-item.has-hit::after {
+            content: '';
+            position: absolute;
+            inset: -35% -12%;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 88% 52%, rgba(255, 75, 75, 0.2), transparent 34%),
+                radial-gradient(circle at 8% 86%, rgba(172, 53, 255, 0.12), transparent 32%);
+            filter: blur(12px);
         }
 
         .manager-item.glow-gold {
@@ -525,8 +542,8 @@
         .chip-slot {
             display: inline-flex;
             align-items: center;
-            min-height: 20px;
-            margin-top: 7px;
+            min-height: 18px;
+            margin-top: 5px;
             padding: 2px 7px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 6px;
@@ -550,8 +567,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-top: 12px;
-            padding-top: 10px;
+            margin-top: 9px;
+            padding-top: 8px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
@@ -650,6 +667,8 @@
         .detail-tile.transfer .detail-value { color: var(--accent-color); }
 
         .manager-item .card-dropdown {
+            position: relative;
+            z-index: 1;
             display: block;
             max-height: 0;
             margin-top: 0;
