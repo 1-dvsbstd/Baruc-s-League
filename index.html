@@ -957,7 +957,22 @@
             scrollGwCarousel(false);
 
             track.addEventListener('scroll', () => {
-                const index = Math.round(track.scrollLeft / track.clientWidth);
+                const slides = Array.from(track.querySelectorAll('.carousel-card'));
+                if (slides.length === 0) return;
+
+                const firstOffset = slides[0].offsetLeft;
+                let index = 0;
+                let closestDistance = Infinity;
+
+                slides.forEach((slide, slideIndex) => {
+                    const slidePosition = slide.offsetLeft - firstOffset;
+                    const distance = Math.abs(track.scrollLeft - slidePosition);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        index = slideIndex;
+                    }
+                });
+
                 if (index !== currentGwSlideIdx && index >= 0 && index < totalGwSlides) {
                     currentGwSlideIdx = index;
                     updateGwCarouselHeader();
@@ -987,8 +1002,10 @@
             const track = document.getElementById('gw-carousel-track');
             const slide = document.getElementById(`gw-slide-${currentGwSlideIdx}`);
             if (track && slide) {
+                const firstSlide = track.querySelector('.carousel-card');
+                const firstOffset = firstSlide ? firstSlide.offsetLeft : 0;
                 track.scrollTo({
-                    left: slide.offsetLeft,
+                    left: slide.offsetLeft - firstOffset,
                     behavior: smooth ? 'smooth' : 'auto'
                 });
             }
