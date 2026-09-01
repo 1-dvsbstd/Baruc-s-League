@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
     
-    <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#190df5">
     <meta name="mobile-web-app-capable" content="yes">
@@ -13,7 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-    <!-- Google Fonts for Premier League Look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,6 +26,12 @@
             --text-muted: #a0a0a0;
             --border-color: #4a155f;
             --border-subtle: rgba(255, 255, 255, 0.08);
+            --danger-color: #ff4b4b;
+            --gold-color: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -68,9 +72,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 0;
-            margin-bottom: 0;
-            animation: none;
         }
 
         .fade-out {
@@ -104,7 +105,7 @@
             margin: 0 0 12px 0;
         }
 
-        /* Live GW Card Styling (Unified Theme) */
+        /* Live GW Card Styling */
         .fut-card {
             position: relative;
             cursor: pointer;
@@ -115,6 +116,7 @@
             margin-bottom: 10px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            user-select: none;
         }
         
         .fut-card:hover {
@@ -122,7 +124,7 @@
         }
 
         .fut-card.glow-gold {
-            border: 2px solid #ffd700 !important;
+            border: 2px solid var(--gold-color) !important;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.15);
         }
 
@@ -133,8 +135,9 @@
             border-radius: 4px;
             margin-left: 8px;
             text-transform: uppercase;
-            background: #ffd700;
+            background: var(--gold-color);
             color: #1a0524;
+            display: inline-block;
         }
 
         .card-dropdown {
@@ -149,7 +152,7 @@
             display: block;
         }
 
-        /* Overall Standings Chip Inventory Pills */
+        /* Standings Chip Inventory Pills */
         .chip-inventory {
             display: flex;
             gap: 4px;
@@ -169,8 +172,8 @@
         }
         
         .chip-pill.active {
-            color: #ffd700;
-            border-color: #ffd700;
+            color: var(--gold-color);
+            border-color: var(--gold-color);
             background: rgba(255, 215, 0, 0.18);
             box-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
         }
@@ -212,6 +215,7 @@
             border-radius: 50%;
             background-color: var(--border-color);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .dot.active {
             width: 20px;
@@ -229,9 +233,8 @@
 </head>
 <body>
 
-    <!-- Splash Screen Overlay -->
     <div id="splash-screen">
-        <img src="splash-bg.png" alt="Loading">
+        <img src="splash-bg.png" alt="Loading" onerror="this.parentElement.style.display='none'">
     </div>
 
     <h1>Baruc's League</h1>
@@ -258,6 +261,16 @@
             }
         }
 
+        function getChipDisplayName(chipKey) {
+            if (!chipKey) return '';
+            const s = String(chipKey).toLowerCase();
+            if (s.includes('wildcard') || s === 'wc') return 'WILDCARD';
+            if (s.includes('free') || s === 'fh') return 'FREE HIT';
+            if (s.includes('bboost') || s.includes('bench') || s === 'bb') return 'BENCH BOOST';
+            if (s.includes('3c') || s.includes('3xc') || s.includes('triple') || s === 'tc') return 'TRIPLE CAPTAIN';
+            return chipKey.toUpperCase();
+        }
+
         function renderChipsHtml(chipsData, activeChip) {
             const standardChips = [
                 { id: 'wc', label: 'WC' },
@@ -272,7 +285,7 @@
                 if (s.includes('wildcard') || s === 'wc') return 'wc';
                 if (s.includes('free') || s === 'fh') return 'fh';
                 if (s.includes('bboost') || s.includes('bench') || s === 'bb') return 'bb';
-                if (s.includes('3c') || s.includes('triple') || s === 'tc') return 'tc';
+                if (s.includes('3c') || s.includes('3xc') || s.includes('triple') || s === 'tc') return 'tc';
                 return s;
             };
 
@@ -309,35 +322,37 @@
             try {
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
-                const liveData = data.liveData || data;
 
                 clearTimeout(safetyTimer);
-                renderApp(data, liveData);
+                renderApp(data);
             } catch (error) {
                 clearTimeout(safetyTimer);
                 console.error('Error fetching data:', error);
                 document.getElementById('app').innerHTML = `
                     <div class="card">
-                        <p style="color: #ff4b4b; text-align: center; font-weight: 500;">Unable to load data. Please check your connection or Apps Script URL.</p>
+                        <p style="color: var(--danger-color); text-align: center; font-weight: 500;">Unable to load data. Please check your connection or Apps Script deployment.</p>
                     </div>`;
             } finally {
                 hideSplash();
             }
         }
 
-        function renderApp(data, liveData) {
+        function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // Live GW Tracker
-            if (liveData && liveData.standings && liveData.standings.length > 0) {
-                liveData.standings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
+            // 1. Live GW Tracker
+            const liveStandings = data.standings || (data.liveData ? data.liveData.standings : []);
+            const liveGameweek = data.gameweek || (data.liveData ? data.liveData.gameweek : null);
 
-                html += `<div class="section-title">Live GW ${liveData.gameweek} Tracker</div>`;
-                liveData.standings.forEach(mgr => {
-                    const hasActiveChip = mgr.activeChip !== null;
+            if (liveStandings && liveStandings.length > 0) {
+                liveStandings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
+
+                html += `<div class="section-title">Live GW ${liveGameweek || ''} Tracker</div>`;
+                liveStandings.forEach(mgr => {
+                    const hasActiveChip = mgr.activeChip !== null && mgr.activeChip !== undefined && mgr.activeChip !== '';
                     const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
-                    const chipLabel = mgr.activeChip ? mgr.activeChip.toUpperCase() : '';
+                    const chipLabel = getChipDisplayName(mgr.activeChip);
 
                     html += `
                         <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
@@ -345,7 +360,7 @@
                                 <div>
                                     <span style="font-weight: 700; font-size: 1rem; color: #fff;">${mgr.managerName}</span>
                                     ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || ''}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || TEAM_NAMES[mgr.managerName] || ''}</div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color);">${mgr.livePoints} pts ▾</span>
                             </div>
@@ -353,14 +368,14 @@
                             <div class="card-dropdown">
                                 <div style="margin-bottom: 5px;">👑 <strong>Captain:</strong> ${mgr.captain ? mgr.captain.name : 'None'} (${mgr.captain ? mgr.captain.points : 0} pts)</div>
                                 <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${mgr.starPerformer ? mgr.starPerformer.name : 'None'} (${mgr.starPerformer ? mgr.starPerformer.points : 0} pts)</div>
-                                <div style="margin-bottom: 4px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${mgr.worstPerformer ? mgr.worstPerformer.name : 'None'} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
+                                <div style="margin-bottom: 4px; color: var(--danger-color);">💩 <strong>Worst:</strong> ${mgr.worstPerformer ? mgr.worstPerformer.name : 'None'} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
                             </div>
                         </div>
                     `;
                 });
             }
 
-            // Manager of the Month Carousel
+            // 2. Manager of the Month Carousel
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => {
                     if (!period.scores || period.scores.length === 0) return false;
@@ -399,7 +414,7 @@
                                 <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
                                     ${period.scores.map((s, idx, arr) => {
-                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
+                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '0');
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
                                             scoreDisplay += ' 💩';
                                         }
@@ -427,11 +442,11 @@
                 }
             }
 
-            // Overall Standings Table
-            if (data.overall && data.overall.rows) {
-                const headers = data.overall.headers;
+            // 3. Overall Standings Table
+            if (data.overall && data.overall.rows && data.overall.rows.length > 0) {
+                const headers = data.overall.headers || [];
                 const getCol = (name, fallback) => {
-                    const idx = headers.findIndex(h => h && h.toLowerCase().includes(name));
+                    const idx = headers.findIndex(h => h && h.toString().toLowerCase().includes(name));
                     return idx !== -1 ? idx : fallback;
                 };
 
@@ -446,8 +461,8 @@
 
                 const chipMap = {};
                 const activeChipMap = {};
-                if (liveData && liveData.standings) {
-                    liveData.standings.forEach(m => {
+                if (liveStandings) {
+                    liveStandings.forEach(m => {
                         chipMap[m.managerName] = m.remainingChips;
                         activeChipMap[m.managerName] = m.activeChip;
                     });
@@ -460,17 +475,17 @@
                             <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <th style="width: 32%; padding: 0 4px 10px 4px; font-weight: 700;">Manager</th>
-                                        <th style="width: 20%; padding: 0 4px 10px 4px; font-weight: 700;">Points</th>
-                                        <th style="width: 16%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">Weeks Won</th>
+                                        <th style="width: 34%; padding: 0 4px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="width: 22%; padding: 0 4px 10px 4px; font-weight: 700;">Points</th>
+                                        <th style="width: 14%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">Won</th>
                                         <th style="width: 14%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
-                                        <th style="width: 18%; padding: 0 4px 10px 4px; font-weight: 700; text-align: right;">Prize</th>
+                                        <th style="width: 16%; padding: 0 4px 10px 4px; font-weight: 700; text-align: right;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${data.overall.rows.map((row, rIdx) => {
                                         const playerName = row[playerIdx] || '';
-                                        const points = row[pointsIdx] || '';
+                                        const points = row[pointsIdx] !== undefined ? row[pointsIdx] : '';
                                         let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
                                         if (!medal) {
                                             if (rIdx === 0) medal = '🥇';
@@ -489,14 +504,14 @@
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 32%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff;">
+                                                <td style="width: 34%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff;">
                                                     <div>${playerName}</div>
                                                     ${chipsHtml}
                                                 </td>
-                                                <td style="width: 20%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
-                                                <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
+                                                <td style="width: 22%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
+                                                <td style="width: 14%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
                                                 <td style="width: 14%; padding: 12px 4px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
-                                                <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
+                                                <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -507,13 +522,15 @@
                 `;
             }
 
-            // Accolades Card
+            // 4. Accolades Card
             if (data.accolades) {
                 const acc = data.accolades;
                 const formatAccoladeValue = (item, type) => {
                     if (!item || item.val === undefined || item.val === null || item.val === '') return 'N/A';
-                    if (type === 'hit') return '-' + Math.abs(Number(item.val));
-                    if (type === 'totalHit') return '-' + Math.abs(Number(item.val));
+                    if (type === 'hit' || type === 'totalHit') {
+                        const num = Number(item.val);
+                        return num > 0 ? '-' + num : String(num);
+                    }
                     if (type === 'margin') return '+' + item.val;
                     return item.val;
                 };
@@ -548,14 +565,14 @@
                                     <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Biggest Transfer Hit</div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.biggestHit ? acc.biggestHit.player : 'N/A'} ${acc.biggestHit && acc.biggestHit.gw ? '(' + acc.biggestHit.gw + ')' : ''}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(acc.biggestHit, 'hit')}</span>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--danger-color);">${formatAccoladeValue(acc.biggestHit, 'hit')}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
                                     <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Highest Total Transfer Cost</div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.highestTotalHit ? acc.highestTotalHit.player : 'N/A'}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(acc.highestTotalHit, 'totalHit')}</span>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--danger-color);">${formatAccoladeValue(acc.highestTotalHit, 'totalHit')}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
                                 <div>
@@ -575,17 +592,34 @@
 
             appDiv.innerHTML = html;
 
+            // Carousel scroll initialization
             const carousel = document.getElementById('period-carousel');
             const dots = document.querySelectorAll('#carousel-dots .dot');
 
             if (carousel && dots.length > 0) {
-                carousel.scrollLeft = carousel.scrollWidth;
-                
-                carousel.addEventListener('scroll', () => {
+                // Scroll to latest period
+                setTimeout(() => {
+                    carousel.scrollLeft = carousel.scrollWidth;
+                }, 50);
+
+                const updateDots = () => {
                     const cardWidth = carousel.querySelector('.carousel-card')?.clientWidth || 1;
-                    const activeIndex = Math.round(carousel.scrollLeft / cardWidth);
+                    const activeIndex = Math.min(
+                        dots.length - 1,
+                        Math.max(0, Math.round(carousel.scrollLeft / cardWidth))
+                    );
                     dots.forEach((dot, idx) => {
                         dot.classList.toggle('active', idx === activeIndex);
+                    });
+                };
+
+                carousel.addEventListener('scroll', updateDots);
+                
+                dots.forEach(dot => {
+                    dot.addEventListener('click', (e) => {
+                        const targetIdx = parseInt(e.target.getAttribute('data-index'), 10);
+                        const cardWidth = carousel.querySelector('.carousel-card')?.clientWidth || 0;
+                        carousel.scrollTo({ left: cardWidth * targetIdx, behavior: 'smooth' });
                     });
                 });
             }
