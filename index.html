@@ -398,9 +398,26 @@
             border-width: 2px;
             padding: 12px 14px;
             margin-bottom: 8px;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            outline: none;
             background:
                 linear-gradient(115deg, rgba(255,255,255,0.035), transparent 30%),
                 linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+        }
+
+        .manager-item * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .manager-item::selection,
+        .manager-item *::selection {
+            background: transparent;
         }
 
         .manager-item::before {
@@ -438,11 +455,16 @@
             box-shadow: 0 0 0 1px rgba(184, 91, 160, 0.05), 0 0 22px rgba(184, 91, 160, 0.08), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .manager-item.has-hit {
+        .manager-item.transfer-positive {
+            box-shadow: -24px 0 28px -17px rgba(30, 255, 125, 0.72), 24px 0 28px -17px rgba(30, 255, 125, 0.72), 0 10px 24px rgba(0, 0, 0, 0.24);
+        }
+
+        .manager-item.transfer-negative {
             box-shadow: -24px 0 28px -17px rgba(255, 30, 50, 0.72), 24px 0 28px -17px rgba(255, 30, 50, 0.72), 0 10px 24px rgba(0, 0, 0, 0.24);
         }
 
-        .manager-item.has-hit::after {
+        .manager-item.transfer-positive::after,
+        .manager-item.transfer-negative::after {
             display: none;
         }
 
@@ -743,7 +765,8 @@
             margin-bottom: 18px;
         }
 
-        .tracker-shell .gw-carousel-header {
+        .tracker-shell .gw-carousel-header,
+        .gw-shell .gw-carousel-header {
             padding: 6px 0 10px;
             border: 0;
             border-radius: 0;
@@ -760,8 +783,12 @@
             margin-bottom: 0 !important;
         }
 
-        .tracker-shell #gw-carousel-track .carousel-card {
-            padding: 0 12px;
+        .gw-shell {
+            margin-bottom: 18px;
+        }
+
+        .gw-shell .carousel-container {
+            margin-bottom: 0 !important;
         }
 
         .period-slide-card {
@@ -777,26 +804,28 @@
         .manager-item .card-dropdown {
             position: relative;
             z-index: 1;
-            display: block;
-            max-height: 0;
+            display: grid;
+            grid-template-rows: 0fr;
             margin-top: 0;
             padding-top: 0;
             overflow: hidden;
             border-top-color: transparent;
             opacity: 0;
-            transform: translateY(-5px);
-            transition: max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease,
-                transform 0.35s ease, margin-top 0.35s ease, padding-top 0.35s ease;
+            transition: grid-template-rows 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease,
+                margin-top 0.32s ease, padding-top 0.32s ease;
         }
 
         .manager-item.expanded .card-dropdown {
-            display: block;
-            max-height: 320px;
+            grid-template-rows: 1fr;
             margin-top: 12px;
             padding-top: 10px;
             border-top-color: var(--border-subtle);
             opacity: 1;
-            transform: translateY(0);
+        }
+
+        .manager-item .card-dropdown > .detail-list {
+            min-height: 0;
+            overflow: hidden;
         }
 
         .period-carousel-header {
@@ -815,6 +844,14 @@
         }
 
         @media (max-width: 430px) {
+            body { padding: 14px 10px; }
+            h1 { font-size: 1.35rem; margin-bottom: 12px; }
+            .manager-item { padding: 9px 12px; margin-bottom: 7px; }
+            .manager-name { font-size: 0.92rem; }
+            .manager-team { font-size: 0.67rem; }
+            .chip-slot { min-height: 17px; margin-top: 4px; padding: 1px 6px; }
+            .form-row { margin-top: 7px; padding-top: 7px; }
+            .form-position { width: 21px; height: 21px; }
             .detail-grid { grid-template-columns: 1fr; }
             .manager-summary { grid-template-columns: 1fr auto; gap: 8px; }
             .manager-score-value { font-size: 1.15rem; }
@@ -833,11 +870,12 @@
     </div>
 
     <h1>Baruc's League</h1>
-    <div id="timestamp" class="update-timestamp"></div>
-    
+
     <div id="app">
         <div class="loading-text">Loading tracker data...</div>
     </div>
+
+    <div id="timestamp" class="update-timestamp" style="margin-top: 20px; margin-bottom: 0;"></div>
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
@@ -1111,7 +1149,7 @@
 
             if (gwDataStore.length > 0) {
                 totalGwSlides = gwDataStore.length;
-                html += `<div class="card support-panel tracker-shell"><div class="section-title">Gameweek Tracker</div>`;
+                html += `<div class="gw-shell">`;
                 
                 html += `
                     <div class="gw-carousel-header">
@@ -1194,7 +1232,10 @@
 
                         const meta = mgr.uiMeta || { weeklyRank: 4, overallRank: 4, rankMovement: 0, form: [null, null, null, null, null], fiveGwAverage: 0 };
                         const rankClass = `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
-                        const hitClass = Number(mgr.hits) > 0 ? 'has-hit' : '';
+                        const transferEffect = Number(mgr.transferEffectiveness);
+                        const hitClass = mgr.transferEffectiveness !== null && mgr.transferEffectiveness !== undefined
+                            ? (transferEffect >= 1 ? 'transfer-positive' : (transferEffect <= -1 ? 'transfer-negative' : ''))
+                            : '';
                         const movementClass = meta.rankMovement > 0 ? 'rank-up' : (meta.rankMovement < 0 ? 'rank-down' : 'rank-level');
                         const movementIcon = meta.rankMovement > 0 ? `▲ ${meta.rankMovement}` : (meta.rankMovement < 0 ? `▼ ${Math.abs(meta.rankMovement)}` : '—');
                         const formHtml = (meta.form || []).map(position => {
@@ -1723,7 +1764,10 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', loadTrackerData);
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTrackerData();
+            window.setInterval(loadTrackerData, 120000);
+        });
     </script>
 </body>
 </html>
