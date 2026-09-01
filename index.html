@@ -357,29 +357,38 @@
                     const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
                     const chipLabel = getChipDisplayName(mgr.activeChip);
 
-                    // Check if Star or Worst player is the Captain
-                    const captName = mgr.captain ? mgr.captain.name : null;
-                    const isStarCaptain = captName && mgr.starPerformer && mgr.starPerformer.name === captName;
-                    const isWorstCaptain = captName && mgr.worstPerformer && mgr.worstPerformer.name === captName;
+                    // Check Captain Status
+                    const captName = mgr.captain ? (typeof mgr.captain === 'object' ? mgr.captain.name : mgr.captain) : null;
+                    const isStarCaptain = captName && mgr.starPerformer && (mgr.starPerformer.name === captName || mgr.starPerformer === captName);
+                    const isWorstCaptain = captName && mgr.worstPerformer && (mgr.worstPerformer.name === captName || mgr.worstPerformer === captName);
 
-                    const starDisplayName = mgr.starPerformer 
-                        ? `${mgr.starPerformer.name}${isStarCaptain ? ' (C)' : ''}` 
-                        : 'None';
+                    const starName = mgr.starPerformer ? (typeof mgr.starPerformer === 'object' ? mgr.starPerformer.name : mgr.starPerformer) : 'None';
+                    const starPts = mgr.starPerformer && typeof mgr.starPerformer === 'object' ? mgr.starPerformer.points : 0;
+                    
+                    const worstName = mgr.worstPerformer ? (typeof mgr.worstPerformer === 'object' ? mgr.worstPerformer.name : mgr.worstPerformer) : 'None';
+                    const worstPts = mgr.worstPerformer && typeof mgr.worstPerformer === 'object' ? mgr.worstPerformer.points : 0;
 
-                    const worstDisplayName = mgr.worstPerformer 
-                        ? `${mgr.worstPerformer.name}${isWorstCaptain ? ' (C)' : ''}` 
-                        : 'None';
+                    const starDisplayName = `${starName}${isStarCaptain ? ' (C)' : ''}`;
+                    const worstDisplayName = `${worstName}${isWorstCaptain ? ' (C)' : ''}`;
 
-                    // Format Transfers for Dropdown
+                    // Multi-check Transfer properties from backend
                     let transfersText = 'None';
                     if (mgr.transfers) {
                         if (Array.isArray(mgr.transfers)) {
                             transfersText = mgr.transfers.length > 0 ? mgr.transfers.join(', ') : 'None';
+                        } else if (typeof mgr.transfers === 'object') {
+                            transfersText = Object.values(mgr.transfers).join(', ');
                         } else {
                             transfersText = String(mgr.transfers);
                         }
-                    } else if (mgr.transfersMade !== undefined) {
-                        transfersText = String(mgr.transfersMade);
+                    } else if (mgr.transfersText) {
+                        transfersText = String(mgr.transfersText);
+                    } else if (mgr.transfersMade !== undefined && mgr.transfersMade !== null) {
+                        const hitCost = mgr.transferCost || mgr.event_transfers_cost || mgr.hitCost;
+                        const hitStr = hitCost ? ` (-${hitCost} pts)` : '';
+                        transfersText = `${mgr.transfersMade} made${hitStr}`;
+                    } else if (mgr.event_transfers !== undefined) {
+                        transfersText = `${mgr.event_transfers} made`;
                     }
 
                     html += `
@@ -394,8 +403,8 @@
                             </div>
                             
                             <div class="card-dropdown">
-                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${starDisplayName} (${mgr.starPerformer ? mgr.starPerformer.points : 0} pts)</div>
-                                <div style="margin-bottom: 5px; color: var(--danger-color);">💩 <strong>Worst:</strong> ${worstDisplayName} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
+                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${starDisplayName} (${starPts} pts)</div>
+                                <div style="margin-bottom: 5px; color: var(--danger-color);">💩 <strong>Worst:</strong> ${worstDisplayName} (${worstPts} pts)</div>
                                 <div style="margin-bottom: 4px; color: var(--accent-color);">🔄 <strong>Transfers:</strong> ${transfersText}</div>
                             </div>
                         </div>
@@ -470,7 +479,10 @@
                 }
             }
 
-            // 3. Overall Standings Table (Cleaned up for maximum Chips space)
+            // 3. Overall Standings Table
+            let topWeeksWonPlayer = null;
+            let maxWeeksWon = -1;
+
             if (data.overall && data.overall.rows && data.overall.rows.length > 0) {
                 const headers = data.overall.headers || [];
                 const getCol = (name, fallback) => {
@@ -481,6 +493,7 @@
                 const playerIdx = getCol('player', getCol('name', 0));
                 const pointsIdx = getCol('point', getCol('total', 1));
                 const medalIdx = getCol('medal', 2);
+                const weeksWonIdx = getCol('won', getCol('week', 3));
                 const prizeIdx = getCol('prize', 5);
 
                 const totalRows = data.overall.rows.length;
@@ -493,6 +506,16 @@
                         activeChipMap[m.managerName] = m.activeChip;
                     });
                 }
+
+                // Parse rows & calculate Most Weeks Won dynamically
+                data.overall.rows.forEach(row => {
+                    const pName = row[playerIdx];
+                    const wWon = Number(row[weeksWonIdx]) || 0;
+                    if (wWon > maxWeeksWon) {
+                        maxWeeksWon = wWon;
+                        topWeeksWonPlayer = { player: pName, val: wWon };
+                    }
+                });
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
@@ -542,21 +565,23 @@
                 `;
             }
 
-            // 4. Updated Accolades Card
-            if (data.accolades) {
-                const acc = data.accolades;
+            // 4. Accolades Card
+            if (data.accolades || topWeeksWonPlayer) {
+                const acc = data.accolades || {};
 
                 const getAccObj = (keys) => {
                     for (let k of keys) {
-                        if (acc[k]) return acc[k];
+                        if (acc[k] && (acc[k].player || acc[k].val !== undefined || acc[k].value !== undefined)) {
+                            return acc[k];
+                        }
                     }
                     return null;
                 };
 
                 const highestScore = getAccObj(['highestScore']);
                 const lowestScore = getAccObj(['lowestScore']);
-                const mostWeeksWon = getAccObj(['mostWeeksWon', 'weeksWon']);
-                const mostWeeksLost = getAccObj(['mostWeeksLost', 'weeksLost']);
+                const mostWeeksWon = getAccObj(['mostWeeksWon', 'weeksWon']) || topWeeksWonPlayer;
+                const mostWeeksLost = getAccObj(['mostWeeksLost', 'weeksLost', 'mostWeeksLast']);
                 const mostTransfers = getAccObj(['mostTransfers', 'transfers']);
                 const highestTransferCost = getAccObj(['highestTransferCost', 'highestTotalHit', 'biggestHit']);
 
