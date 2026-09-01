@@ -395,6 +395,7 @@
             position: relative;
             overflow: hidden;
             border-color: var(--item-accent);
+            border-width: 2px;
             padding: 12px 14px;
             margin-bottom: 8px;
             background:
@@ -438,19 +439,11 @@
         }
 
         .manager-item.has-hit {
-            box-shadow: 0 0 30px rgba(255, 75, 75, 0.14), 0 10px 24px rgba(0, 0, 0, 0.24);
+            box-shadow: 0 0 28px rgba(255, 35, 55, 0.34), 0 0 54px rgba(255, 20, 45, 0.14), 0 10px 24px rgba(0, 0, 0, 0.24);
         }
 
         .manager-item.has-hit::after {
-            content: '';
-            position: absolute;
-            inset: -35% -12%;
-            z-index: 0;
-            pointer-events: none;
-            background:
-                radial-gradient(circle at 88% 52%, rgba(255, 75, 75, 0.2), transparent 34%),
-                radial-gradient(circle at 8% 86%, rgba(172, 53, 255, 0.12), transparent 32%);
-            filter: blur(12px);
+            display: none;
         }
 
         .manager-item.glow-gold {
@@ -507,6 +500,14 @@
 
         .manager-score {
             text-align: right;
+        }
+
+        .compact-overall {
+            margin-top: 7px;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.03em;
         }
 
         .score-metrics {
@@ -666,6 +667,77 @@
         .detail-tile.worst .detail-value { color: var(--danger-color); }
         .detail-tile.transfer .detail-value { color: var(--accent-color); }
 
+        .detail-list {
+            display: grid;
+            gap: 0;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 82px minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 9px 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .detail-row:last-child {
+            border-bottom: 0;
+        }
+
+        .detail-row-label {
+            color: var(--text-muted);
+            font-size: 0.58rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .detail-row-name {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            color: #fff;
+            font-size: 0.74rem;
+            font-weight: 750;
+        }
+
+        .detail-row-points {
+            color: var(--accent-color);
+            font-size: 0.68rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .detail-row.worst .detail-row-points { color: var(--danger-color); }
+        .detail-row.star .detail-row-points { color: var(--gold-color); }
+
+        .support-panel {
+            position: relative;
+            overflow: hidden;
+            border-color: rgba(255, 255, 255, 0.1);
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.04), transparent 31%),
+                linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+            box-shadow: 0 0 24px rgba(118, 62, 155, 0.08), 0 10px 26px rgba(0, 0, 0, 0.24);
+        }
+
+        .support-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+            background-image:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.14) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 20px, rgba(255,255,255,0.028) 20px 21px);
+        }
+
+        .support-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
         .manager-item .card-dropdown {
             position: relative;
             z-index: 1;
@@ -713,6 +785,7 @@
             .carousel-nav-btn { padding: 6px 10px; }
             .score-metrics { gap: 8px; }
             .score-metric + .score-metric { padding-left: 8px; }
+            .detail-row { grid-template-columns: 74px minmax(0, 1fr) auto; gap: 7px; }
         }
     </style>
 </head>
@@ -1097,12 +1170,12 @@
                                     <div>
                                         <span class="manager-name">${managerName}</span>
                                         <div class="manager-team">${teamName}</div>
-                                        <div class="manager-overall">Overall #${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span></div>
                                         <div class="chip-slot ${hasActiveChip ? 'active' : ''}">${hasActiveChip ? `${chipLabel} ACTIVE` : 'No active chip'}</div>
                                     </div>
                                     <div class="manager-score">
                                         <div class="manager-score-value">${pointsDisplay}</div>
                                         <div class="manager-score-label">GW PTS</div>
+                                        <div class="compact-overall">#${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span></div>
                                     </div>
                                 </div>
 
@@ -1110,25 +1183,25 @@
                                     <span class="form-label">FORM</span>
                                     ${formHtml}
                                     <span class="form-average">5GW AVG <strong>${averageDisplay}</strong></span>
-                                    <span class="expand-hint">Details <span class="expand-hint-icon">⌄</span></span>
+                                    <span class="expand-hint"><span class="expand-hint-icon">⌄</span></span>
                                 </div>
                                 
                                 <div class="card-dropdown">
-                                    <div class="detail-grid">
-                                        <div class="detail-tile">
-                                            <div class="detail-label">⭐ Star</div>
-                                            <div class="detail-name">${starName || 'None'}</div>
-                                            <div class="detail-value">${starPts} pts</div>
+                                    <div class="detail-list">
+                                        <div class="detail-row star">
+                                            <div class="detail-row-label">⭐ Star</div>
+                                            <div class="detail-row-name">${starName || 'None'}</div>
+                                            <div class="detail-row-points">${starPts} pts</div>
                                         </div>
-                                        <div class="detail-tile worst">
-                                            <div class="detail-label">💩 Worst</div>
-                                            <div class="detail-name">${worstName || 'None'}</div>
-                                            <div class="detail-value">${worstPts} pts</div>
+                                        <div class="detail-row worst">
+                                            <div class="detail-row-label">💩 Worst</div>
+                                            <div class="detail-row-name">${worstName || 'None'}</div>
+                                            <div class="detail-row-points">${worstPts} pts</div>
                                         </div>
-                                        <div class="detail-tile transfer">
-                                            <div class="detail-label">🔄 Transfers</div>
-                                            <div class="detail-name">${transfersText}</div>
-                                            <div class="detail-value">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}</div>
+                                        <div class="detail-row transfer">
+                                            <div class="detail-row-label">🔄 Transfers</div>
+                                            <div class="detail-row-name">${transfersText}</div>
+                                            <div class="detail-row-points">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1182,7 +1255,7 @@
                         };
 
                         html += `
-                            <div class="card carousel-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
+                            <div class="card carousel-card support-panel" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
                                 <h4 style="margin-top: 0; margin-bottom: 14px; color: var(--accent-color); font-size: 0.95rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
                                     ${period.scores.map((s, idx, arr) => {
@@ -1255,7 +1328,7 @@
                 });
 
                 html += `
-                    <div class="card" style="margin-top: 24px;">
+                    <div class="card support-panel" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left;">
@@ -1389,7 +1462,7 @@
                 };
 
                 html += `
-                    <div class="card" style="margin-top: 24px;">
+                    <div class="card support-panel" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Accolades</div>
                         <ul style="list-style: none; padding: 0; margin: 0;">
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
