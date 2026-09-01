@@ -458,8 +458,18 @@
             }, 5000);
 
             try {
-                const response = await fetch(SCRIPT_URL);
+                const separator = SCRIPT_URL.includes('?') ? '&' : '?';
+                const response = await fetch(`${SCRIPT_URL}${separator}_=${Date.now()}`, {
+                    cache: 'no-store'
+                });
+                if (!response.ok) {
+                    throw new Error(`Tracker request failed with HTTP ${response.status}`);
+                }
                 const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
 
                 clearTimeout(safetyTimer);
                 if (data.updated) {
@@ -994,3 +1004,4 @@
     </script>
 </body>
 </html>
+
