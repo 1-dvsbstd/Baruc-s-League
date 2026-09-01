@@ -413,6 +413,45 @@
             }).join('') + `</div>`;
         }
 
+        function formatTransfers(rawText, hits) {
+            if (!rawText || rawText === 'None') {
+                return hits && hits > 0 ? `(-${hits} pts hit)` : 'None';
+            }
+            const ins = [];
+            const outs = [];
+            const inMatches = rawText.match(/In:\s*([^,\/]+)/gi);
+            const outMatches = rawText.match(/Out:\s*([^,\/]+)/gi);
+            
+            if (inMatches) {
+                inMatches.forEach(m => {
+                    const name = m.replace(/In:\s*/i, '').trim();
+                    if (name && !ins.includes(name)) ins.push(name);
+                });
+            }
+            if (outMatches) {
+                outMatches.forEach(m => {
+                    const name = m.replace(/Out:\s*/i, '').trim();
+                    if (name && !outs.includes(name)) outs.push(name);
+                });
+            }
+            
+            if (ins.length === 0 && outs.length === 0) {
+                let res = String(rawText);
+                if (hits && hits > 0 && !res.includes('pt')) res += ` (-${hits} pts)`;
+                return res;
+            }
+            
+            let resultParts = [];
+            if (ins.length > 0) resultParts.push(`In: ${ins.join(', ')}`);
+            if (outs.length > 0) resultParts.push(`Out: ${outs.join(', ')}`);
+            
+            let finalStr = resultParts.join(' | ');
+            if (hits && hits > 0 && !finalStr.includes('pt')) {
+                finalStr += ` (-${hits} pts)`;
+            }
+            return finalStr;
+        }
+
         async function loadTrackerData() {
             const safetyTimer = setTimeout(() => {
                 hideSplash();
@@ -507,32 +546,26 @@
 
                         const pointsDisplay = mgr.netPoints !== undefined ? mgr.netPoints : (mgr.livePoints !== undefined ? mgr.livePoints : 0);
 
-                        let transfersText = 'None';
+                        let rawTransfers = 'None';
                         if (mgr.transfersText && mgr.transfersText !== 'None') {
-                            transfersText = String(mgr.transfersText);
-                            if (mgr.hits !== undefined && mgr.hits > 0) {
-                                transfersText += ` (-${mgr.hits} pts)`;
-                            }
+                            rawTransfers = String(mgr.transfersText);
                         } else if (mgr.transfers) {
                             if (Array.isArray(mgr.transfers)) {
-                                transfersText = mgr.transfers.length > 0 ? mgr.transfers.join(', ') : 'None';
+                                rawTransfers = mgr.transfers.length > 0 ? mgr.transfers.join(', ') : 'None';
                             } else if (typeof mgr.transfers === 'object') {
-                                transfersText = Object.values(mgr.transfers).join(', ');
+                                rawTransfers = Object.values(mgr.transfers).join(', ');
                             } else {
-                                transfersText = String(mgr.transfers);
+                                rawTransfers = String(mgr.transfers);
                             }
-                            if (mgr.hits !== undefined && mgr.hits > 0) {
-                                transfersText += ` (-${mgr.hits} pts)`;
-                            }
-                        } else if (mgr.hits !== undefined && mgr.hits > 0) {
-                            transfersText = `-${mgr.hits} pts hit`;
                         } else if (mgr.transfersMade !== undefined && mgr.transfersMade !== null) {
                             const hitCost = mgr.transferCost || mgr.event_transfers_cost || mgr.hitCost || mgr.hits;
                             const hitStr = hitCost ? ` (-${hitCost} pts)` : '';
-                            transfersText = `${mgr.transfersMade} made${hitStr}`;
+                            rawTransfers = `${mgr.transfersMade} made${hitStr}`;
                         } else if (mgr.event_transfers !== undefined) {
-                            transfersText = `${mgr.event_transfers} made`;
+                            rawTransfers = `${mgr.event_transfers} made`;
                         }
+
+                        let transfersText = formatTransfers(rawTransfers, mgr.hits);
 
                         html += `
                             <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
