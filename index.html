@@ -104,7 +104,7 @@
             margin: 0 0 12px 0;
         }
 
-        /* Live GW Card Styling */
+        /* Live GW Card Styling (Unified Theme) */
         .fut-card {
             position: relative;
             cursor: pointer;
@@ -149,40 +149,37 @@
             display: block;
         }
 
-        /* Compact Single-Line Mobile Chips */
+        /* Overall Standings Chip Inventory Pills */
         .chip-inventory {
             display: flex;
-            align-items: center;
-            gap: 3px;
+            gap: 4px;
             margin-top: 4px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
         }
         
         .chip-pill {
-            font-size: 0.58rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            padding: 1px 4px;
-            border-radius: 3px;
-            letter-spacing: 0.2px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.03);
-            color: #888888;
-            line-height: 1.1;
+            padding: 1px 5px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+            color: #777777;
         }
         
         .chip-pill.active {
             color: #ffd700;
             border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+            background: rgba(255, 215, 0, 0.18);
+            box-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
         }
         
         .chip-pill.used {
-            color: #555555;
-            border-color: rgba(255, 255, 255, 0.04);
-            background: rgba(0, 0, 0, 0.2);
+            color: #4a4a4a;
+            border-color: rgba(255, 255, 255, 0.05);
             text-decoration: line-through;
-            opacity: 0.45;
+            opacity: 0.5;
         }
 
         /* Carousel Styling */
@@ -332,15 +329,7 @@
             const appDiv = document.getElementById('app');
             let html = '';
 
-            // Map live points for managers
-            const livePointsMap = {};
-            if (liveData && liveData.standings) {
-                liveData.standings.forEach(m => {
-                    livePointsMap[m.managerName] = m.livePoints || 0;
-                });
-            }
-
-            // 1. Live GW Tracker
+            // Live GW Tracker
             if (liveData && liveData.standings && liveData.standings.length > 0) {
                 liveData.standings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
 
@@ -349,23 +338,6 @@
                     const hasActiveChip = mgr.activeChip !== null;
                     const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
                     const chipLabel = mgr.activeChip ? mgr.activeChip.toUpperCase() : '';
-
-                    // Captain detection for Star/Worst performer
-                    const capName = mgr.captain ? mgr.captain.name : '';
-                    const isStarCap = capName && mgr.starPerformer && mgr.starPerformer.name === capName;
-                    const isWorstCap = capName && mgr.worstPerformer && mgr.worstPerformer.name === capName;
-
-                    const starDisplay = mgr.starPerformer 
-                        ? `${mgr.starPerformer.name}${isStarCap ? ' (C)' : ''}` 
-                        : 'None';
-                    const worstDisplay = mgr.worstPerformer 
-                        ? `${mgr.worstPerformer.name}${isWorstCap ? ' (C)' : ''}` 
-                        : 'None';
-
-                    // Transfer formatting
-                    const txMade = mgr.transfersMade !== undefined ? mgr.transfersMade : (mgr.transfers !== undefined ? mgr.transfers : 0);
-                    const txCost = mgr.eventTransfersCost || mgr.transfersCost || 0;
-                    const txStr = txCost > 0 ? `${txMade} (-${txCost} pts)` : `${txMade}`;
 
                     html += `
                         <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
@@ -379,16 +351,16 @@
                             </div>
                             
                             <div class="card-dropdown">
-                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${starDisplay} (${mgr.starPerformer ? mgr.starPerformer.points : 0} pts)</div>
-                                <div style="margin-bottom: 5px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${worstDisplay} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
-                                <div style="margin-bottom: 4px; color: var(--text-muted);">🔄 <strong>Transfers:</strong> ${txStr}</div>
+                                <div style="margin-bottom: 5px;">👑 <strong>Captain:</strong> ${mgr.captain ? mgr.captain.name : 'None'} (${mgr.captain ? mgr.captain.points : 0} pts)</div>
+                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${mgr.starPerformer ? mgr.starPerformer.name : 'None'} (${mgr.starPerformer ? mgr.starPerformer.points : 0} pts)</div>
+                                <div style="margin-bottom: 4px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${mgr.worstPerformer ? mgr.worstPerformer.name : 'None'} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
                             </div>
                         </div>
                     `;
                 });
             }
 
-            // 2. Manager of the Month Carousel
+            // Manager of the Month Carousel
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => {
                     if (!period.scores || period.scores.length === 0) return false;
@@ -413,7 +385,7 @@
 
                     html += `<div class="carousel-container" id="period-carousel">`;
                     
-                    activePeriods.forEach((period, periodIdx) => {
+                    activePeriods.forEach(period => {
                         let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
 
                         const formatPrize = (p) => {
@@ -422,26 +394,13 @@
                             return str.startsWith('£') ? str : '£' + str;
                         };
 
-                        const isCurrentActivePeriod = (periodIdx === activePeriods.length - 1);
-
-                        let updatedScores = period.scores.map(s => {
-                            const staticScore = parseInt(s.score) || 0;
-                            const livePts = isCurrentActivePeriod ? (livePointsMap[s.name] || 0) : 0;
-                            return {
-                                name: s.name,
-                                totalScore: staticScore + livePts
-                            };
-                        });
-
-                        updatedScores.sort((a, b) => b.totalScore - a.totalScore);
-
                         html += `
                             <div class="card carousel-card">
                                 <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
-                                    ${updatedScores.map((s, idx, arr) => {
-                                        let scoreDisplay = s.totalScore;
-                                        if (idx === arr.length - 1) {
+                                    ${period.scores.map((s, idx, arr) => {
+                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
+                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
                                             scoreDisplay += ' 💩';
                                         }
                                         const teamName = TEAM_NAMES[s.name] || '';
@@ -457,8 +416,8 @@
                                     }).join('')}
                                 </ul>
                                 <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Leader:</strong> ${updatedScores[0]?.name || 'N/A'} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
-                                    <div>🥈 <strong style="color: #fff;">2nd:</strong> ${updatedScores[1]?.name || 'N/A'} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
                                 </div>
                             </div>
                         `;
@@ -468,7 +427,7 @@
                 }
             }
 
-            // 3. Streamlined Overall Standings Table (Removed Won/MOTM columns)
+            // Overall Standings Table
             if (data.overall && data.overall.rows) {
                 const headers = data.overall.headers;
                 const getCol = (name, fallback) => {
@@ -478,7 +437,12 @@
 
                 const playerIdx = getCol('player', getCol('name', 0));
                 const pointsIdx = getCol('point', getCol('total', 1));
+                const medalIdx = getCol('medal', 2);
+                const weeksWonIdx = getCol('won', getCol('week', 3));
+                const motmIdx = getCol('motm', getCol('award', 4));
                 const prizeIdx = getCol('prize', 5);
+
+                const totalRows = data.overall.rows.length;
 
                 const chipMap = {};
                 const activeChipMap = {};
@@ -489,52 +453,50 @@
                     });
                 }
 
-                const calculatedRows = data.overall.rows.map(row => {
-                    const playerName = row[playerIdx] || '';
-                    const staticPoints = parseInt(row[pointsIdx]) || 0;
-                    const livePts = livePointsMap[playerName] || 0;
-                    return {
-                        rawRow: row,
-                        playerName: playerName,
-                        totalPoints: staticPoints + livePts,
-                        prizeVal: row[prizeIdx] !== undefined ? row[prizeIdx] : 0
-                    };
-                });
-
-                calculatedRows.sort((a, b) => b.totalPoints - a.totalPoints);
-                const totalRows = calculatedRows.length;
-
                 html += `
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <th style="width: 58%; padding: 0 4px 10px 0; font-weight: 700;">Manager</th>
-                                        <th style="width: 24%; padding: 0 4px 10px 0; font-weight: 700;">Points</th>
-                                        <th style="width: 18%; padding: 0 0 10px 0; font-weight: 700; text-align: right;">Prize</th>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="width: 32%; padding: 0 4px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="width: 20%; padding: 0 4px 10px 4px; font-weight: 700;">Points</th>
+                                        <th style="width: 16%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">Weeks Won</th>
+                                        <th style="width: 14%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
+                                        <th style="width: 18%; padding: 0 4px 10px 4px; font-weight: 700; text-align: right;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${calculatedRows.map((item, rIdx) => {
-                                        let medal = '';
-                                        if (rIdx === 0) medal = '🥇';
-                                        else if (rIdx === 1) medal = '🥈';
-                                        else if (rIdx === 2) medal = '🥉';
-                                        if (rIdx === totalRows - 1) medal += ' 💩';
+                                    ${data.overall.rows.map((row, rIdx) => {
+                                        const playerName = row[playerIdx] || '';
+                                        const points = row[pointsIdx] || '';
+                                        let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
+                                        if (!medal) {
+                                            if (rIdx === 0) medal = '🥇';
+                                            else if (rIdx === 1) medal = '🥈';
+                                            else if (rIdx === 2) medal = '🥉';
+                                        }
+                                        if (rIdx === totalRows - 1 && !String(medal).includes('💩')) {
+                                            medal += ' 💩';
+                                        }
+                                        const weeksWon = row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0;
+                                        const motm = row[motmIdx] !== undefined ? row[motmIdx] : 0;
+                                        const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
+                                        const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
 
-                                        const prizeStr = String(item.prizeVal).startsWith('£') ? item.prizeVal : '£' + item.prizeVal;
-                                        const chipsHtml = renderChipsHtml(chipMap[item.playerName], activeChipMap[item.playerName]);
+                                        const chipsHtml = renderChipsHtml(chipMap[playerName], activeChipMap[playerName]);
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 58%; padding: 10px 4px 10px 0; font-weight: 600; color: #fff;">
-                                                    <div style="font-size: 0.9rem;">${item.playerName}</div>
+                                                <td style="width: 32%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff;">
+                                                    <div>${playerName}</div>
                                                     ${chipsHtml}
                                                 </td>
-                                                <td style="width: 24%; padding: 10px 4px 10px 0; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${item.totalPoints} ${medal}</td>
-                                                <td style="width: 18%; padding: 10px 0 10px 0; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
+                                                <td style="width: 20%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
+                                                <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
+                                                <td style="width: 14%; padding: 12px 4px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
+                                                <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -545,32 +507,16 @@
                 `;
             }
 
-            // 4. Refreshed Accolades Card
+            // Accolades Card
             if (data.accolades) {
                 const acc = data.accolades;
                 const formatAccoladeValue = (item, type) => {
                     if (!item || item.val === undefined || item.val === null || item.val === '') return 'N/A';
-                    if (type === 'hit' || type === 'totalHit') return '-' + Math.abs(Number(item.val)) + ' pts';
+                    if (type === 'hit') return '-' + Math.abs(Number(item.val));
+                    if (type === 'totalHit') return '-' + Math.abs(Number(item.val));
+                    if (type === 'margin') return '+' + item.val;
                     return item.val;
                 };
-
-                const getProp = (obj, prop, fallbackObj, fallbackProp) => {
-                    if (obj && obj[prop] !== undefined) return obj[prop];
-                    if (fallbackObj && fallbackObj[fallbackProp] !== undefined) return fallbackObj[fallbackProp];
-                    return 'N/A';
-                };
-
-                // Extract or fallback accolade values
-                const mostWeeksWonPlayer = getProp(acc.mostWeeksWon, 'player', acc, 'mostWeeksWonPlayer');
-                const mostWeeksWonVal = getProp(acc.mostWeeksWon, 'val', acc, 'mostWeeksWonVal');
-                
-                const mostWeeksLostPlayer = getProp(acc.mostWeeksLost, 'player', acc.mostWeeksLast, 'player');
-                const mostWeeksLostVal = getProp(acc.mostWeeksLost, 'val', acc.mostWeeksLast, 'val');
-
-                const mostTransfersPlayer = getProp(acc.mostTransfers, 'player', acc, 'mostTransfersPlayer');
-                const mostTransfersVal = getProp(acc.mostTransfers, 'val', acc, 'mostTransfersVal');
-
-                const hitObj = acc.highestTotalHit || acc.biggestHit;
 
                 html += `
                     <div class="card" style="margin-top: 24px;">
@@ -592,31 +538,31 @@
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🏆 Most Weeks Won</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${mostWeeksWonPlayer}</div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">⚡ Biggest Win Margin</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.biggestMargin ? acc.biggestMargin.player : 'N/A'} ${acc.biggestMargin && acc.biggestMargin.gw ? '(' + acc.biggestMargin.gw + ')' : ''}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${mostWeeksWonVal}</span>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${formatAccoladeValue(acc.biggestMargin, 'margin')}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💩 Most Weeks Lost</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${mostWeeksLostPlayer}</div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Biggest Transfer Hit</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.biggestHit ? acc.biggestHit.player : 'N/A'} ${acc.biggestHit && acc.biggestHit.gw ? '(' + acc.biggestHit.gw + ')' : ''}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${mostWeeksLostVal}</span>
+                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(acc.biggestHit, 'hit')}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🔄 Most Transfers</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${mostTransfersPlayer}</div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Highest Total Transfer Cost</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.highestTotalHit ? acc.highestTotalHit.player : 'N/A'}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-color);">${mostTransfersVal}</span>
+                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(acc.highestTotalHit, 'totalHit')}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Highest Transfer Cost</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${hitObj ? hitObj.player : 'N/A'}</div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💩 Most Weeks in Last Place</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.mostWeeksLast ? acc.mostWeeksLast.player : 'N/A'}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(hitObj, 'totalHit')}</span>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-color);">${acc.mostWeeksLast ? acc.mostWeeksLast.val : 0}</span>
                             </li>
                         </ul>
                     </div>
