@@ -325,6 +325,311 @@
             margin-top: 40px;
             font-weight: 500;
         }
+
+        /* FUT-inspired Gameweek Experience */
+        .gw-carousel-header {
+            position: sticky;
+            top: 8px;
+            z-index: 30;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            background: rgba(14, 3, 24, 0.92);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38);
+            backdrop-filter: blur(14px);
+        }
+
+        .gw-title-stack {
+            min-width: 110px;
+            text-align: center;
+        }
+
+        .gw-title {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .gw-status {
+            min-height: 22px;
+            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .gw-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            min-height: 12px;
+            margin: -4px 0 12px;
+        }
+
+        .gw-progress-dot {
+            width: 6px;
+            height: 6px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.24);
+            cursor: pointer;
+            transition: width 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+        }
+
+        .gw-progress-dot.active {
+            width: 20px;
+            border-radius: 5px;
+            background: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 255, 135, 0.45);
+        }
+
+        .gw-progress-dot.is-hidden {
+            display: none;
+        }
+
+        .manager-item {
+            --item-accent: rgba(255, 255, 255, 0.14);
+            position: relative;
+            overflow: hidden;
+            border-color: var(--item-accent);
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.07), transparent 30%),
+                linear-gradient(145deg, rgba(58, 18, 84, 0.96), rgba(22, 6, 35, 0.98));
+        }
+
+        .manager-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.2;
+            background-image:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px);
+        }
+
+        .manager-item.rank-card-1 {
+            --item-accent: #ffc72c;
+            background: linear-gradient(145deg, #60430e, #29190a 58%, #160b1d);
+            box-shadow: 0 0 22px rgba(255, 199, 44, 0.18);
+        }
+
+        .manager-item.rank-card-2 {
+            --item-accent: #d1d5db;
+            background: linear-gradient(145deg, #3e4653, #202431 58%, #160b1d);
+        }
+
+        .manager-item.rank-card-3 {
+            --item-accent: #c98245;
+            background: linear-gradient(145deg, #5b321f, #2c1a1d 58%, #160b1d);
+        }
+
+        .manager-item.has-hit {
+            border-right: 3px solid var(--danger-color);
+        }
+
+        .manager-item.glow-gold {
+            box-shadow: 0 0 22px rgba(255, 199, 44, 0.28), inset 0 0 20px rgba(255, 199, 44, 0.08);
+        }
+
+        .manager-summary {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .manager-rank {
+            width: 38px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid color-mix(in srgb, var(--item-accent) 72%, transparent);
+            background: rgba(0, 0, 0, 0.24);
+            clip-path: polygon(18% 0, 100% 0, 100% 82%, 82% 100%, 0 100%, 0 18%);
+            color: var(--item-accent);
+            font-size: 1.3rem;
+            font-weight: 900;
+        }
+
+        .manager-name {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .manager-team {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            margin-top: 2px;
+        }
+
+        .manager-overall {
+            color: var(--text-muted);
+            font-size: 0.66rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .rank-up { color: var(--primary-color); }
+        .rank-down { color: var(--danger-color); }
+        .rank-level { color: var(--text-muted); }
+
+        .manager-score {
+            text-align: right;
+        }
+
+        .score-metrics {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .score-metric + .score-metric {
+            padding-left: 12px;
+            border-left: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .average-value {
+            color: var(--accent-color);
+        }
+
+        .manager-score-value {
+            color: var(--primary-color);
+            font-size: 1.35rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .manager-score-label {
+            color: var(--text-muted);
+            font-size: 0.58rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            margin-top: 5px;
+        }
+
+        .form-row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .form-label {
+            color: var(--text-muted);
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            margin-right: 3px;
+        }
+
+        .form-position {
+            width: 23px;
+            height: 23px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.22);
+            font-size: 0.68rem;
+            font-weight: 900;
+        }
+
+        .form-position.form-rank-1 { color: #171006; background: var(--gold-color); border-color: var(--gold-color); }
+        .form-position.form-rank-2 { color: #17191d; background: var(--silver-color); border-color: var(--silver-color); }
+        .form-position.form-rank-3 { color: #1d0f08; background: #c98245; border-color: #c98245; }
+        .form-position.form-rank-4 { color: #fff; background: #7b2639; border-color: #a93d55; }
+
+        .expand-hint {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .manager-item.expanded .expand-hint-icon {
+            display: inline-block;
+            transform: rotate(180deg);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .detail-tile {
+            min-width: 0;
+            padding: 10px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-size: 0.56rem;
+            font-weight: 900;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+        }
+
+        .detail-name {
+            overflow-wrap: anywhere;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            margin-top: 5px;
+        }
+
+        .detail-value {
+            color: var(--primary-color);
+            font-size: 0.65rem;
+            font-weight: 800;
+            margin-top: 3px;
+        }
+
+        .detail-tile.worst .detail-value { color: var(--danger-color); }
+        .detail-tile.transfer .detail-value { color: var(--accent-color); }
+
+        .period-carousel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .period-carousel-title {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        @media (max-width: 430px) {
+            .detail-grid { grid-template-columns: 1fr; }
+            .manager-summary { grid-template-columns: 1fr auto; gap: 8px; }
+            .manager-score-value { font-size: 1.15rem; }
+            .carousel-nav-btn { padding: 6px 10px; }
+            .score-metrics { gap: 8px; }
+            .score-metric + .score-metric { padding-left: 8px; }
+        }
     </style>
 </head>
 <body>
@@ -354,6 +659,8 @@
         let currentGwSlideIdx = 0;
         let totalGwSlides = 0;
         let gwDataStore = [];
+        let currentPeriodSlideIdx = 0;
+        let totalPeriodSlides = 0;
 
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -455,6 +762,86 @@
             return finalStr;
         }
 
+        function getManagerKey(manager) {
+            return String(manager.managerName || manager.name || '').trim().toLowerCase();
+        }
+
+        function getManagerPoints(manager) {
+            return Number(manager.netPoints !== undefined ? manager.netPoints : manager.livePoints) || 0;
+        }
+
+        function rankKeysByScore(keys, scoreMap) {
+            const sorted = [...keys].sort((a, b) => {
+                const scoreDiff = (scoreMap[b] || 0) - (scoreMap[a] || 0);
+                return scoreDiff || a.localeCompare(b);
+            });
+
+            const ranks = {};
+            let previousScore = null;
+            let previousRank = 0;
+            sorted.forEach((key, index) => {
+                const score = scoreMap[key] || 0;
+                const rank = previousScore !== null && score === previousScore ? previousRank : index + 1;
+                ranks[key] = rank;
+                previousScore = score;
+                previousRank = rank;
+            });
+            return ranks;
+        }
+
+        function decorateGameweekData(gameweeks) {
+            const cumulative = {};
+            const previousOverallRanks = {};
+            const formHistory = {};
+            const pointsHistory = {};
+
+            gameweeks.forEach((gameweek, gwIndex) => {
+                const standings = Array.isArray(gameweek.standings) ? gameweek.standings : [];
+                const managerKeys = standings.map(getManagerKey).filter(Boolean);
+                const weeklyScores = {};
+
+                standings.forEach(manager => {
+                    const key = getManagerKey(manager);
+                    if (!key) return;
+                    const points = getManagerPoints(manager);
+                    weeklyScores[key] = points;
+                    cumulative[key] = (cumulative[key] || 0) + points;
+                    if (!formHistory[key]) formHistory[key] = [];
+                    if (!pointsHistory[key]) pointsHistory[key] = [];
+                });
+
+                const weeklyRanks = rankKeysByScore(managerKeys, weeklyScores);
+                const overallRanks = rankKeysByScore(Object.keys(cumulative), cumulative);
+
+                standings.forEach(manager => {
+                    const key = getManagerKey(manager);
+                    if (!key) return;
+
+                    formHistory[key].push(weeklyRanks[key]);
+                    pointsHistory[key].push(getManagerPoints(manager));
+                    const recentForm = formHistory[key].slice(-5);
+                    const recentPoints = pointsHistory[key].slice(-5);
+                    const paddedForm = Array(Math.max(0, 5 - recentForm.length)).fill(null).concat(recentForm);
+                    const previousRank = previousOverallRanks[key];
+                    const currentRank = overallRanks[key];
+
+                    manager.uiMeta = {
+                        weeklyRank: weeklyRanks[key],
+                        overallRank: currentRank,
+                        rankMovement: gwIndex === 0 || previousRank === undefined ? 0 : previousRank - currentRank,
+                        form: paddedForm,
+                        fiveGwAverage: recentPoints.length
+                            ? recentPoints.reduce((sum, value) => sum + value, 0) / recentPoints.length
+                            : 0
+                    };
+                });
+
+                Object.keys(overallRanks).forEach(key => {
+                    previousOverallRanks[key] = overallRanks[key];
+                });
+            });
+        }
+
         async function loadTrackerData() {
             const safetyTimer = setTimeout(() => {
                 hideSplash();
@@ -494,6 +881,7 @@
         function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
+            totalPeriodSlides = 0;
 
             // 1. Gameweek Tracker Carousel Parsing with Deduplication
             gwDataStore = [];
@@ -526,6 +914,7 @@
                 }
             });
             gwDataStore.sort((a, b) => (Number(a.gameweek || a.gw || 0)) - (Number(b.gameweek || b.gw || 0)));
+            decorateGameweekData(gwDataStore);
 
             if (gwDataStore.length > 0) {
                 totalGwSlides = gwDataStore.length;
@@ -534,8 +923,15 @@
                 html += `
                     <div class="gw-carousel-header">
                         <button id="prevGwBtn" class="carousel-nav-btn" onclick="moveGwSlide(-1)">‹ Prev</button>
-                        <div id="gwSlideTitle" style="font-weight: 700; font-size: 0.9rem; color: var(--text-color); display: flex; align-items: center; gap: 8px;"></div>
+                        <div class="gw-title-stack">
+                            <div id="gwSlideTitle" class="gw-title"></div>
+                            <div id="gwSlideStatus" class="gw-status"></div>
+                        </div>
                         <button id="nextGwBtn" class="carousel-nav-btn" onclick="moveGwSlide(1)">Next ›</button>
+                    </div>
+
+                    <div class="gw-progress" id="gw-progress">
+                        ${gwDataStore.map((_, index) => `<button class="gw-progress-dot" data-gw-index="${index}" onclick="goToGwSlide(${index})" aria-label="Go to gameweek ${index + 1}"></button>`).join('')}
                     </div>
 
                     <div class="carousel-container" id="gw-carousel-track" style="margin-bottom: 24px;">
@@ -555,7 +951,6 @@
                         const managerName = mgr.managerName || mgr.name || '';
                         const teamName = mgr.teamName || TEAM_NAMES[managerName] || '';
                         const hasActiveChip = mgr.activeChip !== null && mgr.activeChip !== undefined && mgr.activeChip !== '' && mgr.activeChip !== 'None';
-                        const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
                         const chipLabel = getChipDisplayName(mgr.activeChip || mgr.chipDisplay);
 
                         // Robustly resolve Star Performer data
@@ -600,23 +995,63 @@
 
                         let transfersText = formatTransfers(rawTransfers, mgr.hits);
 
+                        const meta = mgr.uiMeta || { weeklyRank: 4, overallRank: 4, rankMovement: 0, form: [null, null, null, null, null], fiveGwAverage: 0 };
+                        const rankClass = `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
+                        const hitClass = Number(mgr.hits) > 0 ? 'has-hit' : '';
+                        const movementClass = meta.rankMovement > 0 ? 'rank-up' : (meta.rankMovement < 0 ? 'rank-down' : 'rank-level');
+                        const movementIcon = meta.rankMovement > 0 ? `▲ ${meta.rankMovement}` : (meta.rankMovement < 0 ? `▼ ${Math.abs(meta.rankMovement)}` : '—');
+                        const formHtml = (meta.form || []).map(position => {
+                            const cls = position ? `form-rank-${Math.min(position, 4)}` : '';
+                            return `<span class="form-position ${cls}">${position || '–'}</span>`;
+                        }).join('');
+                        const averageDisplay = Number(meta.fiveGwAverage || 0).toFixed(1);
+                        const cardClass = `fut-card manager-item ${rankClass} ${hitClass} ${hasActiveChip ? 'glow-gold' : ''}`;
+
                         html += `
                             <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="manager-summary">
                                     <div>
-                                        <span style="font-weight: 700; font-size: 1rem; color: #ffffff;">${managerName}</span>
+                                        <span class="manager-name">${managerName}</span>
                                         ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
-                                        <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${teamName}</div>
+                                        <div class="manager-team">${teamName}</div>
+                                        <div class="manager-overall">Overall #${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span></div>
                                     </div>
-                                    <span style="font-weight: 800; font-size: 1.15rem; color: var(--primary-color); display: flex; align-items: center; gap: 4px;">
-                                        ${pointsDisplay} pts <span style="font-size: 0.7rem; opacity: 0.5;">▾</span>
-                                    </span>
+                                    <div class="score-metrics">
+                                        <div class="score-metric manager-score">
+                                            <div class="manager-score-value">${pointsDisplay}</div>
+                                            <div class="manager-score-label">GW PTS</div>
+                                        </div>
+                                        <div class="score-metric manager-score">
+                                            <div class="manager-score-value average-value">${averageDisplay}</div>
+                                            <div class="manager-score-label">5GW AVG</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <span class="form-label">FORM</span>
+                                    ${formHtml}
+                                    <span class="expand-hint">Details <span class="expand-hint-icon">⌄</span></span>
                                 </div>
                                 
                                 <div class="card-dropdown">
-                                    ${starName ? `<div style="margin-bottom: 5px; color: var(--text-muted);">⭐ <strong style="color: #fff;">Star:</strong> <span style="color: var(--primary-color); font-weight: 600;">${starName} (${starPts} pts)</span></div>` : ''}
-                                    ${worstName ? `<div style="margin-bottom: 5px; color: var(--text-muted);">💩 <strong style="color: #fff;">Worst:</strong> <span style="color: var(--danger-color); font-weight: 600;">${worstName} (${worstPts} pts)</span></div>` : ''}
-                                    <div style="margin-bottom: 4px; color: var(--text-muted);">🔄 <strong style="color: #fff;">Transfers:</strong> <span style="color: var(--accent-color); font-weight: 600;">${transfersText}</span></div>
+                                    <div class="detail-grid">
+                                        <div class="detail-tile">
+                                            <div class="detail-label">⭐ Star</div>
+                                            <div class="detail-name">${starName || 'None'}</div>
+                                            <div class="detail-value">${starPts} pts</div>
+                                        </div>
+                                        <div class="detail-tile worst">
+                                            <div class="detail-label">💩 Worst</div>
+                                            <div class="detail-name">${worstName || 'None'}</div>
+                                            <div class="detail-value">${worstPts} pts</div>
+                                        </div>
+                                        <div class="detail-tile transfer">
+                                            <div class="detail-label">🔄 Transfers</div>
+                                            <div class="detail-name">${transfersText}</div>
+                                            <div class="detail-value">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -642,18 +1077,23 @@
                 });
 
                 if (activePeriods.length > 0) {
+                    totalPeriodSlides = activePeriods.length;
                     html += `<div class="section-title" style="margin-top: 24px;">Manager of the Month</div>`;
-                    
-                    html += `<div class="carousel-dots" id="carousel-dots">`;
-                    activePeriods.forEach((_, index) => {
-                        const isActive = index === activePeriods.length - 1 ? 'active' : '';
-                        html += `<div class="dot ${isActive}" data-index="${index}"></div>`;
-                    });
-                    html += `</div>`;
+
+                    html += `
+                        <div class="period-carousel-header">
+                            <button id="prevPeriodBtn" class="carousel-nav-btn" onclick="movePeriodSlide(-1)">‹ Prev</button>
+                            <div id="periodSlideTitle" class="period-carousel-title"></div>
+                            <button id="nextPeriodBtn" class="carousel-nav-btn" onclick="movePeriodSlide(1)">Next ›</button>
+                        </div>
+                        <div class="gw-progress" id="period-progress">
+                            ${activePeriods.map((_, index) => `<button class="gw-progress-dot" data-period-index="${index}" onclick="goToPeriodSlide(${index})" aria-label="Go to Manager of the Month period ${index + 1}"></button>`).join('')}
+                        </div>
+                    `;
 
                     html += `<div class="carousel-container" id="period-carousel">`;
                     
-                    activePeriods.forEach(period => {
+                    activePeriods.forEach((period, periodIndex) => {
                         let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
 
                         const formatPrize = (p) => {
@@ -663,7 +1103,7 @@
                         };
 
                         html += `
-                            <div class="card carousel-card">
+                            <div class="card carousel-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
                                 <h4 style="margin-top: 0; margin-bottom: 14px; color: var(--accent-color); font-size: 0.95rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
                                     ${period.scores.map((s, idx, arr) => {
@@ -911,7 +1351,7 @@
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0;">
                                 <div>
                                     <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💸 Highest Transfer Cost</div>
-                                    <div style="font-size: 0.74rem; color: var/--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
                             </li>
@@ -926,26 +1366,8 @@
                 initGwCarousel();
             }
 
-            const periodCarousel = document.getElementById('period-carousel');
-            const dots = document.querySelectorAll('#carousel-dots .dot');
-
-            if (periodCarousel && dots.length > 0) {
-                periodCarousel.addEventListener('scroll', () => {
-                    const index = Math.round(periodCarousel.scrollLeft / periodCarousel.clientWidth);
-                    dots.forEach((dot, i) => {
-                        dot.classList.toggle('active', i === index);
-                    });
-                });
-
-                dots.forEach(dot => {
-                    dot.addEventListener('click', (e) => {
-                        const index = parseInt(e.target.getAttribute('data-index'));
-                        periodCarousel.scrollTo({
-                            left: index * periodCarousel.clientWidth,
-                            behavior: 'smooth'
-                        });
-                    });
-                });
+            if (totalPeriodSlides > 0) {
+                initPeriodCarousel();
             }
         }
 
@@ -984,6 +1406,8 @@
             const prevBtn = document.getElementById('prevGwBtn');
             const nextBtn = document.getElementById('nextGwBtn');
             const titleEl = document.getElementById('gwSlideTitle');
+            const statusEl = document.getElementById('gwSlideStatus');
+            const dots = document.querySelectorAll('#gw-progress .gw-progress-dot');
 
             if (prevBtn) prevBtn.disabled = (currentGwSlideIdx === 0);
             if (nextBtn) nextBtn.disabled = (currentGwSlideIdx === totalGwSlides - 1);
@@ -994,8 +1418,14 @@
                 const badge = gwInfo.isLive 
                     ? `<span class="badge-live">LIVE</span>` 
                     : `<span class="badge-final">FINAL</span>`;
-                titleEl.innerHTML = `GW ${gwNum} ${badge}`;
+                titleEl.textContent = `GW ${gwNum}`;
+                if (statusEl) statusEl.innerHTML = badge;
             }
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentGwSlideIdx);
+                dot.classList.toggle('is-hidden', Math.abs(index - currentGwSlideIdx) > 3);
+            });
         }
 
         function scrollGwCarousel(smooth = true) {
@@ -1017,6 +1447,88 @@
             if (nextIdx >= 0 && nextIdx < totalGwSlides) {
                 currentGwSlideIdx = nextIdx;
                 scrollGwCarousel(true);
+            }
+        }
+
+        function goToGwSlide(index) {
+            if (index >= 0 && index < totalGwSlides) {
+                currentGwSlideIdx = index;
+                scrollGwCarousel(true);
+            }
+        }
+
+        function initPeriodCarousel() {
+            const track = document.getElementById('period-carousel');
+            if (!track) return;
+
+            currentPeriodSlideIdx = totalPeriodSlides - 1;
+            scrollPeriodCarousel(false);
+
+            track.addEventListener('scroll', () => {
+                const slides = Array.from(track.querySelectorAll('.carousel-card'));
+                if (slides.length === 0) return;
+                const firstOffset = slides[0].offsetLeft;
+                let index = 0;
+                let closestDistance = Infinity;
+
+                slides.forEach((slide, slideIndex) => {
+                    const distance = Math.abs(track.scrollLeft - (slide.offsetLeft - firstOffset));
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        index = slideIndex;
+                    }
+                });
+
+                if (index !== currentPeriodSlideIdx) {
+                    currentPeriodSlideIdx = index;
+                    updatePeriodCarouselHeader();
+                }
+            });
+        }
+
+        function updatePeriodCarouselHeader() {
+            const prevBtn = document.getElementById('prevPeriodBtn');
+            const nextBtn = document.getElementById('nextPeriodBtn');
+            const titleEl = document.getElementById('periodSlideTitle');
+            const slide = document.getElementById(`period-slide-${currentPeriodSlideIdx}`);
+            const dots = document.querySelectorAll('#period-progress .gw-progress-dot');
+
+            if (prevBtn) prevBtn.disabled = currentPeriodSlideIdx === 0;
+            if (nextBtn) nextBtn.disabled = currentPeriodSlideIdx === totalPeriodSlides - 1;
+            if (titleEl && slide) titleEl.textContent = slide.dataset.periodTitle || `Period ${currentPeriodSlideIdx + 1}`;
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentPeriodSlideIdx);
+                dot.classList.toggle('is-hidden', Math.abs(index - currentPeriodSlideIdx) > 3);
+            });
+        }
+
+        function scrollPeriodCarousel(smooth = true) {
+            const track = document.getElementById('period-carousel');
+            const slide = document.getElementById(`period-slide-${currentPeriodSlideIdx}`);
+            if (track && slide) {
+                const firstSlide = track.querySelector('.carousel-card');
+                const firstOffset = firstSlide ? firstSlide.offsetLeft : 0;
+                track.scrollTo({
+                    left: slide.offsetLeft - firstOffset,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
+            }
+            updatePeriodCarouselHeader();
+        }
+
+        function movePeriodSlide(direction) {
+            const nextIdx = currentPeriodSlideIdx + direction;
+            if (nextIdx >= 0 && nextIdx < totalPeriodSlides) {
+                currentPeriodSlideIdx = nextIdx;
+                scrollPeriodCarousel(true);
+            }
+        }
+
+        function goToPeriodSlide(index) {
+            if (index >= 0 && index < totalPeriodSlides) {
+                currentPeriodSlideIdx = index;
+                scrollPeriodCarousel(true);
             }
         }
 
