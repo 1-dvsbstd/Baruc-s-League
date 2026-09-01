@@ -46,7 +46,7 @@
             background-color: var(--surface-color);
             background-image:
                 linear-gradient(180deg, rgba(14, 3, 24, 0.72) 0%, rgba(14, 3, 24, 0.88) 45%, rgba(14, 3, 24, 0.96) 100%),
-                url('splash-bg.png');
+                url('page-bg.png');
             background-size: cover;
             background-position: center top;
             background-repeat: no-repeat;
@@ -399,11 +399,11 @@
             --item-accent: rgba(255, 255, 255, 0.13);
             position: relative;
             overflow: visible;
-            isolation: isolate;
+            z-index: 1;
             border-color: var(--item-accent);
             border-width: 2px;
             padding: 12px 14px;
-            margin-bottom: 8px;
+            margin-bottom: 0;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -414,6 +414,12 @@
             background:
                 linear-gradient(115deg, rgba(255,255,255,0.035), transparent 30%),
                 linear-gradient(145deg, #22122d, #160b1f);
+        }
+
+        .manager-glow-wrap {
+            position: relative;
+            isolation: isolate;
+            margin-bottom: 8px;
         }
 
         .manager-item * {
@@ -463,16 +469,8 @@
             box-shadow: 0 0 0 1px rgba(184, 91, 160, 0.05), 0 0 22px rgba(184, 91, 160, 0.08), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .manager-item.transfer-positive {
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
-        }
-
-        .manager-item.transfer-negative {
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
-        }
-
-        .manager-item.transfer-positive::after,
-        .manager-item.transfer-negative::after {
+        .manager-glow-wrap.transfer-positive::before,
+        .manager-glow-wrap.transfer-negative::before {
             content: '';
             display: block;
             position: absolute;
@@ -480,16 +478,16 @@
             right: -12px;
             bottom: 27%;
             left: -12px;
-            z-index: -1;
+            z-index: 0;
             pointer-events: none;
             filter: blur(10px);
         }
 
-        .manager-item.transfer-positive::after {
+        .manager-glow-wrap.transfer-positive::before {
             background: linear-gradient(90deg, rgba(20, 255, 118, 0.34) 0, transparent 13%, transparent 87%, rgba(20, 255, 118, 0.34) 100%);
         }
 
-        .manager-item.transfer-negative::after {
+        .manager-glow-wrap.transfer-negative::before {
             background: linear-gradient(90deg, rgba(255, 24, 48, 0.38) 0, transparent 13%, transparent 87%, rgba(255, 24, 48, 0.38) 100%);
         }
 
@@ -875,7 +873,8 @@
         @media (max-width: 430px) {
             body { padding: 14px 10px; }
             h1 { font-size: 1.35rem; margin-bottom: 12px; }
-            .manager-item { padding: 9px 12px; margin-bottom: 7px; }
+            .manager-item { padding: 9px 12px; margin-bottom: 0; }
+            .manager-glow-wrap { margin-bottom: 7px; }
             .manager-name { font-size: 0.92rem; }
             .manager-team { font-size: 0.67rem; }
             .chip-slot { min-height: 17px; margin-top: 4px; padding: 1px 6px; }
@@ -1272,10 +1271,11 @@
                             return `<span class="form-position ${cls}">${position || '–'}</span>`;
                         }).join('');
                         const averageDisplay = Number(meta.fiveGwAverage || 0).toFixed(1);
-                        const cardClass = `fut-card manager-item ${rankClass} ${hitClass} ${hasActiveChip ? 'glow-gold' : ''}`;
+                        const cardClass = `fut-card manager-item ${rankClass} ${hasActiveChip ? 'glow-gold' : ''}`;
 
                         html += `
-                            <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
+                            <div class="manager-glow-wrap ${hitClass}">
+                              <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
                                 <div class="manager-summary">
                                     <div>
                                         <span class="manager-name">${managerName}</span>
@@ -1315,6 +1315,7 @@
                                         </div>
                                     </div>
                                 </div>
+                              </div>
                             </div>
                         `;
                     });
