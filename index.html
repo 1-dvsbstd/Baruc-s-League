@@ -439,7 +439,7 @@
         }
 
         .manager-item.has-hit {
-            box-shadow: 0 0 28px rgba(255, 35, 55, 0.34), 0 0 54px rgba(255, 20, 45, 0.14), 0 10px 24px rgba(0, 0, 0, 0.24);
+            box-shadow: -24px 0 28px -17px rgba(255, 30, 50, 0.72), 24px 0 28px -17px rgba(255, 30, 50, 0.72), 0 10px 24px rgba(0, 0, 0, 0.24);
         }
 
         .manager-item.has-hit::after {
@@ -736,6 +736,42 @@
         .support-panel > * {
             position: relative;
             z-index: 1;
+        }
+
+        .tracker-shell {
+            padding: 16px 14px 14px;
+            margin-bottom: 18px;
+        }
+
+        .tracker-shell .gw-carousel-header {
+            padding: 6px 0 10px;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .tracker-shell .section-title {
+            margin-bottom: 8px;
+        }
+
+        .tracker-shell .carousel-container {
+            margin-bottom: 0 !important;
+        }
+
+        .tracker-shell #gw-carousel-track .carousel-card {
+            padding: 0 12px;
+        }
+
+        .period-slide-card {
+            margin-bottom: 0;
+            background: rgba(0, 0, 0, 0.12);
+            box-shadow: none;
+        }
+
+        .transfer-line {
+            display: block;
         }
 
         .manager-item .card-dropdown {
@@ -1075,7 +1111,7 @@
 
             if (gwDataStore.length > 0) {
                 totalGwSlides = gwDataStore.length;
-                html += `<div class="section-title">Gameweek Tracker</div>`;
+                html += `<div class="card support-panel tracker-shell"><div class="section-title">Gameweek Tracker</div>`;
                 
                 html += `
                     <div class="gw-carousel-header">
@@ -1151,6 +1187,10 @@
                         }
 
                         let transfersText = formatTransfers(rawTransfers, mgr.hits);
+                        const transfersHtml = String(transfersText)
+                            .split(/\s*\|\s*/)
+                            .map(part => `<span class="transfer-line">${part}</span>`)
+                            .join('');
 
                         const meta = mgr.uiMeta || { weeklyRank: 4, overallRank: 4, rankMovement: 0, form: [null, null, null, null, null], fiveGwAverage: 0 };
                         const rankClass = `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
@@ -1200,7 +1240,7 @@
                                         </div>
                                         <div class="detail-row transfer">
                                             <div class="detail-row-label">🔄 Transfers</div>
-                                            <div class="detail-row-name">${transfersText}</div>
+                                            <div class="detail-row-name">${transfersHtml}</div>
                                             <div class="detail-row-points">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}</div>
                                         </div>
                                     </div>
@@ -1212,7 +1252,7 @@
                     html += `</div>`;
                 });
 
-                html += `</div>`;
+                html += `</div></div>`;
             }
 
             // 2. Manager of the Month Carousel
@@ -1230,7 +1270,7 @@
 
                 if (activePeriods.length > 0) {
                     totalPeriodSlides = activePeriods.length;
-                    html += `<div class="section-title" style="margin-top: 24px;">Manager of the Month</div>`;
+                    html += `<div class="card support-panel tracker-shell"><div class="section-title">Manager of the Month</div>`;
 
                     html += `
                         <div class="period-carousel-header">
@@ -1255,8 +1295,7 @@
                         };
 
                         html += `
-                            <div class="card carousel-card support-panel" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
-                                <h4 style="margin-top: 0; margin-bottom: 14px; color: var(--accent-color); font-size: 0.95rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
+                            <div class="card carousel-card period-slide-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
                                 <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
                                     ${period.scores.map((s, idx, arr) => {
                                         let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '0');
@@ -1283,7 +1322,7 @@
                         `;
                     });
 
-                    html += `</div>`;
+                    html += `</div></div>`;
                 }
             }
 
