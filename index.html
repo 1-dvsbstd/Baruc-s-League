@@ -7,7 +7,7 @@
     
     <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#190df5">
+    <meta name="theme-color" content="#0e0318">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,16 +20,17 @@
 
     <style>
         :root {
-            --surface-color: #1a0524;
-            --card-bg: #2b083b;
-            --primary-color: #00ff87;
-            --accent-color: #02efff;
-            --text-color: #ffffff;
-            --text-muted: #a0a0a0;
-            --border-color: #4a155f;
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --danger-color: #ff4b4b;
-            --gold-color: #ffd700;
+            --surface-color: #0e0318;       /* Deeper obsidian-purple background */
+            --card-bg: #1c092d;             /* Rich plum card container */
+            --card-border: rgba(255, 255, 255, 0.09); /* Subtle glass edge */
+            --primary-color: #00ff87;        /* FPL Green - RESERVED FOR KEY STATS */
+            --accent-color: #00f5ff;         /* Cyan accent for secondary elements */
+            --ice-blue: #80d4ff;             /* Ice blue for cold/low stats */
+            --text-color: #ffffff;           /* Clean white headers & names */
+            --text-muted: #bdaecf;          /* High-legibility lavender subtext */
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --danger-color: #ff4b4b;        /* Crisp red for hits & low ranks */
+            --gold-color: #ffc72c;          /* Refined gold for winners & money */
         }
 
         * {
@@ -39,20 +40,22 @@
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--surface-color);
+            background-image: radial-gradient(circle at 50% 0%, #2a0943 0%, #0e0318 75%);
+            background-attachment: fixed;
             color: var(--text-color);
             margin: 0;
-            padding: 20px 12px;
+            padding: 24px 14px;
             -webkit-font-smoothing: antialiased;
         }
 
         h1 {
             text-align: center;
-            color: var(--primary-color);
-            font-size: 1.75rem;
+            color: var(--text-color);
+            font-size: 1.65rem;
             font-weight: 800;
             letter-spacing: -0.5px;
-            margin-bottom: 24px;
-            text-shadow: 0 2px 8px rgba(0,255,135,0.2);
+            margin: 0 0 20px 0;
+            text-shadow: 0 4px 16px rgba(0,0,0,0.5);
         }
 
         /* Splash Screen Styling */
@@ -87,59 +90,64 @@
             margin: 0 auto;
         }
 
+        /* Glassmorphic Cards */
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.15) 100%), var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 14px;
             margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
         }
 
         /* Section Headings */
         .section-title {
-            color: var(--primary-color);
+            color: var(--text-color);
             text-align: center;
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin: 0 0 12px 0;
+            margin: 0 0 14px 0;
+            opacity: 0.9;
         }
 
         /* Live GW Card Styling */
         .fut-card {
             position: relative;
             cursor: pointer;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.15) 100%), var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 12px;
             padding: 14px 16px;
             margin-bottom: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             user-select: none;
         }
         
         .fut-card:hover {
             border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
         }
 
         .fut-card.glow-gold {
-            border: 2px solid var(--gold-color) !important;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.15);
+            border: 1.5px solid var(--gold-color) !important;
+            box-shadow: 0 0 16px rgba(255, 199, 44, 0.25), inset 0 0 12px rgba(255, 199, 44, 0.1);
         }
 
         .chip-badge {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: 800;
-            padding: 2px 6px;
+            padding: 2px 7px;
             border-radius: 4px;
             margin-left: 8px;
             text-transform: uppercase;
             background: var(--gold-color);
-            color: #1a0524;
+            color: #12041f;
             display: inline-block;
+            letter-spacing: 0.5px;
         }
 
         .card-dropdown {
@@ -154,42 +162,43 @@
             display: block;
         }
 
-        /* Standings Chip Inventory Pills - Option 1 Single-Line Layout */
+        /* Standings Chip Inventory Pills */
         .chip-inventory {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2px;
+            gap: 3px;
             width: 100%;
         }
         
         .chip-pill {
-            font-size: 0.55rem;
-            font-weight: 800;
+            font-size: 0.58rem;
+            font-weight: 700;
             padding: 3px 0;
-            border-radius: 3px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.06);
-            color: #c4b8d9;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
             text-align: center;
             box-sizing: border-box;
             flex: 1;
             min-width: 0;
-            line-height: 1;
+            line-height: 1.1;
         }
         
         .chip-pill.active {
-            color: var(--gold-color);
-            border-color: var(--gold-color);
-            background: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 0 4px rgba(255, 215, 0, 0.35);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: rgba(0, 255, 135, 0.15);
+            box-shadow: 0 0 6px rgba(0, 255, 135, 0.3);
         }
         
         .chip-pill.used {
-            color: #554868;
-            border-color: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.03);
+            background: transparent;
             text-decoration: line-through;
-            opacity: 0.4;
+            opacity: 0.5;
         }
 
         /* Carousel Styling */
@@ -214,18 +223,18 @@
             display: flex;
             justify-content: center;
             gap: 6px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         .dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background-color: var(--border-color);
+            background-color: rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
             cursor: pointer;
         }
         .dot.active {
-            width: 20px;
+            width: 18px;
             border-radius: 4px;
             background-color: var(--primary-color);
         }
@@ -376,7 +385,7 @@
                     const starDisplayName = `${starName}${isStarCaptain ? ' (C)' : ''}`;
                     const worstDisplayName = `${worstName}${isWorstCaptain ? ' (C)' : ''}`;
 
-                    // Multi-check Transfer properties from backend
+                    // Multi-check Transfer properties
                     let transfersText = 'None';
                     if (mgr.transfers) {
                         if (Array.isArray(mgr.transfers)) {
@@ -400,17 +409,19 @@
                         <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <span style="font-weight: 700; font-size: 1rem; color: #fff;">${mgr.managerName}</span>
+                                    <span style="font-weight: 700; font-size: 1rem; color: #ffffff;">${mgr.managerName}</span>
                                     ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || TEAM_NAMES[mgr.managerName] || ''}</div>
+                                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || TEAM_NAMES[mgr.managerName] || ''}</div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color);">${mgr.livePoints} pts ▾</span>
+                                <span style="font-weight: 800; font-size: 1.15rem; color: var(--primary-color); display: flex; align-items: center; gap: 4px;">
+                                    ${mgr.livePoints} pts <span style="font-size: 0.7rem; opacity: 0.5;">▾</span>
+                                </span>
                             </div>
                             
                             <div class="card-dropdown">
-                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${starDisplayName} (${starPts} pts)</div>
-                                <div style="margin-bottom: 5px; color: var(--danger-color);">💩 <strong>Worst:</strong> ${worstDisplayName} (${worstPts} pts)</div>
-                                <div style="margin-bottom: 4px; color: var(--accent-color);">🔄 <strong>Transfers:</strong> ${transfersText}</div>
+                                <div style="margin-bottom: 5px; color: var(--text-muted);">⭐ <strong style="color: #fff;">Star:</strong> <span style="color: var(--primary-color); font-weight: 600;">${starDisplayName} (${starPts} pts)</span></div>
+                                <div style="margin-bottom: 5px; color: var(--text-muted);">💩 <strong style="color: #fff;">Worst:</strong> <span style="color: var(--danger-color); font-weight: 600;">${worstDisplayName} (${worstPts} pts)</span></div>
+                                <div style="margin-bottom: 4px; color: var(--text-muted);">🔄 <strong style="color: #fff;">Transfers:</strong> <span style="color: var(--accent-color); font-weight: 600;">${transfersText}</span></div>
                             </div>
                         </div>
                     `;
@@ -453,8 +464,8 @@
 
                         html += `
                             <div class="card carousel-card">
-                                <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
-                                <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
+                                <h4 style="margin-top: 0; margin-bottom: 14px; color: var(--accent-color); font-size: 0.95rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
                                     ${period.scores.map((s, idx, arr) => {
                                         let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '0');
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
@@ -462,19 +473,19 @@
                                         }
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         return `
-                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
+                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border-subtle);">
                                                 <div>
-                                                    <div style="font-weight: 600; font-size: 0.95rem; color: #ffffff;">${s.name}</div>
-                                                    ${teamName ? `<div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${teamName}</div>` : ''}
+                                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">${s.name}</div>
+                                                    ${teamName ? `<div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
                                                 </div>
-                                                <span style="font-weight: 700; font-size: 1.05rem; color: var(--primary-color);">${scoreDisplay}</span>
+                                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${scoreDisplay}</span>
                                             </li>
                                         `;
                                     }).join('')}
                                 </ul>
-                                <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
-                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
-                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
+                                <div style="font-size: 0.82rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--gold-color); font-weight: 700;">(${formatPrize(period.winnerPrize)})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color); font-weight: 600;">(${formatPrize(period.runnerPrize)})</span></div>
                                 </div>
                             </div>
                         `;
@@ -484,7 +495,7 @@
                 }
             }
 
-            // 3. Overall Standings Table (Updated Layout & Widths)
+            // 3. Overall Standings Table
             let topWeeksWonPlayer = null;
             let maxWeeksWon = -1;
 
@@ -512,7 +523,6 @@
                     });
                 }
 
-                // Parse rows & calculate Most Weeks Won dynamically
                 data.overall.rows.forEach(row => {
                     const pName = row[playerIdx];
                     const wWon = Number(row[weeksWonIdx]) || 0;
@@ -526,9 +536,9 @@
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
-                            <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 0.82rem;">
+                            <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;">
                                         <th style="width: 27%; padding: 0 2px 10px 2px; font-weight: 700;">Manager</th>
                                         <th style="width: 36%; padding: 0 2px 10px 2px; font-weight: 700; text-align: center;">Chips</th>
                                         <th style="width: 21%; padding: 0 2px 10px 2px; font-weight: 700; text-align: center;">Points</th>
@@ -549,20 +559,29 @@
                                             medal += ' 💩';
                                         }
                                         const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
+                                        const numericPrize = parseFloat(String(prizeVal).replace(/[^0-9.]/g, '')) || 0;
                                         const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
+                                        
+                                        const prizeHtml = numericPrize > 0 
+                                            ? `<span style="color: var(--gold-color); font-weight: 700;">${prizeStr}</span>` 
+                                            : `<span style="color: rgba(255,255,255,0.25); font-weight: 500;">£0</span>`;
 
                                         const chipsHtml = renderChipsHtml(chipMap[playerName], activeChipMap[playerName]);
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 27%; padding: 12px 2px; font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                <td style="width: 27%; padding: 12px 2px; font-weight: 600; color: #ffffff; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                                     ${playerName}
                                                 </td>
                                                 <td style="width: 36%; padding: 12px 2px; text-align: center;">
                                                     ${chipsHtml}
                                                 </td>
-                                                <td style="width: 21%; padding: 12px 2px; font-weight: 700; color: var(--primary-color); text-align: center; white-space: nowrap;">${points} ${medal}</td>
-                                                <td style="width: 16%; padding: 12px 2px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
+                                                <td style="width: 21%; padding: 12px 2px; font-weight: 800; color: var(--primary-color); font-size: 0.92rem; text-align: center; white-space: nowrap;">
+                                                    ${points} ${medal}
+                                                </td>
+                                                <td style="width: 16%; padding: 12px 2px; font-size: 0.85rem; text-align: right; white-space: nowrap;">
+                                                    ${prizeHtml}
+                                                </td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -605,7 +624,7 @@
                 }
             }
 
-            // 4. Accolades Card
+            // 4. Accolades Card (Refined Semantic Colors)
             if (data.accolades || topWeeksWonPlayer || computedWeeksLostPlayer) {
                 const acc = data.accolades || {};
 
@@ -654,47 +673,47 @@
                     <div class="card" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Accolades</div>
                         <ul style="list-style: none; padding: 0; margin: 0;">
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🔥 Highest GW Score</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestScore)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🔥 Highest GW Score</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestScore)}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${formatVal(highestScore)}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--primary-color);">${formatVal(highestScore)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🧊 Lowest GW Score</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(lowestScore)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🧊 Lowest GW Score</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(lowestScore)}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-color);">${formatVal(lowestScore)}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--ice-blue);">${formatVal(lowestScore)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🏆 Most Weeks Won</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksWon)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🏆 Most Weeks Won</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksWon)}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${formatVal(mostWeeksWon)}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--gold-color);">${formatVal(mostWeeksWon)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💩 Most Weeks Lost</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksLost)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💩 Most Weeks Lost</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksLost)}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--danger-color);">${formatVal(mostWeeksLost)}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(mostWeeksLost)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🔄 Most Transfers</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostTransfers)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🔄 Most Transfers</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostTransfers)}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-color);">${formatVal(mostTransfers)}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--accent-color);">${formatVal(mostTransfers)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0;">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Highest Transfer Cost</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💸 Highest Transfer Cost</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
                                 </div>
-                                <span style="font-weight: 700; font-size: 1rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
                             </li>
                         </ul>
                     </div>
