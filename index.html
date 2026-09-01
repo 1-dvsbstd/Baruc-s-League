@@ -571,7 +571,7 @@
                 `;
             }
 
-            // Dynamic calculation for Most Weeks Lost based on lowest weekly scores across all periods
+            // Dynamic calculation for Most Weeks Lost (filters out 0 scores from missing active participation like Charlie GW1)
             let computedWeeksLostPlayer = null;
             if (data.monthly && data.monthly.length > 0) {
                 const bottomCounts = {};
@@ -579,7 +579,8 @@
 
                 data.monthly.forEach(period => {
                     if (period.scores && period.scores.length > 0) {
-                        const validScores = period.scores.filter(s => s.score !== undefined && s.score !== null && !isNaN(Number(s.score)));
+                        // Filter out zero / missing scores to avoid skewing lowest weekly score counts
+                        const validScores = period.scores.filter(s => s.score !== undefined && s.score !== null && !isNaN(Number(s.score)) && Number(s.score) > 0);
                         if (validScores.length > 0) {
                             let minScore = Math.min(...validScores.map(s => Number(s.score)));
                             validScores.forEach(s => {
@@ -620,17 +621,14 @@
                 const lowestScore = getAccObj(['lowestScore']);
                 const mostWeeksWon = getAccObj(['mostWeeksWon', 'weeksWon']) || topWeeksWonPlayer;
                 
-                // Prioritize computed weeks lost; fallback to backend data with override for Charlie -> Mike / Carl
+                // Set Most Weeks Lost to explicitly output Mike / Carl - 1
                 let mostWeeksLost = computedWeeksLostPlayer || getAccObj(['mostWeeksLost', 'weeksLost', 'mostWeeksLast']);
                 
-                if (mostWeeksLost && mostWeeksLost.player) {
-                    // Override backend misattributions to reflect true bottom weekly counts (Mike / Carl)
-                    if (mostWeeksLost.player.toLowerCase().includes('charlie') || !computedWeeksLostPlayer) {
-                        mostWeeksLost = {
-                            player: "Mike / Carl",
-                            val: mostWeeksLost.val && Number(mostWeeksLost.val) !== 10 ? mostWeeksLost.val : (computedWeeksLostPlayer ? computedWeeksLostPlayer.val : 4)
-                        };
-                    }
+                if (!computedWeeksLostPlayer || (mostWeeksLost && (mostWeeksLost.player.includes('Charlie') || Number(mostWeeksLost.val) === 10))) {
+                    mostWeeksLost = {
+                        player: "Mike / Carl",
+                        val: 1
+                    };
                 }
 
                 const mostTransfers = getAccObj(['mostTransfers', 'transfers']);
