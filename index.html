@@ -328,9 +328,9 @@
 
         /* FUT-inspired Gameweek Experience */
         .gw-carousel-header {
-            position: sticky;
-            top: 8px;
-            z-index: 30;
+            position: relative;
+            top: auto;
+            z-index: 1;
             padding: 10px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 14px;
@@ -382,8 +382,8 @@
         .gw-progress-dot.active {
             width: 20px;
             border-radius: 5px;
-            background: var(--primary-color);
-            box-shadow: 0 0 10px rgba(0, 255, 135, 0.45);
+            background: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
         }
 
         .gw-progress-dot.is-hidden {
@@ -391,13 +391,13 @@
         }
 
         .manager-item {
-            --item-accent: rgba(255, 255, 255, 0.14);
+            --item-accent: rgba(255, 255, 255, 0.13);
             position: relative;
             overflow: hidden;
             border-color: var(--item-accent);
             background:
-                linear-gradient(115deg, rgba(255,255,255,0.07), transparent 30%),
-                linear-gradient(145deg, rgba(58, 18, 84, 0.96), rgba(22, 6, 35, 0.98));
+                linear-gradient(115deg, rgba(255,255,255,0.035), transparent 30%),
+                linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
         }
 
         .manager-item::before {
@@ -412,19 +412,24 @@
         }
 
         .manager-item.rank-card-1 {
-            --item-accent: #ffc72c;
-            background: linear-gradient(145deg, #60430e, #29190a 58%, #160b1d);
-            box-shadow: 0 0 22px rgba(255, 199, 44, 0.18);
+            --item-accent: rgba(255, 199, 44, 0.5);
+            background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
         }
 
         .manager-item.rank-card-2 {
-            --item-accent: #d1d5db;
-            background: linear-gradient(145deg, #3e4653, #202431 58%, #160b1d);
+            --item-accent: rgba(209, 213, 219, 0.38);
+            background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
         }
 
         .manager-item.rank-card-3 {
-            --item-accent: #c98245;
-            background: linear-gradient(145deg, #5b321f, #2c1a1d 58%, #160b1d);
+            --item-accent: rgba(201, 130, 69, 0.42);
+            background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
+        }
+
+        .manager-item.rank-card-4 {
+            --item-accent: rgba(184, 91, 160, 0.28);
+            background: linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
         }
 
         .manager-item.has-hit {
@@ -499,11 +504,11 @@
         }
 
         .average-value {
-            color: var(--accent-color);
+            color: var(--text-muted);
         }
 
         .manager-score-value {
-            color: var(--primary-color);
+            color: #fff;
             font-size: 1.35rem;
             font-weight: 900;
             line-height: 1;
@@ -515,6 +520,28 @@
             font-weight: 800;
             letter-spacing: 0.12em;
             margin-top: 5px;
+        }
+
+        .chip-slot {
+            display: inline-flex;
+            align-items: center;
+            min-height: 20px;
+            margin-top: 7px;
+            padding: 2px 7px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.16);
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .chip-slot.active {
+            color: var(--gold-color);
+            border-color: rgba(255, 199, 44, 0.38);
+            background: rgba(255, 199, 44, 0.08);
         }
 
         .form-row {
@@ -554,6 +581,21 @@
         .form-position.form-rank-2 { color: #17191d; background: var(--silver-color); border-color: var(--silver-color); }
         .form-position.form-rank-3 { color: #1d0f08; background: #c98245; border-color: #c98245; }
         .form-position.form-rank-4 { color: #fff; background: #7b2639; border-color: #a93d55; }
+
+        .form-average {
+            margin-left: 5px;
+            padding-left: 10px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .form-average strong {
+            color: #fff;
+            font-size: 0.72rem;
+        }
 
         .expand-hint {
             margin-left: auto;
@@ -606,6 +648,29 @@
 
         .detail-tile.worst .detail-value { color: var(--danger-color); }
         .detail-tile.transfer .detail-value { color: var(--accent-color); }
+
+        .manager-item .card-dropdown {
+            display: block;
+            max-height: 0;
+            margin-top: 0;
+            padding-top: 0;
+            overflow: hidden;
+            border-top-color: transparent;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease,
+                transform 0.35s ease, margin-top 0.35s ease, padding-top 0.35s ease;
+        }
+
+        .manager-item.expanded .card-dropdown {
+            display: block;
+            max-height: 320px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top-color: var(--border-subtle);
+            opacity: 1;
+            transform: translateY(0);
+        }
 
         .period-carousel-header {
             display: flex;
@@ -1012,25 +1077,20 @@
                                 <div class="manager-summary">
                                     <div>
                                         <span class="manager-name">${managerName}</span>
-                                        ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
                                         <div class="manager-team">${teamName}</div>
                                         <div class="manager-overall">Overall #${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span></div>
+                                        <div class="chip-slot ${hasActiveChip ? 'active' : ''}">${hasActiveChip ? `${chipLabel} ACTIVE` : 'No active chip'}</div>
                                     </div>
-                                    <div class="score-metrics">
-                                        <div class="score-metric manager-score">
-                                            <div class="manager-score-value">${pointsDisplay}</div>
-                                            <div class="manager-score-label">GW PTS</div>
-                                        </div>
-                                        <div class="score-metric manager-score">
-                                            <div class="manager-score-value average-value">${averageDisplay}</div>
-                                            <div class="manager-score-label">5GW AVG</div>
-                                        </div>
+                                    <div class="manager-score">
+                                        <div class="manager-score-value">${pointsDisplay}</div>
+                                        <div class="manager-score-label">GW PTS</div>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <span class="form-label">FORM</span>
                                     ${formHtml}
+                                    <span class="form-average">5GW AVG <strong>${averageDisplay}</strong></span>
                                     <span class="expand-hint">Details <span class="expand-hint-icon">⌄</span></span>
                                 </div>
                                 
