@@ -2,233 +2,601 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baruc's League - FPL Side Pot Tracker</title>
+    
+    <!-- PWA Manifest & Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#190df5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Google Fonts for Premier League Look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #37003c;
-            --secondary: #00ff85;
-            --accent-red: #e90052;
-            --bg: #11111d;
-            --card-bg: #1e1e2f;
-            --card-border: #2a2a40;
-            --text-main: #ffffff;
-            --text-muted: #a0a0b8;
+            --surface-color: #1a0524;
+            --card-bg: #2b083b;
+            --primary-color: #00ff87;
+            --accent-color: #02efff;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-color: #4a155f;
+            --border-subtle: rgba(255, 255, 255, 0.08);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text-main); padding: 20px; max-width: 1200px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--primary); }
-        h1 { color: var(--secondary); font-size: 2rem; margin-bottom: 5px; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px 16px;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-        .tab-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
-        .tab-btn.active { background: var(--primary); border-color: var(--secondary); color: var(--secondary); }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            text-shadow: 0 2px 8px rgba(0,255,135,0.2);
+        }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* Splash Screen Styling */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--surface-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease-out;
+        }
 
-        /* Stats Cards Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 15px; text-align: center; }
-        .stat-card h3 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .stat-card .value { font-size: 1.25rem; font-weight: bold; color: var(--secondary); }
-        .stat-card.negative .value { color: var(--accent-red); }
+        #splash-screen img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+            margin-bottom: 0;
+            animation: none;
+        }
 
-        /* Accordion / Dropdowns */
-        .manager-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
-        .manager-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; cursor: pointer; background: rgba(255, 255, 255, 0.02); }
-        .manager-header:hover { background: rgba(255, 255, 255, 0.05); }
-        .manager-details { padding: 15px; border-top: 1px solid var(--card-border); background: #161624; display: none; }
-        .manager-card.open .manager-details { display: block; }
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
 
-        .transfer-list { list-style: none; margin-top: 8px; font-size: 0.9rem; }
-        .transfer-list li { margin: 4px 0; padding: 6px 10px; background: rgba(0,0,0,0.25); border-radius: 4px; display: flex; justify-content: space-between; }
-        .in { color: var(--secondary); font-weight: bold; }
-        .out { color: var(--accent-red); font-weight: bold; }
+        /* App Container */
+        #app {
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-        /* Standings Table */
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-top: 15px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--card-border); }
-        th { background: var(--primary); color: #fff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        tr:hover { background: rgba(255, 255, 255, 0.02); }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
 
-        /* Chip Badges */
-        .chip-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; margin: 2px; }
-        .chip-badge.used { background: rgba(233, 0, 82, 0.15); color: var(--accent-red); border: 1px solid var(--accent-red); }
-        .chip-badge.remaining { background: rgba(0, 255, 133, 0.15); color: var(--secondary); border: 1px solid var(--secondary); }
+        /* Section Headings */
+        .section-title {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin: 0 0 12px 0;
+        }
 
-        /* Accolades Grid */
-        .accolade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
-        .accolade-card { background: var(--card-bg); border-left: 4px solid var(--secondary); padding: 15px; border-radius: 6px; }
-        .accolade-card.negative { border-left-color: var(--accent-red); }
-        .accolade-title { color: var(--text-muted); font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase; }
-        .accolade-holder { font-size: 1.15rem; font-weight: bold; color: var(--text-main); }
-        .accolade-meta { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+        /* Live GW Card Styling (Unified Theme) */
+        .fut-card {
+            position: relative;
+            cursor: pointer;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fut-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .fut-card.glow-gold {
+            border: 2px solid #ffd700 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.15);
+        }
+
+        .chip-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            background: #ffd700;
+            color: #1a0524;
+        }
+
+        .card-dropdown {
+            margin-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 10px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .fut-card.expanded .card-dropdown {
+            display: block;
+        }
+
+        /* Overall Standings Chip Inventory Pills */
+        .chip-inventory {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .chip-pill {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+            color: #777777;
+        }
+        
+        .chip-pill.active {
+            color: #ffd700;
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.18);
+            box-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+        }
+        
+        .chip-pill.used {
+            color: #4a4a4a;
+            border-color: rgba(255, 255, 255, 0.05);
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        /* Carousel Styling */
+        .carousel-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 16px;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+        }
+        .carousel-container::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel-card {
+            min-width: 100%;
+            box-sizing: border-box;
+            scroll-snap-align: start;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .dot.active {
+            width: 20px;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+        }
+
+        .loading-text {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 40px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>BARUC'S LEAGUE FPL SIDE POT TRACKER</h1>
-    </header>
-
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('live', this)">Live Tracker</button>
-        <button class="tab-btn" onclick="switchTab('standings', this)">Overall Standings</button>
-        <button class="tab-btn" onclick="switchTab('accolades', this)">Accolades</button>
+    <!-- Splash Screen Overlay -->
+    <div id="splash-screen">
+        <img src="splash-bg.png" alt="Loading">
     </div>
 
-    <!-- Live Tracker Tab -->
-    <div id="live" class="tab-content active">
-        <!-- Standalone Captain card removed; Star & Worst Player display (C) if captain -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>GW Star Player</h3>
-                <div class="value" id="gw-star-player">Haaland (C) (18 pts)</div>
-            </div>
-            <div class="stat-card negative">
-                <h3>GW Worst Player</h3>
-                <div class="value" id="gw-worst-player">Bednarek (-2 pts)</div>
-            </div>
-        </div>
-
-        <div id="manager-list">
-            <!-- Manager Card Item 1 -->
-            <div class="manager-card" onclick="toggleCard(this)">
-                <div class="manager-header">
-                    <div>
-                        <strong>Manager A</strong>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">Gameweek Points: 74</div>
-                    </div>
-                    <span>▼</span>
-                </div>
-                <div class="manager-details" onclick="event.stopPropagation()">
-                    <p><strong>Star Player:</strong> Haaland (C) (18 pts)</p>
-                    <p><strong>Worst Player:</strong> Pickford (1 pt)</p>
-                    <hr style="border-color: var(--card-border); margin: 10px 0;">
-                    <strong>Gameweek Transfers:</strong>
-                    <ul class="transfer-list">
-                        <li><span class="in">IN: Saka</span> <span class="out">OUT: Palmer</span></li>
-                        <li><span class="in">IN: Joao Pedro</span> <span class="out">OUT: Solanke</span></li>
-                    </ul>
-                    <div style="font-size: 0.8rem; margin-top: 8px; color: var(--text-muted);">Transfer Cost: -4 pts</div>
-                </div>
-            </div>
-
-            <!-- Manager Card Item 2 -->
-            <div class="manager-card" onclick="toggleCard(this)">
-                <div class="manager-header">
-                    <div>
-                        <strong>Manager B</strong>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">Gameweek Points: 52</div>
-                    </div>
-                    <span>▼</span>
-                </div>
-                <div class="manager-details" onclick="event.stopPropagation()">
-                    <p><strong>Star Player:</strong> Salah (12 pts)</p>
-                    <p><strong>Worst Player:</strong> Bednarek (C) (-2 pts)</p>
-                    <hr style="border-color: var(--card-border); margin: 10px 0;">
-                    <strong>Gameweek Transfers:</strong>
-                    <ul class="transfer-list">
-                        <li><span style="color: var(--text-muted);">No transfers made this Gameweek</span></li>
-                    </ul>
-                    <div style="font-size: 0.8rem; margin-top: 8px; color: var(--text-muted);">Transfer Cost: 0 pts</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Overall Standings Tab -->
-    <div id="standings" class="tab-content">
-        <!-- Weeks Won and MOTM removed to maximize real estate for Chips -->
-        <table>
-            <thead>
-                <tr>
-                    <th>Pos</th>
-                    <th>Manager</th>
-                    <th>Total Pts</th>
-                    <th>Chips Played</th>
-                    <th>Chips Remaining</th>
-                </tr>
-            </thead>
-            <tbody id="standings-body">
-                <tr>
-                    <td>1</td>
-                    <td><strong>Manager A</strong></td>
-                    <td>1,420</td>
-                    <td><span class="chip-badge used">3C (GW5)</span> <span class="chip-badge used">TC (GW12)</span></td>
-                    <td><span class="chip-badge remaining">WC1</span> <span class="chip-badge remaining">WC2</span> <span class="chip-badge remaining">FH</span> <span class="chip-badge remaining">BB</span></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td><strong>Manager B</strong></td>
-                    <td>1,395</td>
-                    <td><span class="chip-badge used">WC1 (GW6)</span></td>
-                    <td><span class="chip-badge remaining">WC2</span> <span class="chip-badge remaining">FH</span> <span class="chip-badge remaining">BB</span> <span class="chip-badge remaining">TC</span> <span class="chip-badge remaining">3C</span></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Accolades Tab -->
-    <div id="accolades" class="tab-content">
-        <div class="accolade-grid">
-            <div class="accolade-card">
-                <span class="accolade-title">Highest GW Score</span>
-                <div class="accolade-holder" id="acc-highest-gw-holder">Manager A</div>
-                <div class="accolade-meta" id="acc-highest-gw-score">112 Pts (GW8)</div>
-            </div>
-            <div class="accolade-card negative">
-                <span class="accolade-title">Lowest GW Score</span>
-                <div class="accolade-holder" id="acc-lowest-gw-holder">Manager B</div>
-                <div class="accolade-meta" id="acc-lowest-gw-score">28 Pts (GW14)</div>
-            </div>
-            <div class="accolade-card">
-                <span class="accolade-title">Most Weeks Won</span>
-                <div class="accolade-holder" id="acc-most-wins-holder">Manager A</div>
-                <div class="accolade-meta" id="acc-most-wins-count">6 Gameweeks</div>
-            </div>
-            <div class="accolade-card negative">
-                <span class="accolade-title">Most Weeks Lost</span>
-                <div class="accolade-holder" id="acc-most-losses-holder">Manager B</div>
-                <div class="accolade-meta" id="acc-most-losses-count">5 Gameweeks</div>
-            </div>
-            <div class="accolade-card">
-                <span class="accolade-title">Most Transfers</span>
-                <div class="accolade-holder" id="acc-most-transfers-holder">Manager B</div>
-                <div class="accolade-meta" id="acc-most-transfers-count">34 Transfers</div>
-            </div>
-            <div class="accolade-card negative">
-                <span class="accolade-title">Highest Transfer Cost</span>
-                <div class="accolade-holder" id="acc-highest-cost-holder">Manager A</div>
-                <div class="accolade-meta" id="acc-highest-cost-count">-28 Pts Total</div>
-            </div>
-            <div class="accolade-card">
-                <span class="accolade-title">Manager of the Month</span>
-                <div class="accolade-holder" id="acc-motm-holder">Manager A</div>
-                <div class="accolade-meta" id="acc-motm-count">August, October</div>
-            </div>
-        </div>
+    <h1>Baruc's League</h1>
+    
+    <div id="app">
+        <div class="loading-text">Loading tracker data...</div>
     </div>
 
     <script>
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            btn.classList.add('active');
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
+
+        const TEAM_NAMES = {
+            "Nathan": "nr xi",
+            "Mike": "mikes marauders",
+            "Carl": "Ginger Ninjas",
+            "Charlie": "Oakley1"
+        };
+
+        function hideSplash() {
+            const splash = document.getElementById('splash-screen');
+            if (splash && !splash.classList.contains('fade-out')) {
+                splash.classList.add('fade-out');
+                setTimeout(() => splash.remove(), 400);
+            }
         }
 
-        function toggleCard(cardElement) {
-            cardElement.classList.toggle('open');
+        function renderChipsHtml(chipsData, activeChip) {
+            const standardChips = [
+                { id: 'wc', label: 'WC' },
+                { id: 'fh', label: 'FH' },
+                { id: 'bb', label: 'BB' },
+                { id: 'tc', label: 'TC' }
+            ];
+
+            const normalize = (name) => {
+                if (!name) return '';
+                const s = String(name).toLowerCase();
+                if (s.includes('wildcard') || s === 'wc') return 'wc';
+                if (s.includes('free') || s === 'fh') return 'fh';
+                if (s.includes('bboost') || s.includes('bench') || s === 'bb') return 'bb';
+                if (s.includes('3c') || s.includes('triple') || s === 'tc') return 'tc';
+                return s;
+            };
+
+            const activeNorm = normalize(activeChip);
+
+            const statusMap = {};
+            if (chipsData && typeof chipsData === 'object') {
+                Object.keys(chipsData).forEach(k => {
+                    const normKey = normalize(k);
+                    const val = chipsData[k];
+                    if (val === false || val === 'used') statusMap[normKey] = 'used';
+                    else if (val === true || val === 'available') statusMap[normKey] = 'available';
+                });
+            }
+
+            return `<div class="chip-inventory">` + standardChips.map(chip => {
+                let state = 'available';
+
+                if (activeNorm === chip.id) {
+                    state = 'active';
+                } else if (statusMap[chip.id] === 'used') {
+                    state = 'used';
+                }
+
+                return `<span class="chip-pill ${state}">${chip.label}</span>`;
+            }).join('') + `</div>`;
         }
 
-        // Helper function for dynamic JavaScript rendering:
-        // Appends (C) tag to star or worst player if captained
-        function formatPlayerDisplay(playerName, points, isCaptain) {
-            if (!playerName) return 'N/A';
-            return `${playerName}${isCaptain ? ' (C)' : ''} (${points} pts)`;
+        async function loadTrackerData() {
+            const safetyTimer = setTimeout(() => {
+                hideSplash();
+            }, 5000);
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                const liveData = data.liveData || data;
+
+                clearTimeout(safetyTimer);
+                renderApp(data, liveData);
+            } catch (error) {
+                clearTimeout(safetyTimer);
+                console.error('Error fetching data:', error);
+                document.getElementById('app').innerHTML = `
+                    <div class="card">
+                        <p style="color: #ff4b4b; text-align: center; font-weight: 500;">Unable to load data. Please check your connection or Apps Script URL.</p>
+                    </div>`;
+            } finally {
+                hideSplash();
+            }
+        }
+
+        function renderApp(data, liveData) {
+            const appDiv = document.getElementById('app');
+            let html = '';
+
+            // Live GW Tracker
+            if (liveData && liveData.standings && liveData.standings.length > 0) {
+                liveData.standings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
+
+                html += `<div class="section-title">Live GW ${liveData.gameweek} Tracker</div>`;
+                liveData.standings.forEach(mgr => {
+                    const hasActiveChip = mgr.activeChip !== null;
+                    const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
+                    const chipLabel = mgr.activeChip ? mgr.activeChip.toUpperCase() : '';
+
+                    html += `
+                        <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <span style="font-weight: 700; font-size: 1rem; color: #fff;">${mgr.managerName}</span>
+                                    ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || ''}</div>
+                                </div>
+                                <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color);">${mgr.livePoints} pts ▾</span>
+                            </div>
+                            
+                            <div class="card-dropdown">
+                                <div style="margin-bottom: 5px;">👑 <strong>Captain:</strong> ${mgr.captain ? mgr.captain.name : 'None'} (${mgr.captain ? mgr.captain.points : 0} pts)</div>
+                                <div style="margin-bottom: 5px; color: var(--primary-color);">⭐ <strong>Star:</strong> ${mgr.starPerformer ? mgr.starPerformer.name : 'None'} (${mgr.starPerformer ? mgr.starPerformer.points : 0} pts)</div>
+                                <div style="margin-bottom: 4px; color: #ff4b4b;">💩 <strong>Worst:</strong> ${mgr.worstPerformer ? mgr.worstPerformer.name : 'None'} (${mgr.worstPerformer ? mgr.worstPerformer.points : 0} pts)</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Manager of the Month Carousel
+            if (data.monthly && data.monthly.length > 0) {
+                const activePeriods = data.monthly.filter(period => {
+                    if (!period.scores || period.scores.length === 0) return false;
+                    if (period.title.toLowerCase().includes('period period') || period.title.toLowerCase().includes('monthly side pot')) return false;
+                    
+                    const hasStarted = period.scores.some(s => Number(s.score) > 0);
+                    if (!hasStarted) return false;
+
+                    const isMalformed = period.scores.every(s => String(s.score) === s.name);
+                    return !isMalformed;
+                });
+
+                if (activePeriods.length > 0) {
+                    html += `<div class="section-title" style="margin-top: 24px;">Manager of the Month</div>`;
+                    
+                    html += `<div class="carousel-dots" id="carousel-dots">`;
+                    activePeriods.forEach((_, index) => {
+                        const isActive = index === activePeriods.length - 1 ? 'active' : '';
+                        html += `<div class="dot ${isActive}" data-index="${index}"></div>`;
+                    });
+                    html += `</div>`;
+
+                    html += `<div class="carousel-container" id="period-carousel">`;
+                    
+                    activePeriods.forEach(period => {
+                        let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
+
+                        const formatPrize = (p) => {
+                            if (!p) return '£0';
+                            let str = String(p).trim();
+                            return str.startsWith('£') ? str : '£' + str;
+                        };
+
+                        html += `
+                            <div class="card carousel-card">
+                                <h4 style="margin-top: 0; margin-bottom: 16px; color: var(--accent-color); font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 16px 0;">
+                                    ${period.scores.map((s, idx, arr) => {
+                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '');
+                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
+                                            scoreDisplay += ' 💩';
+                                        }
+                                        const teamName = TEAM_NAMES[s.name] || '';
+                                        return `
+                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
+                                                <div>
+                                                    <div style="font-weight: 600; font-size: 0.95rem; color: #ffffff;">${s.name}</div>
+                                                    ${teamName ? `<div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${teamName}</div>` : ''}
+                                                </div>
+                                                <span style="font-weight: 700; font-size: 1.05rem; color: var(--primary-color);">${scoreDisplay}</span>
+                                            </li>
+                                        `;
+                                    }).join('')}
+                                </ul>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer} <span style="color: var(--primary-color);">(${formatPrize(period.winnerPrize)})</span></div>
+                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName} <span style="color: var(--accent-color);">(${formatPrize(period.runnerPrize)})</span></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+                }
+            }
+
+            // Overall Standings Table
+            if (data.overall && data.overall.rows) {
+                const headers = data.overall.headers;
+                const getCol = (name, fallback) => {
+                    const idx = headers.findIndex(h => h && h.toLowerCase().includes(name));
+                    return idx !== -1 ? idx : fallback;
+                };
+
+                const playerIdx = getCol('player', getCol('name', 0));
+                const pointsIdx = getCol('point', getCol('total', 1));
+                const medalIdx = getCol('medal', 2);
+                const weeksWonIdx = getCol('won', getCol('week', 3));
+                const motmIdx = getCol('motm', getCol('award', 4));
+                const prizeIdx = getCol('prize', 5);
+
+                const totalRows = data.overall.rows.length;
+
+                const chipMap = {};
+                const activeChipMap = {};
+                if (liveData && liveData.standings) {
+                    liveData.standings.forEach(m => {
+                        chipMap[m.managerName] = m.remainingChips;
+                        activeChipMap[m.managerName] = m.activeChip;
+                    });
+                }
+
+                html += `
+                    <div class="card" style="margin-top: 24px;">
+                        <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <th style="width: 32%; padding: 0 4px 10px 4px; font-weight: 700;">Manager</th>
+                                        <th style="width: 20%; padding: 0 4px 10px 4px; font-weight: 700;">Points</th>
+                                        <th style="width: 16%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">Weeks Won</th>
+                                        <th style="width: 14%; padding: 0 4px 10px 4px; font-weight: 700; text-align: center;">MOTM</th>
+                                        <th style="width: 18%; padding: 0 4px 10px 4px; font-weight: 700; text-align: right;">Prize</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.overall.rows.map((row, rIdx) => {
+                                        const playerName = row[playerIdx] || '';
+                                        const points = row[pointsIdx] || '';
+                                        let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
+                                        if (!medal) {
+                                            if (rIdx === 0) medal = '🥇';
+                                            else if (rIdx === 1) medal = '🥈';
+                                            else if (rIdx === 2) medal = '🥉';
+                                        }
+                                        if (rIdx === totalRows - 1 && !String(medal).includes('💩')) {
+                                            medal += ' 💩';
+                                        }
+                                        const weeksWon = row[weeksWonIdx] !== undefined ? row[weeksWonIdx] : 0;
+                                        const motm = row[motmIdx] !== undefined ? row[motmIdx] : 0;
+                                        const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
+                                        const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
+
+                                        const chipsHtml = renderChipsHtml(chipMap[playerName], activeChipMap[playerName]);
+
+                                        return `
+                                            <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                                <td style="width: 32%; padding: 12px 4px 12px 4px; font-weight: 600; color: #fff;">
+                                                    <div>${playerName}</div>
+                                                    ${chipsHtml}
+                                                </td>
+                                                <td style="width: 20%; padding: 12px 4px 12px 4px; font-weight: 700; color: var(--primary-color); white-space: nowrap;">${points} ${medal}</td>
+                                                <td style="width: 16%; padding: 12px 4px 12px 4px; color: var(--text-color); font-weight: 500; text-align: center;">${weeksWon}</td>
+                                                <td style="width: 14%; padding: 12px 4px 12px 4px; color: var(--accent-color); font-weight: 600; text-align: center;">${motm}</td>
+                                                <td style="width: 18%; padding: 12px 4px 12px 4px; color: var(--text-muted); font-weight: 500; text-align: right; white-space: nowrap;">${prizeStr}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Accolades Card
+            if (data.accolades) {
+                const acc = data.accolades;
+                const formatAccoladeValue = (item, type) => {
+                    if (!item || item.val === undefined || item.val === null || item.val === '') return 'N/A';
+                    if (type === 'hit') return '-' + Math.abs(Number(item.val));
+                    if (type === 'totalHit') return '-' + Math.abs(Number(item.val));
+                    if (type === 'margin') return '+' + item.val;
+                    return item.val;
+                };
+
+                html += `
+                    <div class="card" style="margin-top: 24px;">
+                        <div class="section-title" style="margin-bottom: 16px;">Accolades</div>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🔥 Highest GW Score</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.highestScore ? acc.highestScore.player : 'N/A'} ${acc.highestScore && acc.highestScore.gw ? '(' + acc.highestScore.gw + ')' : ''}</div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${formatAccoladeValue(acc.highestScore)}</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">🧊 Lowest GW Score</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.lowestScore ? acc.lowestScore.player : 'N/A'} ${acc.lowestScore && acc.lowestScore.gw ? '(' + acc.lowestScore.gw + ')' : ''}</div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-color);">${formatAccoladeValue(acc.lowestScore)}</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">⚡ Biggest Win Margin</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.biggestMargin ? acc.biggestMargin.player : 'N/A'} ${acc.biggestMargin && acc.biggestMargin.gw ? '(' + acc.biggestMargin.gw + ')' : ''}</div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${formatAccoladeValue(acc.biggestMargin, 'margin')}</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Biggest Transfer Hit</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.biggestHit ? acc.biggestHit.player : 'N/A'} ${acc.biggestHit && acc.biggestHit.gw ? '(' + acc.biggestHit.gw + ')' : ''}</div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(acc.biggestHit, 'hit')}</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💸 Highest Total Transfer Cost</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.highestTotalHit ? acc.highestTotalHit.player : 'N/A'}</div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 1rem; color: #ff4b4b;">${formatAccoladeValue(acc.highestTotalHit, 'totalHit')}</span>
+                            </li>
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">💩 Most Weeks in Last Place</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${acc.mostWeeksLast ? acc.mostWeeksLast.player : 'N/A'}</div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-color);">${acc.mostWeeksLast ? acc.mostWeeksLast.val : 0}</span>
+                            </li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            if (data.updated) {
+                html += `<p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 24px; font-weight: 500;">Last synced: ${data.updated}</p>`;
+            }
+
+            appDiv.innerHTML = html;
+
+            const carousel = document.getElementById('period-carousel');
+            const dots = document.querySelectorAll('#carousel-dots .dot');
+
+            if (carousel && dots.length > 0) {
+                carousel.scrollLeft = carousel.scrollWidth;
+                
+                carousel.addEventListener('scroll', () => {
+                    const cardWidth = carousel.querySelector('.carousel-card')?.clientWidth || 1;
+                    const activeIndex = Math.round(carousel.scrollLeft / cardWidth);
+                    dots.forEach((dot, idx) => {
+                        dot.classList.toggle('active', idx === activeIndex);
+                    });
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTrackerData();
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker registration failed:', err));
         }
     </script>
 </body>
