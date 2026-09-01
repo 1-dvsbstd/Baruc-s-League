@@ -97,17 +97,26 @@
         #app {
             max-width: 600px;
             margin: 0 auto;
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         @media (min-width: 768px) {
             #app {
-                max-width: 1050px;
+                max-width: 1080px;
                 display: grid;
                 grid-template-columns: 1fr 1fr;
                 gap: 20px;
                 align-items: start;
             }
+        }
+
+        .dashboard-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
         }
 
         /* Glassmorphic Cards */
@@ -116,7 +125,6 @@
             border: 1px solid var(--card-border);
             border-radius: 14px;
             padding: 16px 14px;
-            margin-bottom: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(8px);
         }
@@ -137,32 +145,35 @@
         .fut-card {
             position: relative;
             cursor: pointer;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.15) 100%), var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 12px 14px;
             margin-bottom: 10px;
             transition: all 0.25s ease;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             user-select: none;
         }
         
+        .fut-card:last-child {
+            margin-bottom: 0;
+        }
+
         .fut-card:hover {
             border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.07);
         }
 
         /* Leader Card Highlight */
         .fut-card.leader-card {
             border: 1px solid rgba(0, 255, 135, 0.35);
-            background: linear-gradient(180deg, rgba(0, 255, 135, 0.06) 0%, rgba(28, 9, 45, 0.95) 100%);
+            background: linear-gradient(180deg, rgba(0, 255, 135, 0.08) 0%, rgba(28, 9, 45, 0.6) 100%);
         }
 
         /* Pulsing Keyframe Animation for Active Chips */
         @keyframes goldPulse {
-            0% { box-shadow: 0 0 12px rgba(255, 199, 44, 0.25), inset 0 0 8px rgba(255, 199, 44, 0.1); }
-            50% { box-shadow: 0 0 22px rgba(255, 199, 44, 0.55), inset 0 0 14px rgba(255, 199, 44, 0.2); }
-            100% { box-shadow: 0 0 12px rgba(255, 199, 44, 0.25), inset 0 0 8px rgba(255, 199, 44, 0.1); }
+            0% { box-shadow: 0 0 10px rgba(255, 199, 44, 0.25), inset 0 0 6px rgba(255, 199, 44, 0.1); }
+            50% { box-shadow: 0 0 18px rgba(255, 199, 44, 0.5), inset 0 0 10px rgba(255, 199, 44, 0.2); }
+            100% { box-shadow: 0 0 10px rgba(255, 199, 44, 0.25), inset 0 0 6px rgba(255, 199, 44, 0.1); }
         }
 
         .fut-card.glow-gold {
@@ -171,11 +182,11 @@
         }
 
         .chip-badge {
-            font-size: 0.62rem;
+            font-size: 0.6rem;
             font-weight: 800;
-            padding: 2px 7px;
+            padding: 2px 6px;
             border-radius: 4px;
-            margin-left: 8px;
+            margin-left: 6px;
             text-transform: uppercase;
             background: var(--gold-color);
             color: #12041f;
@@ -184,10 +195,10 @@
         }
 
         .card-dropdown {
-            margin-top: 12px;
+            margin-top: 10px;
             border-top: 1px solid var(--border-subtle);
             padding-top: 10px;
-            font-size: 0.85rem;
+            font-size: 0.83rem;
             display: none;
         }
 
@@ -205,7 +216,7 @@
         }
         
         .chip-pill {
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: 800;
             padding: 3px 0;
             border-radius: 4px;
@@ -254,24 +265,23 @@
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             gap: 16px;
-            padding-bottom: 8px;
+            padding-bottom: 4px;
             scrollbar-width: none;
         }
         .carousel-container::-webkit-scrollbar {
             display: none;
         }
-        .carousel-card {
+        .carousel-slide {
             min-width: 100%;
             box-sizing: border-box;
             scroll-snap-align: start;
-            margin-bottom: 0;
         }
 
         .carousel-dots {
             display: flex;
             justify-content: center;
             gap: 6px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .dot {
             width: 6px;
@@ -409,17 +419,19 @@
 
         function renderApp(data) {
             const appDiv = document.getElementById('app');
-            let html = '';
+            let leftColHtml = '';
+            let rightColHtml = '';
 
-            // 1. Live GW Tracker
             const liveStandings = data.standings || (data.liveData ? data.liveData.standings : []);
             const liveGameweek = data.gameweek || (data.liveData ? data.liveData.gameweek : null);
 
+            // 1. Live GW Tracker Widget (Left Column)
             if (liveStandings && liveStandings.length > 0) {
                 liveStandings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
 
-                html += `<div class="tracker-section">`;
-                html += `<div class="section-title">Live GW ${liveGameweek || ''} Tracker</div>`;
+                leftColHtml += `<div class="card tracker-card">`;
+                leftColHtml += `<div class="section-title">Live GW ${liveGameweek || ''} Tracker</div>`;
+                
                 liveStandings.forEach((mgr, idx) => {
                     const hasActiveChip = mgr.activeChip !== null && mgr.activeChip !== undefined && mgr.activeChip !== '';
                     let cardClass = 'fut-card';
@@ -428,7 +440,6 @@
 
                     const chipLabel = getChipDisplayName(mgr.activeChip);
 
-                    // Check Captain Status
                     const captName = mgr.captain ? (typeof mgr.captain === 'object' ? mgr.captain.name : mgr.captain) : null;
                     const isStarCaptain = captName && mgr.starPerformer && (mgr.starPerformer.name === captName || mgr.starPerformer === captName);
                     const isWorstCaptain = captName && mgr.worstPerformer && (mgr.worstPerformer.name === captName || mgr.worstPerformer === captName);
@@ -442,7 +453,6 @@
                     const starDisplayName = `${starName}${isStarCaptain ? ' (C)' : ''}`;
                     const worstDisplayName = `${worstName}${isWorstCaptain ? ' (C)' : ''}`;
 
-                    // Transfer Formatting
                     let transfersText = 'None';
                     if (mgr.transfers) {
                         if (Array.isArray(mgr.transfers)) {
@@ -462,15 +472,15 @@
                         transfersText = `${mgr.event_transfers} made`;
                     }
 
-                    html += `
+                    leftColHtml += `
                         <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <span style="font-weight: 700; font-size: 1rem; color: #ffffff;">${mgr.managerName}</span>
+                                    <span style="font-weight: 700; font-size: 0.95rem; color: #ffffff;">${mgr.managerName}</span>
                                     ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
-                                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || TEAM_NAMES[mgr.managerName] || ''}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || TEAM_NAMES[mgr.managerName] || ''}</div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1.15rem; color: var(--primary-color); display: flex; align-items: center; gap: 4px;">
+                                <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color); display: flex; align-items: center; gap: 4px;">
                                     ${mgr.livePoints} pts <span style="font-size: 0.7rem; opacity: 0.5;">▾</span>
                                 </span>
                             </div>
@@ -483,10 +493,10 @@
                         </div>
                     `;
                 });
-                html += `</div>`;
+                leftColHtml += `</div>`;
             }
 
-            // 2. Manager of the Month Carousel
+            // 2. Manager of the Month Carousel Widget (Right Column)
             if (data.monthly && data.monthly.length > 0) {
                 const activePeriods = data.monthly.filter(period => {
                     if (!period.scores || period.scores.length === 0) return false;
@@ -500,17 +510,17 @@
                 });
 
                 if (activePeriods.length > 0) {
-                    html += `<div class="carousel-section">`;
-                    html += `<div class="section-title">Manager of the Month</div>`;
+                    rightColHtml += `<div class="card monthly-card">`;
+                    rightColHtml += `<div class="section-title" style="margin-bottom: 8px;">Manager of the Month</div>`;
                     
-                    html += `<div class="carousel-dots" id="carousel-dots">`;
+                    rightColHtml += `<div class="carousel-dots" id="carousel-dots">`;
                     activePeriods.forEach((_, index) => {
                         const isActive = index === activePeriods.length - 1 ? 'active' : '';
-                        html += `<div class="dot ${isActive}" data-index="${index}"></div>`;
+                        rightColHtml += `<div class="dot ${isActive}" data-index="${index}"></div>`;
                     });
-                    html += `</div>`;
+                    rightColHtml += `</div>`;
 
-                    html += `<div class="carousel-container" id="period-carousel">`;
+                    rightColHtml += `<div class="carousel-container" id="period-carousel">`;
                     
                     activePeriods.forEach(period => {
                         let cleanTitle = period.title.replace(/^Period\s+\d+\s*\(([^)]+)\)/i, '$1');
@@ -521,10 +531,10 @@
                             return str.startsWith('£') ? str : '£' + str;
                         };
 
-                        html += `
-                            <div class="card carousel-card">
-                                <h4 style="margin-top: 0; margin-bottom: 14px; color: var(--accent-color); font-size: 0.95rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; letter-spacing: 0.3px;">${cleanTitle}</h4>
-                                <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
+                        rightColHtml += `
+                            <div class="carousel-slide">
+                                <h4 style="margin-top: 0; margin-bottom: 12px; color: var(--accent-color); font-size: 0.9rem; font-weight: 700; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px; letter-spacing: 0.3px;">${cleanTitle}</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0 0 12px 0;">
                                     ${period.scores.map((s, idx, arr) => {
                                         let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '0');
                                         if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
@@ -532,17 +542,17 @@
                                         }
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         return `
-                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border-subtle);">
+                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">
                                                 <div>
-                                                    <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">${s.name}</div>
-                                                    ${teamName ? `<div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
+                                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">${s.name}</div>
+                                                    ${teamName ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
                                                 </div>
-                                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${scoreDisplay}</span>
+                                                <span style="font-weight: 700; font-size: 0.95rem; color: var(--primary-color);">${scoreDisplay}</span>
                                             </li>
                                         `;
                                     }).join('')}
                                 </ul>
-                                <div style="font-size: 0.82rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                <div style="font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
                                     <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer || 'TBD'} <span style="color: var(--gold-color); font-weight: 700;">(${formatPrize(period.winnerPrize)})</span></div>
                                     <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName || 'TBD'} <span style="color: var(--silver-color); font-weight: 700;">(${formatPrize(period.runnerPrize)})</span></div>
                                 </div>
@@ -550,11 +560,11 @@
                         `;
                     });
 
-                    html += `</div></div>`;
+                    rightColHtml += `</div></div>`;
                 }
             }
 
-            // 3. Overall Standings Table
+            // 3. Overall Standings Table Widget (Left Column)
             let topWeeksWonPlayer = null;
             let maxWeeksWon = -1;
 
@@ -592,17 +602,17 @@
                     }
                 });
 
-                html += `
+                leftColHtml += `
                     <div class="card standings-card">
-                        <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
+                        <div class="section-title">Overall Standings</div>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;">
-                                        <th style="width: 27%; padding: 0 2px 10px 2px; font-weight: 700;">Manager</th>
-                                        <th style="width: 36%; padding: 0 2px 10px 2px; font-weight: 700; text-align: center;">Chips</th>
-                                        <th style="width: 21%; padding: 0 2px 10px 2px; font-weight: 700; text-align: center;">Points</th>
-                                        <th style="width: 16%; padding: 0 2px 10px 2px; font-weight: 700; text-align: right;">Prize</th>
+                                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;">
+                                        <th style="width: 27%; padding: 0 2px 8px 2px; font-weight: 700;">Manager</th>
+                                        <th style="width: 36%; padding: 0 2px 8px 2px; font-weight: 700; text-align: center;">Chips</th>
+                                        <th style="width: 21%; padding: 0 2px 8px 2px; font-weight: 700; text-align: center;">Points</th>
+                                        <th style="width: 16%; padding: 0 2px 8px 2px; font-weight: 700; text-align: right;">Prize</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -636,16 +646,16 @@
 
                                         return `
                                             <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 27%; padding: 12px 2px; font-weight: 600; color: #ffffff; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                <td style="width: 27%; padding: 10px 2px; font-weight: 600; color: #ffffff; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                                     ${playerName}
                                                 </td>
-                                                <td style="width: 36%; padding: 12px 2px; text-align: center;">
+                                                <td style="width: 36%; padding: 10px 2px; text-align: center;">
                                                     ${chipsHtml}
                                                 </td>
-                                                <td style="width: 21%; padding: 12px 2px; font-weight: 800; color: var(--primary-color); font-size: 0.92rem; text-align: center; white-space: nowrap;">
+                                                <td style="width: 21%; padding: 10px 2px; font-weight: 800; color: var(--primary-color); font-size: 0.9rem; text-align: center; white-space: nowrap;">
                                                     ${points} ${medal}
                                                 </td>
-                                                <td style="width: 16%; padding: 12px 2px; font-size: 0.85rem; text-align: right; white-space: nowrap;">
+                                                <td style="width: 16%; padding: 10px 2px; font-size: 0.83rem; text-align: right; white-space: nowrap;">
                                                     ${prizeHtml}
                                                 </td>
                                             </tr>
@@ -658,57 +668,35 @@
                 `;
             }
 
-            // 4. Dynamic Calculation for Most Weeks Lost (Fallback)
-            let computedWeeksLostPlayer = null;
-            if (data.monthly && data.monthly.length > 0) {
-                const bottomCounts = {};
-                let maxLostCount = 0;
-
-                data.monthly.forEach(period => {
-                    if (period.scores && period.scores.length > 0) {
-                        const validScores = period.scores.filter(s => s.score !== undefined && s.score !== null && !isNaN(Number(s.score)) && Number(s.score) > 0);
-                        if (validScores.length > 0) {
-                            let minScore = Math.min(...validScores.map(s => Number(s.score)));
-                            validScores.forEach(s => {
-                                if (Number(s.score) === minScore) {
-                                    bottomCounts[s.name] = (bottomCounts[s.name] || 0) + 1;
-                                    if (bottomCounts[s.name] > maxLostCount) {
-                                        maxLostCount = bottomCounts[s.name];
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-
-                if (maxLostCount > 0) {
-                    const tiedPlayers = Object.keys(bottomCounts).filter(p => bottomCounts[p] === maxLostCount);
-                    computedWeeksLostPlayer = {
-                        player: tiedPlayers.join(' / '),
-                        val: maxLostCount
-                    };
-                }
-            }
-
-            // 5. Accolades Card
-            if (data.accolades || topWeeksWonPlayer || computedWeeksLostPlayer) {
+            // 4. Accolades Section Widget (Right Column)
+            if (data.accolades || topWeeksWonPlayer) {
                 const acc = data.accolades || {};
 
                 const getAccObj = (keys) => {
                     for (let k of keys) {
-                        if (acc[k] && (acc[k].player || acc[k].val !== undefined || acc[k].value !== undefined)) {
-                            return acc[k];
+                        if (acc[k]) {
+                            const val = acc[k];
+                            if (typeof val === 'object' && (val.player || val.val !== undefined || val.value !== undefined || val.count !== undefined)) {
+                                return val;
+                            }
+                            if (typeof val === 'string' || typeof val === 'number') {
+                                return { player: String(val), val: val };
+                            }
                         }
                     }
                     return null;
                 };
 
-                const highestScore = getAccObj(['highestScore']);
-                const lowestScore = getAccObj(['lowestScore']);
-                const mostWeeksWon = getAccObj(['mostWeeksWon', 'weeksWon']) || topWeeksWonPlayer;
-                const mostWeeksLost = getAccObj(['mostWeeksLost', 'mostWeeksLast', 'weeksLost']) || computedWeeksLostPlayer;
+                const highestScore = getAccObj(['highestScore', 'topScore', 'maxScore']);
+                const lowestScore = getAccObj(['lowestScore', 'minScore', 'bottomScore']);
+                const mostWeeksWon = getAccObj(['mostWeeksWon', 'weeksWon', 'mostWins', 'topWeeks']) || topWeeksWonPlayer;
+                const mostWeeksLost = getAccObj([
+                    'mostWeeksLost', 'mostWeeksLast', 'weeksLost', 
+                    'mostWeeksBottom', 'mostBottom', 'mostLosses', 
+                    'bottomWeeks', 'mostLast', 'lowestWeeks'
+                ]);
                 const mostTransfers = getAccObj(['mostTransfers', 'highestTotalTransfers', 'transfers']);
-                const highestTransferCost = getAccObj(['highestTotalHit', 'biggestHit', 'highestTransferCost']);
+                const highestTransferCost = getAccObj(['highestTotalHit', 'biggestHit', 'highestTransferCost', 'mostHits']);
 
                 const formatSub = (item) => {
                     if (!item || !item.player) return 'N/A';
@@ -716,9 +704,12 @@
                 };
 
                 const formatVal = (item, type) => {
-                    if (!item) return '0';
-                    const val = item.val !== undefined ? item.val : (item.value !== undefined ? item.value : item);
-                    if (val === undefined || val === null || val === '') return '0';
+                    if (!item) return 'N/A';
+                    const val = item.val !== undefined ? item.val : 
+                               (item.value !== undefined ? item.value : 
+                               (item.count !== undefined ? item.count : 
+                               (item.score !== undefined ? item.score : item)));
+                    if (val === undefined || val === null || val === '' || val === item.player) return '';
                     if (type === 'cost') {
                         const num = Number(val);
                         return num > 0 ? '-' + num : String(num);
@@ -726,76 +717,80 @@
                     return String(val);
                 };
 
-                html += `
+                rightColHtml += `
                     <div class="card accolades-card">
-                        <div class="section-title" style="margin-bottom: 16px;">Accolades</div>
+                        <div class="section-title">Accolades</div>
                         <ul style="list-style: none; padding: 0; margin: 0;">
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div style="display: flex; align-items: center;">
                                     <span class="accolade-icon">🔥</span>
                                     <div>
-                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Highest GW Score</div>
-                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestScore)}</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #ffffff;">Highest GW Score</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestScore)}</div>
                                     </div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--primary-color);">${formatVal(highestScore)}</span>
+                                <span style="font-weight: 800; font-size: 0.95rem; color: var(--primary-color);">${formatVal(highestScore)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div style="display: flex; align-items: center;">
                                     <span class="accolade-icon">🧊</span>
                                     <div>
-                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Lowest GW Score</div>
-                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(lowestScore)}</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #ffffff;">Lowest GW Score</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(lowestScore)}</div>
                                     </div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--ice-blue);">${formatVal(lowestScore)}</span>
+                                <span style="font-weight: 800; font-size: 0.95rem; color: var(--ice-blue);">${formatVal(lowestScore)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div style="display: flex; align-items: center;">
                                     <span class="accolade-icon">🏆</span>
                                     <div>
-                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Most Weeks Won</div>
-                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksWon)}</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #ffffff;">Most Weeks Won</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksWon)}</div>
                                     </div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--gold-color);">${formatVal(mostWeeksWon)}</span>
+                                <span style="font-weight: 800; font-size: 0.95rem; color: var(--gold-color);">${formatVal(mostWeeksWon)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div style="display: flex; align-items: center;">
                                     <span class="accolade-icon">💩</span>
                                     <div>
-                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Most Weeks Lost</div>
-                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksLost)}</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #ffffff;">Most Weeks Lost</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksLost)}</div>
                                     </div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(mostWeeksLost)}</span>
+                                <span style="font-weight: 800; font-size: 0.95rem; color: var(--danger-color);">${formatVal(mostWeeksLost)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-subtle);">
                                 <div style="display: flex; align-items: center;">
                                     <span class="accolade-icon">🔄</span>
                                     <div>
-                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Most Transfers</div>
-                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostTransfers)}</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #ffffff;">Most Transfers</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostTransfers)}</div>
                                     </div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--accent-color);">${formatVal(mostTransfers)}</span>
+                                <span style="font-weight: 800; font-size: 0.95rem; color: var(--accent-color);">${formatVal(mostTransfers)}</span>
                             </li>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0;">
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
                                 <div style="display: flex; align-items: center;">
                                     <span class="accolade-icon">💸</span>
                                     <div>
-                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Highest Transfer Cost</div>
-                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: #ffffff;">Highest Transfer Cost</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
                                     </div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
+                                <span style="font-weight: 800; font-size: 0.95rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
                             </li>
                         </ul>
                     </div>
                 `;
             }
 
-            appDiv.innerHTML = html;
+            // Combine into two balanced columns
+            appDiv.innerHTML = `
+                <div class="dashboard-col">${leftColHtml}</div>
+                <div class="dashboard-col">${rightColHtml}</div>
+            `;
 
             // Carousel Dots Syncing
             const carousel = document.getElementById('period-carousel');
