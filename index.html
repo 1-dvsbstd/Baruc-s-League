@@ -93,10 +93,21 @@
             pointer-events: none;
         }
 
-        /* App Container */
+        /* App Container & Desktop Grid Layout */
         #app {
             max-width: 600px;
             margin: 0 auto;
+            display: block;
+        }
+
+        @media (min-width: 768px) {
+            #app {
+                max-width: 1050px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                align-items: start;
+            }
         }
 
         /* Glassmorphic Cards */
@@ -141,9 +152,22 @@
             transform: translateY(-1px);
         }
 
+        /* Leader Card Highlight */
+        .fut-card.leader-card {
+            border: 1px solid rgba(0, 255, 135, 0.35);
+            background: linear-gradient(180deg, rgba(0, 255, 135, 0.06) 0%, rgba(28, 9, 45, 0.95) 100%);
+        }
+
+        /* Pulsing Keyframe Animation for Active Chips */
+        @keyframes goldPulse {
+            0% { box-shadow: 0 0 12px rgba(255, 199, 44, 0.25), inset 0 0 8px rgba(255, 199, 44, 0.1); }
+            50% { box-shadow: 0 0 22px rgba(255, 199, 44, 0.55), inset 0 0 14px rgba(255, 199, 44, 0.2); }
+            100% { box-shadow: 0 0 12px rgba(255, 199, 44, 0.25), inset 0 0 8px rgba(255, 199, 44, 0.1); }
+        }
+
         .fut-card.glow-gold {
             border: 1.5px solid var(--gold-color) !important;
-            box-shadow: 0 0 16px rgba(255, 199, 44, 0.25), inset 0 0 12px rgba(255, 199, 44, 0.1);
+            animation: goldPulse 2.5s infinite ease-in-out;
         }
 
         .chip-badge {
@@ -181,13 +205,13 @@
         }
         
         .chip-pill {
-            font-size: 0.58rem;
-            font-weight: 700;
+            font-size: 0.6rem;
+            font-weight: 800;
             padding: 3px 0;
             border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-color);
             text-align: center;
             box-sizing: border-box;
             flex: 1;
@@ -198,16 +222,30 @@
         .chip-pill.active {
             color: var(--primary-color);
             border-color: var(--primary-color);
-            background: rgba(0, 255, 135, 0.15);
-            box-shadow: 0 0 6px rgba(0, 255, 135, 0.3);
+            background: rgba(0, 255, 135, 0.18);
+            box-shadow: 0 0 8px rgba(0, 255, 135, 0.35);
         }
         
         .chip-pill.used {
             color: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.05);
             background: transparent;
-            text-decoration: line-through;
-            opacity: 0.5;
+            text-decoration: none;
+            opacity: 0.35;
+        }
+
+        /* Accolade Icon Badges */
+        .accolade-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            margin-right: 10px;
+            font-size: 0.95rem;
+            flex-shrink: 0;
         }
 
         /* Carousel Styling */
@@ -226,6 +264,7 @@
             min-width: 100%;
             box-sizing: border-box;
             scroll-snap-align: start;
+            margin-bottom: 0;
         }
 
         .carousel-dots {
@@ -253,6 +292,7 @@
             color: var(--text-muted);
             margin-top: 40px;
             font-weight: 500;
+            grid-column: 1 / -1;
         }
     </style>
 </head>
@@ -359,7 +399,7 @@
                 clearTimeout(safetyTimer);
                 console.error('Error fetching data:', error);
                 document.getElementById('app').innerHTML = `
-                    <div class="card">
+                    <div class="card" style="grid-column: 1 / -1;">
                         <p style="color: var(--danger-color); text-align: center; font-weight: 500;">Unable to load data. Please check your connection or Apps Script deployment.</p>
                     </div>`;
             } finally {
@@ -378,10 +418,14 @@
             if (liveStandings && liveStandings.length > 0) {
                 liveStandings.sort((a, b) => (b.livePoints || 0) - (a.livePoints || 0));
 
+                html += `<div class="tracker-section">`;
                 html += `<div class="section-title">Live GW ${liveGameweek || ''} Tracker</div>`;
-                liveStandings.forEach(mgr => {
+                liveStandings.forEach((mgr, idx) => {
                     const hasActiveChip = mgr.activeChip !== null && mgr.activeChip !== undefined && mgr.activeChip !== '';
-                    const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
+                    let cardClass = 'fut-card';
+                    if (idx === 0) cardClass += ' leader-card';
+                    if (hasActiveChip) cardClass += ' glow-gold';
+
                     const chipLabel = getChipDisplayName(mgr.activeChip);
 
                     // Check Captain Status
@@ -439,6 +483,7 @@
                         </div>
                     `;
                 });
+                html += `</div>`;
             }
 
             // 2. Manager of the Month Carousel
@@ -455,7 +500,8 @@
                 });
 
                 if (activePeriods.length > 0) {
-                    html += `<div class="section-title" style="margin-top: 24px;">Manager of the Month</div>`;
+                    html += `<div class="carousel-section">`;
+                    html += `<div class="section-title">Manager of the Month</div>`;
                     
                     html += `<div class="carousel-dots" id="carousel-dots">`;
                     activePeriods.forEach((_, index) => {
@@ -504,7 +550,7 @@
                         `;
                     });
 
-                    html += `</div>`;
+                    html += `</div></div>`;
                 }
             }
 
@@ -547,7 +593,7 @@
                 });
 
                 html += `
-                    <div class="card" style="margin-top: 24px;">
+                    <div class="card standings-card">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div style="overflow-x: auto;">
                             <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left;">
@@ -681,48 +727,66 @@
                 };
 
                 html += `
-                    <div class="card" style="margin-top: 24px;">
+                    <div class="card accolades-card">
                         <div class="section-title" style="margin-bottom: 16px;">Accolades</div>
                         <ul style="list-style: none; padding: 0; margin: 0;">
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🔥 Highest GW Score</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestScore)}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="accolade-icon">🔥</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Highest GW Score</div>
+                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestScore)}</div>
+                                    </div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--primary-color);">${formatVal(highestScore)}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🧊 Lowest GW Score</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(lowestScore)}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="accolade-icon">🧊</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Lowest GW Score</div>
+                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(lowestScore)}</div>
+                                    </div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--ice-blue);">${formatVal(lowestScore)}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🏆 Most Weeks Won</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksWon)}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="accolade-icon">🏆</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Most Weeks Won</div>
+                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksWon)}</div>
+                                    </div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--gold-color);">${formatVal(mostWeeksWon)}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💩 Most Weeks Lost</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksLost)}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="accolade-icon">💩</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Most Weeks Lost</div>
+                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostWeeksLost)}</div>
+                                    </div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(mostWeeksLost)}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border-subtle);">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">🔄 Most Transfers</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostTransfers)}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="accolade-icon">🔄</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Most Transfers</div>
+                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(mostTransfers)}</div>
+                                    </div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--accent-color);">${formatVal(mostTransfers)}</span>
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0;">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💸 Highest Transfer Cost</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="accolade-icon">💸</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">Highest Transfer Cost</div>
+                                        <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
+                                    </div>
                                 </div>
                                 <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
                             </li>
