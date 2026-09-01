@@ -448,7 +448,6 @@
             if (data.gameweeks && Array.isArray(data.gameweeks) && data.gameweeks.length > 0) {
                 gwDataStore = data.gameweeks;
             } else {
-                // Fallback parsing for legacy backend single-GW payloads
                 const legacyStandings = data.standings || (data.liveData ? data.liveData.standings : []);
                 const legacyGw = data.gameweek || (data.liveData ? data.liveData.gameweek : 1);
                 if (legacyStandings.length > 0) {
@@ -485,11 +484,12 @@
                     html += `<div class="carousel-card" id="gw-slide-${gwIdx}">`;
 
                     standings.forEach(mgr => {
+                        const managerName = mgr.managerName || mgr.name || '';
+                        const teamName = mgr.teamName || TEAM_NAMES[managerName] || '';
                         const hasActiveChip = mgr.activeChip !== null && mgr.activeChip !== undefined && mgr.activeChip !== '' && mgr.activeChip !== 'None';
                         const cardClass = hasActiveChip ? 'fut-card glow-gold' : 'fut-card';
                         const chipLabel = getChipDisplayName(mgr.activeChip || mgr.chipDisplay);
 
-                        // Captain formatting
                         const captName = mgr.captain ? (typeof mgr.captain === 'object' ? mgr.captain.name : mgr.captain) : null;
                         const captPts = mgr.captain && typeof mgr.captain === 'object' ? mgr.captain.points : null;
 
@@ -507,7 +507,6 @@
 
                         const pointsDisplay = mgr.netPoints !== undefined ? mgr.netPoints : (mgr.livePoints !== undefined ? mgr.livePoints : 0);
 
-                        // Transfer & Hits formatting
                         let transfersText = 'None';
                         if (mgr.hits !== undefined && mgr.hits > 0) {
                             transfersText = `-${mgr.hits} pts hit`;
@@ -533,9 +532,9 @@
                             <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <div>
-                                        <span style="font-weight: 700; font-size: 1rem; color: #ffffff;">${mgr.managerName}</span>
+                                        <span style="font-weight: 700; font-size: 1rem; color: #ffffff;">${managerName}</span>
                                         ${hasActiveChip ? `<span class="chip-badge">${chipLabel} ACTIVE</span>` : ''}
-                                        <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${mgr.teamName || TEAM_NAMES[mgr.managerName] || ''}</div>
+                                        <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${teamName}</div>
                                     </div>
                                     <span style="font-weight: 800; font-size: 1.15rem; color: var(--primary-color); display: flex; align-items: center; gap: 4px;">
                                         ${pointsDisplay} pts <span style="font-size: 0.7rem; opacity: 0.5;">▾</span>
@@ -647,11 +646,10 @@
                 const chipMap = {};
                 const activeChipMap = {};
 
-                // Use latest active GW standings for chip inventory rendering
                 const latestStandings = gwDataStore.length > 0 ? gwDataStore[gwDataStore.length - 1].standings : [];
                 if (latestStandings) {
                     latestStandings.forEach(m => {
-                        const key = (m.managerName || '').trim().toLowerCase();
+                        const key = (m.managerName || m.name || '').trim().toLowerCase();
                         chipMap[key] = m.remainingChips;
                         activeChipMap[key] = m.activeChip;
                     });
@@ -853,12 +851,10 @@
 
             appDiv.innerHTML = html;
 
-            // Initialize GW Carousel positioning
             if (totalGwSlides > 0) {
                 initGwCarousel();
             }
 
-            // Sync Manager of the Month Carousel
             const periodCarousel = document.getElementById('period-carousel');
             const dots = document.querySelectorAll('#carousel-dots .dot');
 
@@ -882,16 +878,13 @@
             }
         }
 
-        // --- GW CAROUSEL CONTROLLER ---
         function initGwCarousel() {
             const track = document.getElementById('gw-carousel-track');
             if (!track) return;
 
-            // Set default view to the latest active Gameweek slide
             currentGwSlideIdx = totalGwSlides - 1;
             scrollGwCarousel(false);
 
-            // Listen for native touch-swipe actions
             track.addEventListener('scroll', () => {
                 const index = Math.round(track.scrollLeft / track.clientWidth);
                 if (index !== currentGwSlideIdx && index >= 0 && index < totalGwSlides) {
