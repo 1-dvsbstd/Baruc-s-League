@@ -590,6 +590,14 @@
             margin-top: 5px;
         }
 
+        .players-left {
+            margin-top: 4px;
+            color: var(--accent-color);
+            font-size: 0.58rem;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
         .chip-slot {
             display: inline-flex;
             align-items: center;
@@ -757,6 +765,16 @@
             font-weight: 900;
             white-space: nowrap;
         }
+
+        .transfer-result {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.6rem;
+        }
+
+        .transfer-result.positive { color: var(--primary-color); }
+        .transfer-result.negative { color: var(--danger-color); }
+        .transfer-result.level { color: var(--text-muted); }
 
         .detail-row.worst .detail-row-points { color: var(--danger-color); }
         .detail-row.star .detail-row-points { color: var(--gold-color); }
@@ -1295,6 +1313,15 @@
                         const hitClass = mgr.transferEffectiveness !== null && mgr.transferEffectiveness !== undefined
                             ? (transferEffect >= 1 ? 'transfer-positive' : (transferEffect <= -1 ? 'transfer-negative' : ''))
                             : '';
+                        const hasTransferResult = mgr.transferEffectiveness !== null && mgr.transferEffectiveness !== undefined;
+                        const transferResultClass = transferEffect > 0 ? 'positive' : (transferEffect < 0 ? 'negative' : 'level');
+                        const transferResultText = hasTransferResult
+                            ? `<span class="transfer-result ${transferResultClass}">Result ${transferEffect > 0 ? '+' : ''}${transferEffect} pts</span>`
+                            : '';
+                        const playersLeft = mgr.playersLeft !== null && mgr.playersLeft !== undefined ? Number(mgr.playersLeft) : null;
+                        const playersLeftHtml = Boolean(gwGroup.isLive) && playersLeft !== null && !hasNoEntry
+                            ? `<div class="players-left">${playersLeft} ${playersLeft === 1 ? 'player' : 'players'} left</div>`
+                            : '';
                         const movementClass = meta.rankMovement > 0 ? 'rank-up' : (meta.rankMovement < 0 ? 'rank-down' : 'rank-level');
                         const movementIcon = meta.rankMovement > 0 ? `▲ ${meta.rankMovement}` : (meta.rankMovement < 0 ? `▼ ${Math.abs(meta.rankMovement)}` : '—');
                         const formHtml = (meta.form || []).map(position => {
@@ -1316,6 +1343,7 @@
                                     <div class="manager-score">
                                         <div class="manager-score-value">${pointsDisplay}</div>
                                         <div class="manager-score-label">GW PTS</div>
+                                        ${playersLeftHtml}
                                         <div class="compact-overall">#${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span></div>
                                     </div>
                                 </div>
@@ -1342,7 +1370,7 @@
                                         <div class="detail-row transfer">
                                             <div class="detail-row-label">🔄 Transfers</div>
                                             <div class="detail-row-name">${transfersHtml}</div>
-                                            <div class="detail-row-points">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}</div>
+                                            <div class="detail-row-points">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}${transferResultText}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1602,6 +1630,17 @@
                     return String(val);
                 };
 
+                const transferMarketSub = (() => {
+                    if (!highestTransferCost || !highestTransferCost.player || highestTransferCost.player === 'N/A') return 'N/A';
+                    const values = Array.isArray(highestTransferCost.netByPlayer) ? highestTransferCost.netByPlayer : [];
+                    if (values.length === 0) return formatSub(highestTransferCost);
+                    return values.map(item => {
+                        const net = Number(item.val) || 0;
+                        const colour = net > 0 ? 'var(--primary-color)' : (net < 0 ? 'var(--danger-color)' : 'var(--text-muted)');
+                        return `<span style="color:${colour};">${item.player} ${net > 0 ? '+' : ''}${net} net</span>`;
+                    }).join(' · ');
+                })();
+
                 html += `
                     <div class="card support-panel" style="margin-top: 24px;">
                         <div class="section-title" style="margin-bottom: 16px;">Accolades</div>
@@ -1643,10 +1682,10 @@
                             </li>
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 11px 0;">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💸 Highest Transfer Cost</div>
-                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">${formatSub(highestTransferCost)}</div>
+                                    <div style="font-weight: 600; font-size: 0.88rem; color: #ffffff;">💸 Most Points Spent on Transfers</div>
+                                    <div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 600; margin-top: 2px;">${transferMarketSub}</div>
                                 </div>
-                                <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color);">${formatVal(highestTransferCost, 'cost')}</span>
+                                <span style="font-weight: 800; font-size: 1rem; color: var(--danger-color); white-space: nowrap; margin-left: 12px;">${formatVal(highestTransferCost)} pts</span>
                             </li>
                         </ul>
                     </div>
