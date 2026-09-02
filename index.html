@@ -781,10 +781,6 @@
             .support-panel table th:nth-child(3), .support-panel table td:nth-child(3) { padding-left: 8px !important; }
         }
 
-        .support-panel table:has(th:nth-child(5)) td:nth-child(4) {
-            color: var(--danger-color);
-        }
-
         .detail-row.worst .detail-row-points { color: var(--danger-color); }
         .detail-row.star .detail-row-points { color: var(--gold-color); }
 
@@ -1695,6 +1691,15 @@
             }
 
             appDiv.innerHTML = html;
+
+            document.querySelectorAll('.support-panel table:has(th:nth-child(5)) tbody tr').forEach(row => {
+                const pointsCell = row.cells[3];
+                if (!pointsCell) return;
+                const value = Number(pointsCell.textContent.trim()) || 0;
+                pointsCell.style.color = value > 0
+                    ? 'var(--primary-color)'
+                    : (value < 0 ? 'var(--danger-color)' : 'var(--text-muted)');
+            });
 
             if (totalGwSlides > 0) {
                 initGwCarousel();
