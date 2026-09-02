@@ -45,7 +45,7 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--surface-color);
             background-image:
-                linear-gradient(180deg, rgba(14, 3, 24, 0.30) 0%, rgba(14, 3, 24, 0.44) 48%, rgba(14, 3, 24, 0.64) 100%),
+                linear-gradient(180deg, rgba(7, 4, 18, 0.12) 0%, rgba(14, 3, 24, 0.22) 52%, rgba(7, 4, 18, 0.38) 100%),
                 url('page-bg.png');
             background-size: cover;
             background-position: center top;
@@ -379,7 +379,7 @@
             padding: 0;
             border: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.24);
+            background: rgba(255, 255, 255, 0.38);
             cursor: pointer;
             transition: width 0.2s ease, background 0.2s ease, opacity 0.2s ease;
         }
@@ -414,6 +414,11 @@
             background:
                 linear-gradient(115deg, rgba(255,255,255,0.035), transparent 30%),
                 linear-gradient(145deg, #22122d, #160b1f);
+        }
+
+        .manager-item:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 3px;
         }
 
         .manager-glow-wrap {
@@ -863,6 +868,18 @@
             margin-bottom: 10px;
         }
 
+        .period-carousel-header.single-period .carousel-nav-btn {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        @media (min-width: 700px) {
+            body {
+                background-size: 920px auto;
+                background-position: center 35%;
+            }
+        }
+
         .period-carousel-title {
             color: #fff;
             font-size: 0.9rem;
@@ -1137,6 +1154,18 @@
             }
         }
 
+        function toggleManagerCard(card) {
+            const isExpanded = card.classList.toggle('expanded');
+            card.setAttribute('aria-expanded', String(isExpanded));
+        }
+
+        function handleManagerCardKey(event, card) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleManagerCard(card);
+            }
+        }
+
         function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
@@ -1181,12 +1210,12 @@
                 
                 html += `
                     <div class="gw-carousel-header">
-                        <button id="prevGwBtn" class="carousel-nav-btn" onclick="moveGwSlide(-1)">‹ Prev</button>
+                        <button id="prevGwBtn" class="carousel-nav-btn" onclick="moveGwSlide(-1)" aria-label="Previous gameweek">‹ Prev</button>
                         <div class="gw-title-stack">
                             <div id="gwSlideTitle" class="gw-title"></div>
                             <div id="gwSlideStatus" class="gw-status"></div>
                         </div>
-                        <button id="nextGwBtn" class="carousel-nav-btn" onclick="moveGwSlide(1)">Next ›</button>
+                        <button id="nextGwBtn" class="carousel-nav-btn" onclick="moveGwSlide(1)" aria-label="Next gameweek">Next ›</button>
                     </div>
 
                     <div class="gw-progress" id="gw-progress">
@@ -1231,7 +1260,9 @@
                         const worstName = worstObj ? (typeof worstObj === 'object' ? (worstObj.name || worstObj.player || worstObj.playerName || 'None') : worstObj) : null;
                         const worstPts = worstObj && typeof worstObj === 'object' ? (worstObj.points !== undefined ? worstObj.points : (worstObj.pts !== undefined ? worstObj.pts : 0)) : 0;
 
-                        const pointsDisplay = mgr.netPoints !== undefined ? mgr.netPoints : (mgr.livePoints !== undefined ? mgr.livePoints : 0);
+                        const rawPoints = mgr.netPoints !== undefined ? mgr.netPoints : (mgr.livePoints !== undefined ? mgr.livePoints : 0);
+                        const hasNoEntry = Boolean(gwGroup.isLive) && Number(rawPoints) === 0 && !starName && !worstName;
+                        const pointsDisplay = hasNoEntry ? '–' : rawPoints;
 
                         let rawTransfers = 'None';
                         if (mgr.transfersText && mgr.transfersText !== 'None') {
@@ -1275,7 +1306,7 @@
 
                         html += `
                             <div class="manager-glow-wrap ${hitClass}">
-                              <div class="${cardClass}" onclick="this.classList.toggle('expanded')">
+                              <div class="${cardClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Show details for ${managerName}" onclick="toggleManagerCard(this)" onkeydown="handleManagerCardKey(event, this)">
                                 <div class="manager-summary">
                                     <div>
                                         <span class="manager-name">${managerName}</span>
@@ -1344,10 +1375,10 @@
                     html += `<div class="card support-panel tracker-shell"><div class="section-title">Manager of the Month</div>`;
 
                     html += `
-                        <div class="period-carousel-header">
-                            <button id="prevPeriodBtn" class="carousel-nav-btn" onclick="movePeriodSlide(-1)">‹ Prev</button>
+                        <div class="period-carousel-header ${activePeriods.length === 1 ? 'single-period' : ''}">
+                            <button id="prevPeriodBtn" class="carousel-nav-btn" onclick="movePeriodSlide(-1)" aria-label="Previous Manager of the Month period">‹ Prev</button>
                             <div id="periodSlideTitle" class="period-carousel-title"></div>
-                            <button id="nextPeriodBtn" class="carousel-nav-btn" onclick="movePeriodSlide(1)">Next ›</button>
+                            <button id="nextPeriodBtn" class="carousel-nav-btn" onclick="movePeriodSlide(1)" aria-label="Next Manager of the Month period">Next ›</button>
                         </div>
                         <div class="gw-progress" id="period-progress">
                             ${activePeriods.map((_, index) => `<button class="gw-progress-dot" data-period-index="${index}" onclick="goToPeriodSlide(${index})" aria-label="Go to Manager of the Month period ${index + 1}"></button>`).join('')}
