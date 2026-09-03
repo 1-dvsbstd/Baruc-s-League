@@ -1213,10 +1213,15 @@
 
             gameweeks.forEach((gameweek, gwIndex) => {
                 const standings = Array.isArray(gameweek.standings) ? gameweek.standings : [];
-                const managerKeys = standings.map(getManagerKey).filter(Boolean);
+                const isNonParticipant = manager => {
+                    const key = getManagerKey(manager);
+                    return Number(gameweek.gameweek) === 1 && key === 'charlie';
+                };
+                const participatingStandings = standings.filter(manager => !isNonParticipant(manager));
+                const managerKeys = participatingStandings.map(getManagerKey).filter(Boolean);
                 const weeklyScores = {};
 
-                standings.forEach(manager => {
+                participatingStandings.forEach(manager => {
                     const key = getManagerKey(manager);
                     if (!key) return;
                     const points = getManagerPoints(manager);
@@ -1232,6 +1237,18 @@
                 standings.forEach(manager => {
                     const key = getManagerKey(manager);
                     if (!key) return;
+
+                    if (isNonParticipant(manager)) {
+                        manager.uiMeta = {
+                            notParticipating: true,
+                            weeklyRank: null,
+                            overallRank: null,
+                            rankMovement: 0,
+                            form: [null, null, null, null, null],
+                            fiveGwAverage: null
+                        };
+                        return;
+                    }
 
                     formHistory[key].push(weeklyRanks[key]);
                     pointsHistory[key].push(getManagerPoints(manager));
@@ -1401,7 +1418,8 @@
                         const worstPts = worstObj && typeof worstObj === 'object' ? (worstObj.points !== undefined ? worstObj.points : (worstObj.pts !== undefined ? worstObj.pts : 0)) : 0;
 
                         const rawPoints = mgr.netPoints !== undefined ? mgr.netPoints : (mgr.livePoints !== undefined ? mgr.livePoints : 0);
-                        const hasNoEntry = Boolean(gwGroup.isLive) && Number(rawPoints) === 0 && !starName && !worstName;
+                        const isNonParticipant = Boolean(mgr.uiMeta && mgr.uiMeta.notParticipating);
+                        const hasNoEntry = isNonParticipant || (Boolean(gwGroup.isLive) && Number(rawPoints) === 0 && !starName && !worstName);
                         const pointsDisplay = hasNoEntry ? '–' : rawPoints;
 
                         let rawTransfers = 'None';
@@ -1430,7 +1448,7 @@
                             .join('');
 
                         const meta = mgr.uiMeta || { weeklyRank: 4, overallRank: 4, rankMovement: 0, form: [null, null, null, null, null], fiveGwAverage: 0 };
-                        const rankClass = `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
+                        const rankClass = meta.notParticipating ? '' : `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
                         const transferEffect = Number(mgr.transferEffectiveness);
                         const hitClass = mgr.transferEffectiveness !== null && mgr.transferEffectiveness !== undefined
                             ? (transferEffect >= 1 ? 'transfer-positive' : (transferEffect <= -1 ? 'transfer-negative' : ''))
@@ -1446,11 +1464,16 @@
                             : '';
                         const movementClass = meta.rankMovement > 0 ? 'rank-up' : (meta.rankMovement < 0 ? 'rank-down' : 'rank-level');
                         const movementIcon = meta.rankMovement > 0 ? `▲ ${meta.rankMovement}` : (meta.rankMovement < 0 ? `▼ ${Math.abs(meta.rankMovement)}` : '—');
+                        const overallDisplay = meta.notParticipating
+                            ? '–'
+                            : `#${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span>`;
                         const formHtml = (meta.form || []).map(position => {
                             const cls = position ? `form-rank-${Math.min(position, 4)}` : '';
                             return `<span class="form-position ${cls}">${position || '–'}</span>`;
                         }).join('');
-                        const averageDisplay = Number(meta.fiveGwAverage || 0).toFixed(1);
+                        const averageDisplay = meta.notParticipating || meta.fiveGwAverage === null
+                            ? '–'
+                            : Number(meta.fiveGwAverage || 0).toFixed(1);
                         const cardClass = `fut-card manager-item ${rankClass} ${hasActiveChip ? 'glow-gold' : ''}`;
 
                         html += `
@@ -1466,7 +1489,7 @@
                                         <div class="manager-score-value">${pointsDisplay}</div>
                                         <div class="manager-score-label">GW PTS</div>
                                         ${playersLeftHtml}
-                                        <div class="compact-overall">#${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span></div>
+                                        <div class="compact-overall">${overallDisplay}</div>
                                     </div>
                                 </div>
 
