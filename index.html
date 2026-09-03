@@ -96,6 +96,42 @@
             object-fit: cover;
         }
 
+        /* Tiny Team-of-the-Week easter egg over the tactics board. */
+        #splash-tactics {
+            position: absolute;
+            z-index: 2;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #f3c86a;
+            clip-path: polygon(16% 0, 100% 4%, 78% 100%, 0 92%);
+            pointer-events: none;
+        }
+
+        .totw-marker {
+            position: absolute;
+            width: clamp(4px, 0.62vw, 7px);
+            aspect-ratio: 1;
+            border: 1px solid rgba(255, 224, 151, 0.9);
+            border-radius: 50%;
+            background: #bc7b22;
+            box-shadow: 0 0 5px rgba(255, 199, 44, 0.72);
+            transform: translate(-50%, -50%);
+            opacity: 0.88;
+            transition: transform 180ms ease, filter 180ms ease;
+        }
+
+        .totw-marker.top-player {
+            width: clamp(6px, 0.9vw, 10px);
+            border-color: #fff0a8;
+            background: #ffd43b;
+            box-shadow:
+                0 0 4px rgba(255, 255, 220, 0.95),
+                0 0 11px rgba(255, 199, 44, 0.9);
+            opacity: 1;
+        }
+
         .fade-out {
             opacity: 0;
             pointer-events: none;
@@ -945,7 +981,10 @@
 
     <!-- Splash Screen Overlay -->
     <div id="splash-screen">
-        <img src="splash-bg.png" alt="Loading" onerror="this.parentElement.style.display='none'">
+        <img id="splash-image" src="splash-bg-team-of-week.webp" alt="Loading" onerror="this.parentElement.style.display='none'">
+        <div id="splash-tactics" aria-hidden="true">
+            <span id="totw-markers" aria-hidden="true"></span>
+        </div>
     </div>
 
     <h1>Baruc's League</h1>
@@ -1091,6 +1130,88 @@
         let gwButtonScrollToken = 0;
         let currentPeriodSlideIdx = 0;
         let totalPeriodSlides = 0;
+
+        const FALLBACK_DREAM_TEAM = {
+            gameweek: 2,
+            formation: '4-5-1',
+            players: [
+                { type: 1 },
+                { type: 2 }, { type: 2 }, { type: 2 }, { type: 2 },
+                { type: 3 }, { type: 3, isTopPlayer: true }, { type: 3 }, { type: 3 }, { type: 3 },
+                { type: 4 }
+            ]
+        };
+
+        function positionSplashTactics() {
+            const splash = document.getElementById('splash-screen');
+            const image = document.getElementById('splash-image');
+            const board = document.getElementById('splash-tactics');
+            if (!splash || !image || !board || !image.naturalWidth || !image.naturalHeight) return;
+
+            const viewWidth = splash.clientWidth;
+            const viewHeight = splash.clientHeight;
+            const scale = Math.max(viewWidth / image.naturalWidth, viewHeight / image.naturalHeight);
+            const imageLeft = (viewWidth - image.naturalWidth * scale) / 2;
+            const imageTop = (viewHeight - image.naturalHeight * scale) / 2;
+
+            // Coordinates of the clean tactics board in the 1024 x 1536 splash artwork.
+            board.style.left = (imageLeft + 770 * scale) + 'px';
+            board.style.top = (imageTop + 666 * scale) + 'px';
+            board.style.width = (244 * scale) + 'px';
+            board.style.height = (267 * scale) + 'px';
+        }
+
+        function renderSplashTeamOfWeek(team) {
+            const markerLayer = document.getElementById('totw-markers');
+            if (!markerLayer) return;
+
+            const usableTeam = team && Array.isArray(team.players) && team.players.length === 11
+                ? team
+                : FALLBACK_DREAM_TEAM;
+            const rows = { 1: [], 2: [], 3: [], 4: [] };
+            usableTeam.players.forEach(player => {
+                const type = Number(player.type);
+                if (rows[type]) rows[type].push(player);
+            });
+
+            if (rows[1].length !== 1 || rows[2].length < 3 || rows[3].length < 2 || rows[4].length < 1) {
+                return renderSplashTeamOfWeek(FALLBACK_DREAM_TEAM);
+            }
+
+            markerLayer.replaceChildren();
+            const rowHeights = { 1: 84, 2: 66, 3: 44, 4: 22 };
+
+            Object.keys(rows).forEach(typeKey => {
+                const players = rows[typeKey];
+                players.forEach((player, index) => {
+                    const marker = document.createElement('span');
+                    marker.className = 'totw-marker' + (player.isTopPlayer ? ' top-player' : '');
+                    marker.style.left = (16 + (68 * (index + 1) / (players.length + 1))) + '%';
+                    marker.style.top = rowHeights[typeKey] + '%';
+                    markerLayer.appendChild(marker);
+                });
+            });
+        }
+
+        function initialiseSplashTeamOfWeek() {
+            let savedTeam = null;
+            try {
+                savedTeam = JSON.parse(localStorage.getItem('barucsLeagueDreamTeam') || 'null');
+            } catch (error) {}
+
+            renderSplashTeamOfWeek(savedTeam || FALLBACK_DREAM_TEAM);
+            const image = document.getElementById('splash-image');
+            if (image) image.addEventListener('load', positionSplashTactics, { once: true });
+            positionSplashTactics();
+        }
+
+        function updateSplashTeamOfWeek(team) {
+            if (!team || !Array.isArray(team.players) || team.players.length !== 11) return;
+            renderSplashTeamOfWeek(team);
+            try {
+                localStorage.setItem('barucsLeagueDreamTeam', JSON.stringify(team));
+            } catch (error) {}
+        }
 
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -1330,6 +1451,7 @@
                 }
 
                 clearTimeout(safetyTimer);
+                updateSplashTeamOfWeek(data.dreamTeam);
                 if (data.updated) {
                     document.getElementById('timestamp').innerText = `Updated: ${data.updated}`;
                 }
@@ -2106,6 +2228,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            initialiseSplashTeamOfWeek();
             loadTrackerData();
             window.setInterval(() => {
                 if (!document.hidden) loadTrackerData();
@@ -2113,6 +2236,7 @@
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) loadTrackerData();
             });
+            window.addEventListener('resize', positionSplashTactics, { passive: true });
         });
     </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "78a0e9d421124389b9247a1677f5dc89"}'></script><!-- End Cloudflare Web Analytics -->
