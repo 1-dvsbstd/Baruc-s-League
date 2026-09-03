@@ -298,6 +298,17 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
+        .badge-deadline {
+            background: rgba(0, 209, 255, 0.08);
+            color: var(--ice-blue);
+            border: 1px solid rgba(0, 209, 255, 0.24);
+            padding: 3px 7px;
+            border-radius: 6px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            letter-spacing: 0.35px;
+            white-space: nowrap;
+        }
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.9); }
@@ -1213,11 +1224,14 @@
 
             gameweeks.forEach((gameweek, gwIndex) => {
                 const standings = Array.isArray(gameweek.standings) ? gameweek.standings : [];
+                const isUpcomingGameweek = gameweek.isUpcoming === true;
                 const isNonParticipant = manager => {
                     const key = getManagerKey(manager);
                     return Number(gameweek.gameweek) === 1 && key === 'charlie';
                 };
-                const participatingStandings = standings.filter(manager => !isNonParticipant(manager));
+                const participatingStandings = isUpcomingGameweek
+                    ? []
+                    : standings.filter(manager => !isNonParticipant(manager));
                 const managerKeys = participatingStandings.map(getManagerKey).filter(Boolean);
                 const weeklyScores = {};
 
@@ -1237,6 +1251,24 @@
                 standings.forEach(manager => {
                     const key = getManagerKey(manager);
                     if (!key) return;
+
+                    if (isUpcomingGameweek) {
+                        const recentForm = (formHistory[key] || []).slice(-5);
+                        const recentPoints = (pointsHistory[key] || []).slice(-5);
+                        const paddedForm = Array(Math.max(0, 5 - recentForm.length)).fill(null).concat(recentForm);
+
+                        manager.uiMeta = {
+                            upcoming: true,
+                            weeklyRank: null,
+                            overallRank: previousOverallRanks[key] || null,
+                            rankMovement: 0,
+                            form: paddedForm,
+                            fiveGwAverage: recentPoints.length
+                                ? recentPoints.reduce((sum, value) => sum + value, 0) / recentPoints.length
+                                : null
+                        };
+                        return;
+                    }
 
                     if (isNonParticipant(manager)) {
                         manager.uiMeta = {
@@ -1419,7 +1451,7 @@
 
                         const rawPoints = mgr.netPoints !== undefined ? mgr.netPoints : (mgr.livePoints !== undefined ? mgr.livePoints : 0);
                         const isNonParticipant = Boolean(mgr.uiMeta && mgr.uiMeta.notParticipating);
-                        const hasNoEntry = isNonParticipant || (Boolean(gwGroup.isLive) && Number(rawPoints) === 0 && !starName && !worstName);
+                        const hasNoEntry = isNonParticipant || Boolean(gwGroup.isUpcoming) || (Boolean(gwGroup.isLive) && Number(rawPoints) === 0 && !starName && !worstName);
                         const pointsDisplay = hasNoEntry ? '–' : rawPoints;
 
                         let rawTransfers = 'None';
@@ -1448,7 +1480,7 @@
                             .join('');
 
                         const meta = mgr.uiMeta || { weeklyRank: 4, overallRank: 4, rankMovement: 0, form: [null, null, null, null, null], fiveGwAverage: 0 };
-                        const rankClass = meta.notParticipating ? '' : `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
+                        const rankClass = meta.notParticipating || meta.upcoming ? '' : `rank-card-${Math.min(meta.weeklyRank || 4, 4)}`;
                         const transferEffect = Number(mgr.transferEffectiveness);
                         const hitClass = mgr.transferEffectiveness !== null && mgr.transferEffectiveness !== undefined
                             ? (transferEffect >= 1 ? 'transfer-positive' : (transferEffect <= -1 ? 'transfer-negative' : ''))
@@ -1881,6 +1913,22 @@
             });
         }
 
+        function formatDeadlineBadge(deadlineValue) {
+            const deadline = new Date(deadlineValue);
+            if (Number.isNaN(deadline.getTime())) return 'DEADLINE';
+
+            const weekday = deadline.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase();
+            const day = deadline.toLocaleDateString(undefined, { day: 'numeric' });
+            const month = deadline.toLocaleDateString(undefined, { month: 'short' }).toUpperCase();
+            const time = deadline.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            return `DEADLINE · ${weekday} ${day} ${month} · ${time}`;
+        }
+
         function updateGwCarouselHeader() {
             const prevBtn = document.getElementById('prevGwBtn');
             const nextBtn = document.getElementById('nextGwBtn');
@@ -1894,9 +1942,11 @@
             if (titleEl && gwDataStore[currentGwSlideIdx]) {
                 const gwInfo = gwDataStore[currentGwSlideIdx];
                 const gwNum = gwInfo.gameweek !== undefined ? gwInfo.gameweek : (gwInfo.gw !== undefined ? gwInfo.gw : (currentGwSlideIdx + 1));
-                const badge = gwInfo.isLive 
-                    ? `<span class="badge-live">LIVE</span>` 
-                    : `<span class="badge-final">FINAL</span>`;
+                const badge = gwInfo.isUpcoming
+                    ? `<span class="badge-deadline">${formatDeadlineBadge(gwInfo.deadline)}</span>`
+                    : (gwInfo.isLive
+                        ? `<span class="badge-live">LIVE</span>`
+                        : `<span class="badge-final">FINAL</span>`);
                 titleEl.textContent = `GW ${gwNum}`;
                 if (statusEl) statusEl.innerHTML = badge;
             }
