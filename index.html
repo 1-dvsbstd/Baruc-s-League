@@ -1086,6 +1086,9 @@
         let currentGwSlideIdx = 0;
         let totalGwSlides = 0;
         let gwDataStore = [];
+        let gwButtonScrollActive = false;
+        let gwButtonScrollTimer = null;
+        let gwButtonScrollToken = 0;
         let currentPeriodSlideIdx = 0;
         let totalPeriodSlides = 0;
 
@@ -1890,6 +1893,11 @@
             scrollGwCarousel(false);
 
             track.addEventListener('scroll', () => {
+                // Previous/Next already selected the destination slide.
+                // Ignore intermediate browser scroll positions so the header
+                // does not flash back to the departing gameweek.
+                if (gwButtonScrollActive) return;
+
                 const slides = Array.from(track.querySelectorAll('.carousel-card'));
                 if (slides.length === 0) return;
 
@@ -1957,32 +1965,68 @@
             });
         }
 
-        function scrollGwCarousel(smooth = true) {
+        function scrollGwCarousel(smooth = true, fromButton = false) {
             const track = document.getElementById('gw-carousel-track');
             const slide = document.getElementById(`gw-slide-${currentGwSlideIdx}`);
             if (track && slide) {
                 const firstSlide = track.querySelector('.carousel-card');
                 const firstOffset = firstSlide ? firstSlide.offsetLeft : 0;
+
+                if (fromButton) {
+                    gwButtonScrollActive = true;
+                    gwButtonScrollToken += 1;
+                    if (gwButtonScrollTimer) clearTimeout(gwButtonScrollTimer);
+                }
+
                 track.scrollTo({
                     left: slide.offsetLeft - firstOffset,
                     behavior: smooth ? 'smooth' : 'auto'
                 });
+
+                if (fromButton) {
+                    const activeScrollToken = gwButtonScrollToken;
+                    const releaseButtonScroll = () => {
+                        if (activeScrollToken !== gwButtonScrollToken) return;
+                        if (!gwButtonScrollActive) return;
+
+                        gwButtonScrollActive = false;
+                        if (gwButtonScrollTimer) {
+                            clearTimeout(gwButtonScrollTimer);
+                            gwButtonScrollTimer = null;
+                        }
+
+                        // Keep the departing GW label in place while the cards
+                        // move, then update the title, badge, arrows and dots
+                        // once the destination slide has settled.
+                        updateGwCarouselHeader();
+                    };
+
+                    if ('onscrollend' in track) {
+                        track.addEventListener('scrollend', releaseButtonScroll, { once: true });
+                    }
+
+                    // Fallback for browsers that do not support scrollend.
+                    gwButtonScrollTimer = setTimeout(releaseButtonScroll, smooth ? 700 : 50);
+                }
             }
-            updateGwCarouselHeader();
+
+            if (!fromButton) {
+                updateGwCarouselHeader();
+            }
         }
 
         function moveGwSlide(direction) {
             const nextIdx = currentGwSlideIdx + direction;
             if (nextIdx >= 0 && nextIdx < totalGwSlides) {
                 currentGwSlideIdx = nextIdx;
-                scrollGwCarousel(true);
+                scrollGwCarousel(true, true);
             }
         }
 
         function goToGwSlide(index) {
             if (index >= 0 && index < totalGwSlides) {
                 currentGwSlideIdx = index;
-                scrollGwCarousel(true);
+                scrollGwCarousel(true, true);
             }
         }
 
