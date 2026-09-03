@@ -947,7 +947,124 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
+        
+        /*
+         * Anonymous background device tracking.
+         * No names, IP addresses or personal details are stored.
+         */
+        function getAnonymousVisitorId() {
+            const storageKey = 'barucsLeagueVisitorId';
 
+            try {
+                let visitorId = localStorage.getItem(storageKey);
+
+                if (!visitorId) {
+                    if (
+                        window.crypto &&
+                        typeof window.crypto.randomUUID === 'function'
+                    ) {
+                        visitorId = window.crypto.randomUUID();
+                    } else {
+                        visitorId =
+                            'device_' +
+                            Date.now().toString(36) +
+                            '_' +
+                            Math.random()
+                                .toString(36)
+                                .substring(2, 15);
+                    }
+
+                    localStorage.setItem(storageKey, visitorId);
+                }
+
+                return visitorId;
+            } catch (error) {
+                /*
+                 * Storage may be unavailable in some private browsers.
+                 */
+                return (
+                    'temporary_' +
+                    Date.now().toString(36) +
+                    '_' +
+                    Math.random()
+                        .toString(36)
+                        .substring(2, 15)
+                );
+            }
+        }
+
+        function getAnonymousDeviceLabel() {
+            const userAgent = navigator.userAgent || '';
+            let platform = 'Unknown device';
+
+            if (/iPad/i.test(userAgent)) {
+                platform = 'iPad';
+            } else if (/iPhone|iPod/i.test(userAgent)) {
+                platform = 'iPhone';
+            } else if (/Android/i.test(userAgent)) {
+                platform = 'Android';
+            } else if (/Windows/i.test(userAgent)) {
+                platform = 'Windows PC';
+            } else if (/Macintosh|Mac OS X/i.test(userAgent)) {
+                platform = 'Mac';
+            } else if (/Linux/i.test(userAgent)) {
+                platform = 'Linux';
+            }
+
+            const installed =
+                window.matchMedia(
+                    '(display-mode: standalone)'
+                ).matches ||
+                window.navigator.standalone === true;
+
+            return (
+                platform +
+                (installed ? ' - Installed app' : ' - Browser')
+            );
+        }
+
+        function trackAnonymousWebsiteVisit() {
+            try {
+                const trackingUrl = new URL(SCRIPT_URL);
+
+                trackingUrl.searchParams.set(
+                    'action',
+                    'trackVisit'
+                );
+
+                trackingUrl.searchParams.set(
+                    'deviceId',
+                    getAnonymousVisitorId()
+                );
+
+                trackingUrl.searchParams.set(
+                    'device',
+                    getAnonymousDeviceLabel()
+                );
+
+                trackingUrl.searchParams.set(
+                    '_',
+                    Date.now().toString()
+                );
+
+                fetch(trackingUrl.toString(), {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    keepalive: true
+                }).catch(function (error) {
+                    console.log(
+                        'Background visit tracking unavailable.'
+                    );
+                });
+            } catch (error) {
+                console.log(
+                    'Background visit tracking unavailable.'
+                );
+            }
+        }
+
+        trackAnonymousWebsiteVisit();
         const TEAM_NAMES = {
             "Nathan": "nr xi",
             "Mike": "mikes marauders",
