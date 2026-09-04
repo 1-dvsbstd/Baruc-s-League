@@ -644,6 +644,19 @@
             font-weight: 800;
         }
 
+        .manager-name-line {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .manager-name-line .compact-overall {
+            margin: 0;
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
+
         .manager-team {
             color: var(--text-muted);
             font-size: 0.72rem;
@@ -1035,12 +1048,33 @@
             align-items: center;
             gap: 10px;
             padding: 12px;
-            margin-bottom: 8px;
-            border: 2px solid rgba(145, 163, 184, 0.28);
-            border-radius: 10px;
-            background: linear-gradient(120deg, rgba(255,255,255,0.10), transparent 28%, rgba(255,255,255,0.02) 50%, transparent 72%), linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 7px 18px rgba(0,0,0,0.20);
+            margin-bottom: 7px;
+            margin: 7px;
+            border: 1px solid rgba(145, 163, 184, 0.22);
+            border-radius: 9px;
+            background:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px),
+                linear-gradient(145deg, rgba(34,18,45,0.78), rgba(13,12,28,0.78));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
         }
+
+        .profile-fut-panel {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 9px;
+            padding: 3px;
+            border: 2px solid rgba(145, 163, 184, 0.38);
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(25,15,35,0.94), rgba(9,12,24,0.94));
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+
+        .profile-fut-panel::before {
+            display: none;
+        }
+
+        .profile-fut-panel > * { position: relative; z-index: 1; }
 
         .profile-overall {
             color: var(--gold-color);
@@ -1065,19 +1099,50 @@
         .profile-formation { color: #fff; font-size: 0.68rem; font-weight: 700; margin-top: 3px; }
 
         .profile-title-block {
-            margin: 0 0 8px;
+            --achievement-art:
+                radial-gradient(ellipse at 50% -20%, rgba(190,255,222,0.36), transparent 45%),
+                conic-gradient(from 248deg at 50% 50%, transparent 0 8%, rgba(104,255,188,0.08) 8.5% 10%, transparent 10.5% 19%, rgba(255,255,255,0.055) 19.5% 21%, transparent 21.5% 100%),
+                linear-gradient(118deg, transparent 0 17%, rgba(88,255,182,0.11) 17.5% 19.5%, transparent 20% 80%, rgba(88,255,182,0.09) 80.5% 82.5%, transparent 83%),
+                linear-gradient(135deg, #052b24, #087153 49%, #064535 72%, #031f1b);
+            margin: 0 7px 7px;
             padding: 0;
             position: relative;
             overflow: visible;
             text-align: center;
             display: grid;
             grid-template-columns: 58px minmax(0, 1fr) 58px;
-            align-items: center;
-            gap: 8px;
+            align-items: stretch;
+            gap: 5px;
+            container-type: inline-size;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
         }
 
         .profile-title-block::before {
             display: none;
+        }
+
+        .profile-title-copy::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 104px;
+            height: 70px;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            clip-path: polygon(50% 0, 88% 12%, 100% 50%, 86% 88%, 50% 100%, 14% 88%, 0 50%, 12% 12%);
+            background:
+                linear-gradient(145deg, rgba(208,255,231,0.22) 0 12%, transparent 13% 43%, rgba(0,22,17,0.20) 44% 62%, rgba(86,255,181,0.13) 63% 100%),
+                linear-gradient(35deg, #0c7d5d, #064434 58%, #0a674e);
+            box-shadow:
+                0 0 30px rgba(0,255,135,0.28),
+                inset 0 0 0 1px rgba(186,255,220,0.26),
+                inset 8px 0 18px rgba(104,255,188,0.10),
+                inset -10px -8px 18px rgba(0,18,14,0.26);
+            pointer-events: none;
         }
 
         .profile-title-block::after {
@@ -1092,40 +1157,44 @@
 
         .profile-title-copy {
             min-width: 0;
-            min-height: 54px;
+            height: 64px;
             padding: 9px 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             overflow: hidden;
-            border: 2px solid rgba(0, 255, 135, 0.58);
+            border: 2px solid rgba(0,255,135,0.70);
             border-radius: 10px;
-            background:
-                radial-gradient(circle at 50% 0%, rgba(78,255,174,0.28), transparent 48%),
-                linear-gradient(118deg, transparent 0 18%, rgba(0,255,135,0.08) 18.5% 20%, transparent 20.5% 79%, rgba(0,255,135,0.06) 79.5% 81%, transparent 81.5%),
-                linear-gradient(135deg, #07382d, #0a5a43 52%, #083b30);
-            box-shadow: 0 0 26px rgba(0,255,135,0.18), inset 0 0 24px rgba(0,255,135,0.08), inset 0 1px 0 rgba(171,255,216,0.16), 0 7px 18px rgba(0,0,0,0.24);
+            background-image: var(--achievement-art);
+            background-size: 100cqw 100%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            box-shadow: 0 0 22px rgba(0,255,135,0.20), inset 0 0 24px rgba(35,255,153,0.08), 0 7px 18px rgba(0,0,0,0.24);
         }
 
         .profile-honour-count {
-            min-height: 54px;
+            height: 64px;
             padding: 5px 3px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(0, 255, 135, 0.58);
+            border: 2px solid rgba(0,255,135,0.70);
             border-radius: 10px;
-            background:
-                radial-gradient(circle at 50% 0%, rgba(78,255,174,0.24), transparent 58%),
-                linear-gradient(135deg, #07382d, #0a5a43 52%, #083b30);
-            box-shadow: 0 0 22px rgba(0,255,135,0.16), inset 0 1px 0 rgba(171,255,216,0.16), 0 7px 18px rgba(0,0,0,0.24);
+            background-image: var(--achievement-art);
+            background-size: 100cqw 100%;
+            background-repeat: no-repeat;
+            box-shadow: 0 0 20px rgba(0,255,135,0.18), inset 0 0 20px rgba(35,255,153,0.07), 0 7px 18px rgba(0,0,0,0.24);
         }
+
+        .profile-honour-count:first-child { background-position: left center; }
+        .profile-honour-count:last-child { background-position: right center; }
 
         .profile-honour-count strong {
             color: #fff;
-            font-size: 0.92rem;
+            font-size: 1rem;
             line-height: 1;
+            text-shadow: 0 0 11px rgba(106,255,187,0.34);
         }
 
         .profile-honour-count span {
@@ -1164,7 +1233,56 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
         }
 
-        .profile-title-name { position: relative; z-index: 1; color: #baffdc; font-size: 0.8rem; font-weight: 850; letter-spacing: 1.3px; text-shadow: 0 0 14px rgba(0,255,135,0.30); text-transform: uppercase; }
+        .profile-chip-block .chip-pill.active {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            color: var(--gold-color);
+            border-color: var(--rank-gold-edge);
+            background:
+                radial-gradient(circle at 50% -30%, rgba(255,199,44,0.42) 0%, rgba(255,199,44,0.13) 24%, transparent 46%),
+                linear-gradient(115deg, transparent 0 13%, rgba(255,199,44,0.10) 13.5% 14.5%, transparent 15% 84%, rgba(255,199,44,0.10) 84.5% 85.5%, transparent 86%),
+                linear-gradient(145deg, #071637, #0b3274 52%, #07132f);
+            box-shadow:
+                0 0 9px rgba(36,112,219,0.36),
+                0 0 6px rgba(255,199,44,0.22),
+                inset 0 0 8px rgba(32,104,202,0.22),
+                inset 0 1px 0 rgba(255,238,178,0.30);
+            text-shadow: 0 0 6px rgba(255,199,44,0.36);
+        }
+
+        .profile-chip-block .chip-pill.active > span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-chip-block .chip-pill.active::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            border: 0;
+            border-radius: inherit;
+            background:
+                conic-gradient(from 45deg at 50% 48%, transparent 0 10%, rgba(255,215,90,0.055) 10% 12%, transparent 12% 23%, rgba(255,255,255,0.035) 23% 25%, transparent 25% 100%),
+                radial-gradient(circle at 50% 50%, rgba(104,174,255,0.12), transparent 45%);
+            clip-path: none;
+            pointer-events: none;
+        }
+
+        .profile-chip-block .chip-pill.active::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            z-index: 1;
+            border: 1px solid rgba(255,199,44,0.52);
+            border-radius: 2px;
+            background: linear-gradient(120deg, rgba(255,199,44,0.06), transparent 32%, rgba(255,199,44,0.025) 62%, transparent);
+            clip-path: none;
+            pointer-events: none;
+        }
+
+        .profile-title-name { position: relative; z-index: 1; color: #d9ffeb; font-size: 0.86rem; font-weight: 900; letter-spacing: 1.4px; text-shadow: 0 0 15px rgba(0,255,135,0.46), 0 1px 0 rgba(0,0,0,0.55); text-transform: uppercase; }
         .profile-title-explanation { position: relative; z-index: 1; color: #b7d4c8; font-size: 0.62rem; line-height: 1.25; margin-top: 3px; }
 
         @media (min-width: 560px) {
@@ -1172,7 +1290,7 @@
             .profile-chip-block .chip-inventory { grid-template-columns: repeat(4, 42px); }
         }
 
-        @media (max-width: 390px) {
+        @media (max-width: 430px) {
             .profile-title-block {
                 grid-template-columns: 50px minmax(0, 1fr) 50px;
                 gap: 5px;
@@ -1184,7 +1302,7 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 7px;
-            margin-bottom: 12px;
+            margin: 0 7px 7px;
         }
 
         .profile-rating {
@@ -1193,15 +1311,18 @@
             justify-content: space-between;
             gap: 5px;
             padding: 8px 9px;
-            border: 2px solid rgba(145, 163, 184, 0.24);
+            border: 1px solid rgba(145, 163, 184, 0.22);
             border-radius: 8px;
-            background: linear-gradient(120deg, rgba(255,255,255,0.09), transparent 30%, rgba(255,255,255,0.018) 52%, transparent 74%), linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 5px 14px rgba(0,0,0,0.16);
+            background:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px),
+                rgba(4,9,25,0.34);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
         }
 
         .profile-rating strong { color: #fff; font-size: 1rem; }
         .profile-rating.highest strong { color: var(--gold-color); }
-        .profile-rating-label { color: var(--text-violet); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .profile-rating-label { color: var(--text-violet); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
         .profile-rating-value { display: flex; align-items: baseline; gap: 4px; }
         .rating-change { font-size: 0.58rem; font-weight: 800; }
         .rating-change.up { color: var(--primary-color); }
@@ -1211,6 +1332,7 @@
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 7px;
+            margin: 0 7px 7px;
             border: 0;
             border-radius: 0;
             overflow: visible;
@@ -1219,10 +1341,13 @@
         .profile-stat {
             min-width: 0;
             padding: 9px 5px;
-            border: 2px solid rgba(145, 163, 184, 0.24);
+            border: 1px solid rgba(145, 163, 184, 0.22);
             border-radius: 8px;
-            background: linear-gradient(120deg, rgba(255,255,255,0.09), transparent 30%, rgba(255,255,255,0.018) 52%, transparent 74%), linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 5px 14px rgba(0,0,0,0.16);
+            background:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px),
+                rgba(4,9,25,0.34);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
             text-align: center;
         }
 
@@ -1231,14 +1356,21 @@
         .profile-stat-value { color: #fff; font-size: 0.82rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .profile-stat-value.positive { color: var(--primary-color); }
         .profile-stat-value.negative { color: var(--danger-color); }
-        .profile-stat-label { color: var(--text-violet); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.4px; margin-top: 3px; text-transform: uppercase; white-space: nowrap; }
+        .profile-stat-label { color: var(--text-violet); font-size: 0.66rem; font-weight: 750; letter-spacing: 0.4px; margin-top: 3px; text-transform: uppercase; white-space: nowrap; }
 
-        @media (max-width: 390px) {
-            .profile-slide { min-height: 448px; }
+        @media (max-width: 430px) {
+            .profile-slide { min-height: 0; }
             .profile-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .profile-stat:nth-child(2n),
-            .profile-stat:nth-child(4n) { border-right: 2px solid rgba(145, 163, 184, 0.24); }
-            .profile-stat:nth-last-child(-n + 2) { border-bottom: 2px solid rgba(145, 163, 184, 0.24); }
+        }
+
+        .season-record-row,
+        .period-standing-row,
+        .overall-standing-tile {
+            background:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px),
+                linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 7px 18px rgba(0,0,0,0.22);
         }
 
         .period-standing-row {
@@ -1256,6 +1388,50 @@
         .period-standing-row.rank-2 { border-color: var(--rank-silver-edge) !important; }
         .period-standing-row.rank-3,
         .period-standing-row.rank-4 { border-color: rgba(145,163,184,0.28) !important; }
+
+        /* Use the exact same base and overlay order as a normal Live GW card. */
+        .profile-card-header,
+        .profile-rating,
+        .profile-stat,
+        .season-record-row,
+        .period-standing-row,
+        .overall-standing-tile {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            background-color: #160b1f;
+            background:
+                linear-gradient(115deg, rgba(255,255,255,0.035), transparent 30%),
+                linear-gradient(145deg, #22122d, #160b1f);
+        }
+
+        .profile-card-header::before,
+        .profile-rating::before,
+        .profile-stat::before,
+        .season-record-row::before,
+        .period-standing-row::before,
+        .overall-standing-tile::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0.2;
+            background-image:
+                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px);
+        }
+
+        .profile-card-header > *,
+        .profile-rating > *,
+        .profile-stat > *,
+        .season-record-row > *,
+        .period-standing-row > *,
+        .overall-standing-tile > * {
+            position: relative;
+            z-index: 1;
+        }
 
         .period-prize-grid {
             display: grid;
@@ -1405,20 +1581,19 @@
             position: relative;
             z-index: 1;
             display: block;
-            max-height: 0;
+            height: 0;
             margin-top: 0;
             padding-top: 10px;
             overflow: hidden;
             border-top-color: transparent;
             opacity: 0;
             transform: translateY(-4px);
-            transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease,
+            transition: height 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease,
                 transform 0.22s ease, border-color 0.18s ease;
-            will-change: max-height, opacity, transform;
+            will-change: height, opacity, transform;
         }
 
         .manager-item.expanded .card-dropdown {
-            max-height: 240px;
             border-top-color: var(--border-subtle);
             opacity: 1;
             transform: translateY(0);
@@ -1752,7 +1927,7 @@
                     state = 'used';
                 }
 
-                return `<span class="chip-pill ${state}">${chip.label}</span>`;
+                return `<span class="chip-pill ${state}"><span>${chip.label}</span></span>`;
             }).join('') + `</div>`;
         }
 
@@ -1967,8 +2142,12 @@
         }
 
         function toggleManagerCard(card) {
-            const isExpanded = card.classList.toggle('expanded');
+            const dropdown = card.querySelector('.card-dropdown');
+            const isExpanded = !card.classList.contains('expanded');
+            card.classList.toggle('expanded', isExpanded);
             card.setAttribute('aria-expanded', String(isExpanded));
+            if (!dropdown) return;
+            dropdown.style.height = isExpanded ? `${dropdown.scrollHeight}px` : '0px';
         }
 
         function handleManagerCardKey(event, card) {
@@ -2127,6 +2306,8 @@
                 const stats = manager.stats || {};
                 const managerKey = String(manager.managerName || '').trim().toLowerCase();
                 const managerChips = renderChipsHtml(profileChipMap[managerKey], profileActiveChipMap[managerKey]);
+                const profileActiveChip = profileActiveChipMap[managerKey];
+                const hasProfileActiveChip = profileActiveChip !== null && profileActiveChip !== undefined && profileActiveChip !== '' && String(profileActiveChip).toLowerCase() !== 'none';
                 const honours = honourMap[managerKey] || { gwWins: 0, motmWins: 0 };
                 const transferReturn = Number(stats.transferReturn) || 0;
                 const transferClass = transferReturn > 0 ? 'positive' : (transferReturn < 0 ? 'negative' : '');
@@ -2138,13 +2319,12 @@
                 ];
                 const statItems = [
                     ['Transfers', stats.transfers], ['Transfer pts', signedProfileValue(transferReturn), transferClass],
-                    ['Goals', stats.goals], ['Assists', stats.assists],
-                    ['Team value', `£${Number(stats.teamValue || 0).toFixed(1)}m`], ['Bench pts', stats.benchPoints],
-                    ['Own goals', stats.ownGoals], ['Red cards', stats.redCards]
+                    ['Goals', stats.goals], ['Assists', stats.assists]
                 ];
 
                 carousel += `
                     <section class="carousel-card profile-slide" id="profile-slide-${slideIndex}" data-profile-title="${escapeProfileHtml(manager.managerName)}">
+                        <div class="profile-fut-panel ${hasProfileActiveChip ? 'chip-active' : ''}">
                         <div class="profile-card-header">
                             <div class="profile-identity">
                                 <div class="profile-manager-name">${escapeProfileHtml(manager.managerName)}</div>
@@ -2160,7 +2340,7 @@
                                 <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
                                 <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
                             </div>
-                            <div class="profile-honour-count"><strong>${honours.motmWins}</strong><span>MOTM WINS</span></div>
+                            <div class="profile-honour-count"><strong>${honours.motmWins}</strong><span>MotM</span></div>
                         </div>
                         <div class="profile-rating-grid">
                             ${ratingItems.map(([label, key, value]) => {
@@ -2172,6 +2352,7 @@
                         </div>
                         <div class="profile-stat-grid">
                             ${statItems.map(([label, value, valueClass = '']) => `<div class="profile-stat"><div class="profile-stat-value ${valueClass}">${escapeProfileHtml(value)}</div><div class="profile-stat-label">${label}</div></div>`).join('')}
+                        </div>
                         </div>
                     </section>`;
             });
@@ -2362,7 +2543,7 @@
                               <div class="${cardClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Show details for ${managerName}" onclick="toggleManagerCard(this)" onkeydown="handleManagerCardKey(event, this)">
                                 <div class="manager-summary">
                                     <div>
-                                        <span class="manager-name">${managerName}</span>
+                                        <div class="manager-name-line"><span class="manager-name">${managerName}</span><span class="compact-overall">${overallDisplay}</span></div>
                                         <div class="manager-team">${teamName}</div>
                                         <div class="chip-slot ${hasActiveChip ? 'active' : ''}">${hasActiveChip ? `${chipLabel} ACTIVE` : 'No active chip'}</div>
                                     </div>
@@ -2370,7 +2551,6 @@
                                         <div class="manager-score-value">${pointsDisplay}</div>
                                         <div class="manager-score-label">GW PTS</div>
                                         ${playersLeftHtml}
-                                        <div class="compact-overall">${overallDisplay}</div>
                                     </div>
                                 </div>
 
