@@ -1552,6 +1552,8 @@
         let totalProfileSlides = 0;
         let periodCarouselInitialized = false;
         let profileCarouselInitialized = false;
+        let periodLoopActive = false;
+        let profileLoopActive = false;
 
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -2779,6 +2781,16 @@
             const track = document.getElementById('period-carousel');
             if (!track) return;
 
+            track.querySelectorAll('.period-loop-clone').forEach(slide => slide.remove());
+            const firstRealSlide = track.querySelector('.carousel-card');
+            if (firstRealSlide && totalPeriodSlides > 1) {
+                const loopClone = firstRealSlide.cloneNode(true);
+                loopClone.id = 'period-slide-loop-first';
+                loopClone.classList.add('period-loop-clone');
+                loopClone.setAttribute('aria-hidden', 'true');
+                track.appendChild(loopClone);
+            }
+
             if (!periodCarouselInitialized) {
                 currentPeriodSlideIdx = totalPeriodSlides - 1;
                 periodCarouselInitialized = true;
@@ -2789,7 +2801,8 @@
             enableEdgeWrapSwipe(track, () => currentPeriodSlideIdx, () => totalPeriodSlides, movePeriodSlide);
 
             track.addEventListener('scroll', () => {
-                const slides = Array.from(track.querySelectorAll('.carousel-card'));
+                if (periodLoopActive) return;
+                const slides = Array.from(track.querySelectorAll('.carousel-card:not(.period-loop-clone)'));
                 if (slides.length === 0) return;
                 const firstOffset = slides[0].offsetLeft;
                 let index = 0;
@@ -2843,6 +2856,46 @@
 
         function movePeriodSlide(direction) {
             if (totalPeriodSlides < 1) return;
+
+            if (direction > 0 && currentPeriodSlideIdx === totalPeriodSlides - 1 && totalPeriodSlides > 1) {
+                const track = document.getElementById('period-carousel');
+                const clone = document.getElementById('period-slide-loop-first');
+                const first = document.getElementById('period-slide-0');
+                if (track && clone && first) {
+                    currentPeriodSlideIdx = 0;
+                    periodLoopActive = true;
+                    const firstOffset = first.offsetLeft;
+                    track.scrollTo({ left: clone.offsetLeft - firstOffset, behavior: 'smooth' });
+                    setTimeout(() => {
+                        track.scrollTo({ left: 0, behavior: 'auto' });
+                        periodLoopActive = false;
+                        updatePeriodCarouselHeader();
+                    }, 700);
+                    return;
+                }
+            }
+
+            if (direction < 0 && currentPeriodSlideIdx === 0 && totalPeriodSlides > 1) {
+                const track = document.getElementById('period-carousel');
+                const clone = document.getElementById('period-slide-loop-first');
+                const first = document.getElementById('period-slide-0');
+                const last = document.getElementById(`period-slide-${totalPeriodSlides - 1}`);
+                if (track && clone && first && last) {
+                    currentPeriodSlideIdx = totalPeriodSlides - 1;
+                    periodLoopActive = true;
+                    const firstOffset = first.offsetLeft;
+                    track.scrollTo({ left: clone.offsetLeft - firstOffset, behavior: 'auto' });
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        track.scrollTo({ left: last.offsetLeft - firstOffset, behavior: 'smooth' });
+                    }));
+                    setTimeout(() => {
+                        periodLoopActive = false;
+                        updatePeriodCarouselHeader();
+                    }, 700);
+                    return;
+                }
+            }
+
             currentPeriodSlideIdx = (currentPeriodSlideIdx + direction + totalPeriodSlides) % totalPeriodSlides;
             scrollPeriodCarousel(true);
         }
@@ -2858,6 +2911,16 @@
             const track = document.getElementById('profile-carousel-track');
             if (!track) return;
 
+            track.querySelectorAll('.profile-loop-clone').forEach(slide => slide.remove());
+            const firstRealSlide = track.querySelector('.profile-slide');
+            if (firstRealSlide && totalProfileSlides > 1) {
+                const loopClone = firstRealSlide.cloneNode(true);
+                loopClone.id = 'profile-slide-loop-first';
+                loopClone.classList.add('profile-loop-clone');
+                loopClone.setAttribute('aria-hidden', 'true');
+                track.appendChild(loopClone);
+            }
+
             if (!profileCarouselInitialized) {
                 currentProfileSlideIdx = 0;
                 profileCarouselInitialized = true;
@@ -2868,7 +2931,8 @@
             enableEdgeWrapSwipe(track, () => currentProfileSlideIdx, () => totalProfileSlides, moveProfileSlide);
 
             track.addEventListener('scroll', () => {
-                const slides = Array.from(track.querySelectorAll('.profile-slide'));
+                if (profileLoopActive) return;
+                const slides = Array.from(track.querySelectorAll('.profile-slide:not(.profile-loop-clone)'));
                 if (slides.length === 0) return;
                 const firstOffset = slides[0].offsetLeft;
                 let closestIndex = 0;
@@ -2918,6 +2982,46 @@
 
         function moveProfileSlide(direction) {
             if (totalProfileSlides < 1) return;
+
+            if (direction > 0 && currentProfileSlideIdx === totalProfileSlides - 1 && totalProfileSlides > 1) {
+                const track = document.getElementById('profile-carousel-track');
+                const clone = document.getElementById('profile-slide-loop-first');
+                const first = document.getElementById('profile-slide-0');
+                if (track && clone && first) {
+                    currentProfileSlideIdx = 0;
+                    profileLoopActive = true;
+                    const firstOffset = first.offsetLeft;
+                    track.scrollTo({ left: clone.offsetLeft - firstOffset, behavior: 'smooth' });
+                    setTimeout(() => {
+                        track.scrollTo({ left: 0, behavior: 'auto' });
+                        profileLoopActive = false;
+                        updateProfileCarouselHeader();
+                    }, 700);
+                    return;
+                }
+            }
+
+            if (direction < 0 && currentProfileSlideIdx === 0 && totalProfileSlides > 1) {
+                const track = document.getElementById('profile-carousel-track');
+                const clone = document.getElementById('profile-slide-loop-first');
+                const first = document.getElementById('profile-slide-0');
+                const last = document.getElementById(`profile-slide-${totalProfileSlides - 1}`);
+                if (track && clone && first && last) {
+                    currentProfileSlideIdx = totalProfileSlides - 1;
+                    profileLoopActive = true;
+                    const firstOffset = first.offsetLeft;
+                    track.scrollTo({ left: clone.offsetLeft - firstOffset, behavior: 'auto' });
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        track.scrollTo({ left: last.offsetLeft - firstOffset, behavior: 'smooth' });
+                    }));
+                    setTimeout(() => {
+                        profileLoopActive = false;
+                        updateProfileCarouselHeader();
+                    }, 700);
+                    return;
+                }
+            }
+
             currentProfileSlideIdx = (currentProfileSlideIdx + direction + totalProfileSlides) % totalProfileSlides;
             scrollProfileCarousel(true);
         }
