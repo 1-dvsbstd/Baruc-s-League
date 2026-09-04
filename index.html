@@ -998,7 +998,7 @@
 
         .profile-card-header {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(118px, 1.15fr) minmax(0, 0.8fr);
+            grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
             align-items: center;
             gap: 10px;
             padding: 12px;
@@ -1072,7 +1072,13 @@
             pointer-events: none;
         }
 
-        .profile-chip-block { min-width: 0; text-align: center; }
+        .profile-chip-block {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
 
         .profile-chip-block .chip-inventory {
             display: grid;
@@ -2299,7 +2305,6 @@
 
                 const playerIdx = getCol('player', getCol('name', 0));
                 const pointsIdx = getCol('point', getCol('total', 1));
-                const medalIdx = getCol('medal', 2);
                 const weeksWonIdx = getCol('won', getCol('week', 3));
                 const prizeIdx = getCol('prize', 5);
 
@@ -2343,18 +2348,12 @@
                                     ${data.overall.rows.map((row, rIdx) => {
                                         const playerName = row[playerIdx] || '';
                                         const points = row[pointsIdx] !== undefined ? row[pointsIdx] : '';
-                                        let medal = medalIdx !== -1 && row[medalIdx] !== undefined ? row[medalIdx] : '';
-                                        if (!medal) {
-                                            if (rIdx === 0) medal = '🥇';
-                                            else if (rIdx === 1) medal = '🥈';
-                                        }
-                                        if (rIdx >= 2) medal = '';
                                         const teamName = TEAM_NAMES[playerName] || '';
 
                                         return `
                                             <div class="overall-standing-tile rank-${rIdx + 1}">
                                                 <div><div class="overall-tile-name">${playerName}</div>${teamName ? `<div class="overall-tile-team">${teamName}</div>` : ''}</div>
-                                                <div class="overall-tile-points">${points} ${medal}</div>
+                                                <div class="overall-tile-points">${points}</div>
                                             </div>
                                         `;
                                     }).join('')}
@@ -2540,6 +2539,19 @@
             const track = document.getElementById('gw-carousel-track');
             if (!track) return;
 
+            // A visual copy of GW1 after the final gameweek lets the carousel
+            // continue moving forwards. Once it settles, we silently return to
+            // the real GW1 at the identical position in the sequence.
+            track.querySelectorAll('.gw-loop-clone').forEach(slide => slide.remove());
+            const firstRealSlide = track.querySelector('.carousel-card');
+            if (firstRealSlide && totalGwSlides > 1) {
+                const firstLoopClone = firstRealSlide.cloneNode(true);
+                firstLoopClone.id = 'gw-slide-loop-first';
+                firstLoopClone.classList.add('gw-loop-clone');
+                firstLoopClone.setAttribute('aria-hidden', 'true');
+                track.appendChild(firstLoopClone);
+            }
+
             if (!gwCarouselInitialized) {
                 currentGwSlideIdx = totalGwSlides - 1;
                 gwCarouselInitialized = true;
@@ -2555,7 +2567,7 @@
                 // does not flash back to the departing gameweek.
                 if (gwButtonScrollActive) return;
 
-                const slides = Array.from(track.querySelectorAll('.carousel-card'));
+                const slides = Array.from(track.querySelectorAll('.carousel-card:not(.gw-loop-clone)'));
                 if (slides.length === 0) return;
 
                 const firstOffset = slides[0].offsetLeft;
@@ -2674,6 +2686,84 @@
 
         function moveGwSlide(direction) {
             if (totalGwSlides < 1) return;
+
+            if (direction > 0 && currentGwSlideIdx === totalGwSlides - 1 && totalGwSlides > 1) {
+                const track = document.getElementById('gw-carousel-track');
+                const loopClone = document.getElementById('gw-slide-loop-first');
+                const firstRealSlide = document.getElementById('gw-slide-0');
+                if (track && loopClone && firstRealSlide) {
+                    currentGwSlideIdx = 0;
+                    gwButtonScrollActive = true;
+                    gwButtonScrollToken += 1;
+                    const activeScrollToken = gwButtonScrollToken;
+                    if (gwButtonScrollTimer) clearTimeout(gwButtonScrollTimer);
+
+                    const firstOffset = firstRealSlide.offsetLeft;
+                    track.scrollTo({
+                        left: loopClone.offsetLeft - firstOffset,
+                        behavior: 'smooth'
+                    });
+
+                    const finishLoop = () => {
+                        if (activeScrollToken !== gwButtonScrollToken) return;
+                        if (!gwButtonScrollActive) return;
+                        track.scrollTo({ left: 0, behavior: 'auto' });
+                        gwButtonScrollActive = false;
+                        gwButtonScrollTimer = null;
+                        updateGwCarouselHeader();
+                    };
+
+                    if ('onscrollend' in track) {
+                        track.addEventListener('scrollend', finishLoop, { once: true });
+                    }
+                    gwButtonScrollTimer = setTimeout(finishLoop, 700);
+                    return;
+                }
+            }
+
+            if (direction < 0 && currentGwSlideIdx === 0 && totalGwSlides > 1) {
+                const track = document.getElementById('gw-carousel-track');
+                const loopClone = document.getElementById('gw-slide-loop-first');
+                const firstRealSlide = document.getElementById('gw-slide-0');
+                const lastRealSlide = document.getElementById(`gw-slide-${totalGwSlides - 1}`);
+                if (track && loopClone && firstRealSlide && lastRealSlide) {
+                    currentGwSlideIdx = totalGwSlides - 1;
+                    gwButtonScrollActive = true;
+                    gwButtonScrollToken += 1;
+                    const activeScrollToken = gwButtonScrollToken;
+                    if (gwButtonScrollTimer) clearTimeout(gwButtonScrollTimer);
+
+                    const firstOffset = firstRealSlide.offsetLeft;
+                    // Jump to the identical GW1 copy, then travel one card
+                    // backwards into the final real gameweek.
+                    track.scrollTo({
+                        left: loopClone.offsetLeft - firstOffset,
+                        behavior: 'auto'
+                    });
+
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        track.scrollTo({
+                            left: lastRealSlide.offsetLeft - firstOffset,
+                            behavior: 'smooth'
+                        });
+                    }));
+
+                    const finishReverseLoop = () => {
+                        if (activeScrollToken !== gwButtonScrollToken) return;
+                        if (!gwButtonScrollActive) return;
+                        gwButtonScrollActive = false;
+                        gwButtonScrollTimer = null;
+                        updateGwCarouselHeader();
+                    };
+
+                    if ('onscrollend' in track) {
+                        track.addEventListener('scrollend', finishReverseLoop, { once: true });
+                    }
+                    gwButtonScrollTimer = setTimeout(finishReverseLoop, 700);
+                    return;
+                }
+            }
+
             currentGwSlideIdx = (currentGwSlideIdx + direction + totalGwSlides) % totalGwSlides;
             scrollGwCarousel(true, true);
         }
