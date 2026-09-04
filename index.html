@@ -10,7 +10,7 @@
     
     <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0e0318">
+    <meta name="theme-color" content="#070b12">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,20 +21,66 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <script>
+        (() => {
+            const previewTheme = new URLSearchParams(window.location.search).get('theme');
+            const allowedThemes = ['royal', 'stadium', 'burgundy'];
+            if (allowedThemes.includes(previewTheme)) {
+                document.documentElement.dataset.theme = previewTheme;
+            }
+        })();
+    </script>
+
     <style>
         :root {
-            --surface-color: #0e0318;       /* Deeper obsidian-purple background */
-            --card-bg: #1c092d;             /* Rich plum card container */
+            --surface-color: #070b12;       /* Stadium-night navy */
+            --card-bg: #111a28;             /* Floodlit slate card */
             --card-border: rgba(255, 255, 255, 0.09); /* Subtle glass edge */
             --primary-color: #00ff87;        /* FPL Green - RESERVED FOR KEY STATS */
-            --accent-color: #00f5ff;         /* Cyan accent for secondary elements */
-            --ice-blue: #80d4ff;             /* Ice blue for cold/low stats */
-            --text-color: #ffffff;           /* Clean white headers & names */
-            --text-muted: #bdaecf;          /* High-legibility lavender subtext */
+            --accent-color: #d2b06f;         /* Aged trophy brass */
+            --ice-blue: #bdcbd8;             /* Floodlight silver-blue */
+            --text-color: #f3ede2;           /* Warm stadium ivory */
+            --text-muted: #adb9c8;           /* Slate supporting copy */
+            --text-warm: #e1c28b;            /* Trophy-room champagne */
+            --text-violet: #91a3b8;          /* Steel-blue tertiary labels */
             --border-subtle: rgba(255, 255, 255, 0.06);
             --danger-color: #ff4b4b;        /* Crisp red for hits & low ranks */
             --gold-color: #ffc72c;          /* Refined gold for winners & 1st place */
             --silver-color: #d1d5db;        /* Metallic silver for runner-up prizes */
+        }
+
+        /* Optional palette previews. Rank and prize colours stay unchanged. */
+        :root[data-theme="royal"] {
+            --surface-color: #09070d;
+            --card-bg: #1b1120;
+            --accent-color: #b98a43;
+            --ice-blue: #bbb5b0;
+            --text-color: #f0e7d9;
+            --text-muted: #aaa3aa;
+            --text-warm: #d5b274;
+            --text-violet: #918893;
+        }
+
+        :root[data-theme="stadium"] {
+            --surface-color: #070b12;
+            --card-bg: #111a28;
+            --accent-color: #d2b06f;
+            --ice-blue: #bdcbd8;
+            --text-color: #f3ede2;
+            --text-muted: #adb9c8;
+            --text-warm: #e1c28b;
+            --text-violet: #91a3b8;
+        }
+
+        :root[data-theme="burgundy"] {
+            --surface-color: #12080d;
+            --card-bg: #2a101c;
+            --accent-color: #d4a06f;
+            --ice-blue: #d8c5cd;
+            --text-color: #f5e9df;
+            --text-muted: #cbb3bd;
+            --text-warm: #e6c092;
+            --text-violet: #bd879d;
         }
 
         * {
@@ -246,9 +292,9 @@
             padding: 0 2px;
         }
         .carousel-nav-btn {
-            background: var(--card-bg);
+            background: transparent;
             color: var(--text-color);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             padding: 6px 14px;
             border-radius: 8px;
             cursor: pointer;
@@ -258,7 +304,7 @@
         }
         .carousel-nav-btn:hover:not(:disabled) {
             border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
         }
         .carousel-nav-btn:disabled {
             opacity: 0.3;
@@ -299,9 +345,9 @@
             letter-spacing: 0.5px;
         }
         .badge-deadline {
-            background: rgba(0, 209, 255, 0.08);
+            background: rgba(197, 164, 210, 0.10);
             color: var(--ice-blue);
-            border: 1px solid rgba(0, 209, 255, 0.24);
+            border: 1px solid rgba(197, 164, 210, 0.28);
             padding: 3px 7px;
             border-radius: 6px;
             font-size: 0.58rem;
@@ -411,8 +457,7 @@
             position: relative;
             overflow: visible;
             z-index: 1;
-            border-color: var(--item-accent);
-            border-width: 2px;
+            border: 2px solid var(--item-accent) !important;
             padding: 12px 14px;
             margin-bottom: 0;
             -webkit-tap-highlight-color: transparent;
@@ -480,10 +525,15 @@
         }
 
         .manager-item.rank-card-4 {
-            --item-accent: rgba(184, 91, 160, 0.28);
+            --item-accent: rgba(169, 61, 85, 0.34);
             background: linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: 0 0 0 1px rgba(184, 91, 160, 0.05), 0 0 22px rgba(184, 91, 160, 0.08), 0 8px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 0 1px rgba(169, 61, 85, 0.07), 0 0 22px rgba(169, 61, 85, 0.1), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
+
+        .manager-item.rank-card-1 .manager-score-value { color: var(--gold-color); }
+        .manager-item.rank-card-2 .manager-score-value { color: var(--silver-color); }
+        .manager-item.rank-card-3 .manager-score-value { color: #a86f46; }
+        .manager-item.rank-card-4 .manager-score-value { color: #9a5968; }
 
         .manager-glow-wrap.transfer-positive::before,
         .manager-glow-wrap.transfer-negative::before {
@@ -594,7 +644,7 @@
         }
 
         .manager-score-label {
-            color: var(--text-muted);
+            color: var(--text-violet);
             font-size: 0.58rem;
             font-weight: 800;
             letter-spacing: 0.12em;
@@ -668,6 +718,11 @@
         .form-position.form-rank-2 { color: #17191d; background: var(--silver-color); border-color: var(--silver-color); }
         .form-position.form-rank-3 { color: #1d0f08; background: #c98245; border-color: #c98245; }
         .form-position.form-rank-4 { color: #fff; background: #7b2639; border-color: #a93d55; }
+
+        .form-position[class*="form-rank-"] {
+            background-image: linear-gradient(145deg, rgba(255,255,255,0.36) 0%, rgba(255,255,255,0.08) 34%, rgba(0,0,0,0.16) 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 7px rgba(0,0,0,0.28);
+        }
 
         .form-average {
             margin-left: 5px;
@@ -801,8 +856,9 @@
             border-color: rgba(255, 255, 255, 0.1);
             background:
                 linear-gradient(115deg, rgba(255,255,255,0.04), transparent 31%),
-                linear-gradient(145deg, rgba(34, 18, 45, 0.98), rgba(22, 11, 31, 0.99));
-            box-shadow: 0 0 24px rgba(118, 62, 155, 0.08), 0 10px 26px rgba(0, 0, 0, 0.24);
+                linear-gradient(145deg, rgba(255,255,255,0.025), rgba(0,0,0,0.16)),
+                var(--card-bg);
+            box-shadow: 0 0 24px rgba(92, 119, 145, 0.07), 0 10px 26px rgba(0, 0, 0, 0.24);
         }
 
         .support-panel::before {
@@ -822,8 +878,294 @@
             z-index: 1;
         }
 
+        .profile-carousel-shell {
+            margin-top: 24px;
+            padding: 0;
+        }
+
+        .profile-carousel-header {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .profile-carousel-title {
+            color: #fff;
+            font-size: 0.86rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-align: center;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-carousel-track {
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-slide {
+            min-height: 430px;
+            padding: 16px 14px;
+            margin-bottom: 0;
+            background: linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+        }
+
+        .season-record-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(5, 1, 12, 0.2);
+        }
+
+        .season-record-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            min-height: 79px;
+            padding: 11px 13px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .season-record-row:last-child { border-bottom: 0; }
+        .season-record-label { color: #fff; font-size: 0.82rem; font-weight: 700; }
+        .season-record-meta { color: var(--text-muted); font-size: 0.72rem; margin-top: 3px; }
+        .season-record-value { color: #fff; font-size: 0.96rem; font-weight: 800; text-align: right; }
+        .season-record-value.record-gold,
+        .season-record-value.record-ice { color: #fff; }
+        .season-record-value.transfer { max-width: 170px; font-size: 0.78rem; line-height: 1.25; }
+        .season-record-difference { display: block; margin-top: 2px; font-size: 0.72rem; }
+        .season-record-difference.positive { color: var(--primary-color); }
+        .season-record-difference.negative { color: var(--danger-color); }
+
+        .profile-identity {
+            min-width: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        .profile-card-header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(110px, 1fr) minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+            padding: 5px 3px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .profile-overall {
+            color: var(--gold-color);
+            font-size: 1.7rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -2px;
+            text-align: right;
+            margin: 0;
+        }
+
+        .profile-overall span {
+            display: block;
+            margin: 3px 0 0;
+            color: var(--text-muted);
+            font-size: 0.62rem;
+            letter-spacing: 1px;
+        }
+
+        .profile-manager-name { color: #fff; font-size: 0.94rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-team-name { color: var(--text-muted); font-size: 0.74rem; margin-top: 3px; }
+        .profile-formation { color: #fff; font-size: 0.68rem; font-weight: 700; margin-top: 3px; }
+
+        .profile-title-block {
+            margin: 0;
+            padding: 8px 9px;
+            border: 1px solid rgba(0, 255, 135, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 255, 135, 0.045);
+            text-align: center;
+        }
+
+        .profile-title-name { color: var(--gold-color); font-size: 0.78rem; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
+        .profile-title-explanation { color: var(--text-muted); font-size: 0.62rem; line-height: 1.25; margin-top: 3px; }
+
+        .profile-rating-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+
+        .profile-rating {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 5px;
+            padding: 8px 9px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .profile-rating strong { color: #fff; font-size: 1rem; }
+        .profile-rating.highest strong { color: var(--gold-color); }
+        .profile-rating-label { color: var(--text-violet); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .profile-rating-value { display: flex; align-items: baseline; gap: 4px; }
+        .rating-change { font-size: 0.58rem; font-weight: 800; }
+        .rating-change.up { color: var(--primary-color); }
+        .rating-change.down { color: var(--danger-color); }
+
+        .profile-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .profile-stat {
+            min-width: 0;
+            padding: 9px 5px;
+            border-right: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .profile-stat:nth-child(4n) { border-right: 0; }
+        .profile-stat:nth-last-child(-n + 4) { border-bottom: 0; }
+        .profile-stat-value { color: #fff; font-size: 0.82rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-stat-value.positive { color: var(--primary-color); }
+        .profile-stat-value.negative { color: var(--danger-color); }
+        .profile-stat-label { color: var(--text-violet); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.4px; margin-top: 3px; text-transform: uppercase; white-space: nowrap; }
+
+        @media (max-width: 390px) {
+            .profile-slide { min-height: 448px; }
+            .profile-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .profile-stat:nth-child(2n) { border-right: 0; }
+            .profile-stat:nth-child(4n) { border-right: 0; }
+            .profile-stat:nth-last-child(-n + 4) { border-bottom: 1px solid var(--border-subtle); }
+            .profile-stat:nth-last-child(-n + 2) { border-bottom: 0; }
+        }
+
+        .period-standing-row {
+            position: relative;
+            margin: 0 0 8px;
+            padding: 10px 11px !important;
+            border: 1px solid var(--border-subtle) !important;
+            border-radius: 9px;
+            background: linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: 0 7px 18px rgba(0,0,0,0.22);
+            overflow: hidden;
+        }
+
+        .period-standing-row.rank-1 { border-color: rgba(255, 199, 44, 0.50) !important; }
+        .period-standing-row.rank-2 { border-color: rgba(209, 213, 219, 0.38) !important; }
+        .period-standing-row.rank-3 { border-color: rgba(201, 130, 69, 0.42) !important; }
+        .period-standing-row.rank-4 { border-color: rgba(169, 61, 85, 0.34) !important; }
+
+        .period-prize-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .period-prize {
+            padding: 10px 8px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.22);
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 5px 16px rgba(0,0,0,0.16);
+        }
+
+        .period-prize strong { display: block; margin-bottom: 3px; font-size: 0.75rem; }
+        .period-prize.winner { border-color: rgba(255,199,44,0.42); background: linear-gradient(145deg, rgba(255,199,44,0.11), rgba(0,0,0,0.12) 58%), #160b1f; }
+        .period-prize.winner strong { color: var(--gold-color); }
+        .period-prize.runner { border-color: rgba(209,213,219,0.34); background: linear-gradient(145deg, rgba(209,213,219,0.10), rgba(0,0,0,0.12) 58%), #160b1f; }
+        .period-prize.runner strong { color: var(--silver-color); }
+        .period-prize span { color: inherit; font-weight: 700; }
+
+        .overall-standings-section {
+            margin-top: 24px;
+        }
+
+        .overall-standings-head,
+        .overall-standing-tile {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(112px, 1.35fr) minmax(72px, 0.75fr) minmax(48px, 0.55fr);
+            align-items: center;
+            gap: 8px;
+        }
+
+        .overall-standings-head {
+            padding: 0 12px 8px;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .overall-standings-head span:nth-child(n + 2) { text-align: center; }
+        .overall-standings-head span:last-child { text-align: right; }
+
+        .overall-standing-tile {
+            --overall-accent: rgba(255,255,255,0.14);
+            margin-bottom: 8px;
+            padding: 11px 12px;
+            border: 2px solid var(--overall-accent);
+            border-radius: 12px;
+            background: linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: 0 7px 18px rgba(0,0,0,0.22);
+        }
+
+        .overall-standing-tile.rank-1 { --overall-accent: rgba(255,199,44,0.50); }
+        .overall-standing-tile.rank-2 { --overall-accent: rgba(209,213,219,0.38); }
+        .overall-standing-tile.rank-3 { --overall-accent: rgba(201,130,69,0.42); }
+        .overall-standing-tile.rank-4 { --overall-accent: rgba(169,61,85,0.34); }
+
+        .overall-tile-name {
+            min-width: 0;
+            overflow: hidden;
+            color: var(--text-color);
+            font-size: 0.86rem;
+            font-weight: 750;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .overall-tile-chips { min-width: 0; text-align: center; }
+        .overall-tile-points { color: var(--text-color); font-size: 0.9rem; font-weight: 850; text-align: center; white-space: nowrap; }
+        .overall-standing-tile.rank-1 .overall-tile-points { color: var(--gold-color); }
+        .overall-standing-tile.rank-2 .overall-tile-points { color: var(--silver-color); }
+        .overall-standing-tile.rank-3 .overall-tile-points { color: #a86f46; }
+        .overall-standing-tile.rank-4 .overall-tile-points { color: #9a5968; }
+        .overall-tile-prize { font-size: 0.83rem; text-align: right; white-space: nowrap; }
+
+        @media (max-width: 390px) {
+            .overall-standings-head,
+            .overall-standing-tile {
+                grid-template-columns: minmax(0, 1fr) minmax(94px, 1.1fr) 66px 42px;
+                gap: 5px;
+            }
+            .overall-standing-tile { padding: 10px 9px; }
+            .overall-tile-name { font-size: 0.8rem; }
+            .overall-tile-points { font-size: 0.82rem; }
+            .overall-tile-prize { font-size: 0.75rem; }
+        }
+
         .tracker-shell {
-            padding: 16px 14px 14px;
+            padding: 0;
             margin-bottom: 18px;
         }
 
@@ -859,9 +1201,15 @@
 
         .period-slide-card {
             margin-bottom: 0;
-            background: rgba(0, 0, 0, 0.12);
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
             box-shadow: none;
+            backdrop-filter: none;
         }
+
+        .period-slide-card::before { display: none; }
 
         .transfer-line {
             display: block;
@@ -1086,11 +1434,16 @@
         let currentGwSlideIdx = 0;
         let totalGwSlides = 0;
         let gwDataStore = [];
+        let gwCarouselInitialized = false;
         let gwButtonScrollActive = false;
         let gwButtonScrollTimer = null;
         let gwButtonScrollToken = 0;
         let currentPeriodSlideIdx = 0;
         let totalPeriodSlides = 0;
+        let currentProfileSlideIdx = 0;
+        let totalProfileSlides = 0;
+        let periodCarouselInitialized = false;
+        let profileCarouselInitialized = false;
 
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -1358,10 +1711,157 @@
             }
         }
 
+        function escapeProfileHtml(value) {
+            return String(value === undefined || value === null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function signedProfileValue(value) {
+            const number = Number(value) || 0;
+            return number > 0 ? `+${number}` : String(number);
+        }
+
+        function orderedManagerProfiles(profiles) {
+            const items = Array.isArray(profiles) ? profiles.slice() : [];
+            if (items.length < 2) return items;
+
+            const storageKey = 'barucsLeagueManagerProfileOrder';
+            try {
+                const savedOrder = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+                const currentKeys = items.map(item => String(item.managerName || '').toLowerCase());
+                const validSavedOrder = savedOrder.length === currentKeys.length &&
+                    savedOrder.every(key => currentKeys.includes(key));
+
+                if (validSavedOrder) {
+                    return savedOrder.map(key => items.find(item => String(item.managerName || '').toLowerCase() === key));
+                }
+
+                for (let index = items.length - 1; index > 0; index--) {
+                    const randomIndex = Math.floor(Math.random() * (index + 1));
+                    [items[index], items[randomIndex]] = [items[randomIndex], items[index]];
+                }
+                sessionStorage.setItem(storageKey, JSON.stringify(items.map(item => String(item.managerName || '').toLowerCase())));
+            } catch (error) {
+                items.sort(() => Math.random() - 0.5);
+            }
+            return items;
+        }
+
+        function buildManagerProfileCarousel(data) {
+            const records = data.seasonRecords || {};
+            const managers = orderedManagerProfiles(data.managerProfiles || []);
+            if (managers.length === 0) return '';
+
+            const highest = records.highestScore || {};
+            const lowest = records.lowestScore || {};
+            const valuable = records.mostValuableTeam || {};
+            const bestTransfer = records.bestTransfer || {};
+            const worstTransfer = records.worstTransfer || {};
+            totalProfileSlides = managers.length + 1;
+            const ratingKeys = ['attack', 'defence', 'scouting', 'tactics', 'determination', 'leadership'];
+            const highestRatings = {};
+            const highestRatingCounts = {};
+            ratingKeys.forEach(key => {
+                highestRatings[key] = Math.max(...managers.map(manager => Number((manager.ratings || {})[key]) || 0));
+                highestRatingCounts[key] = managers.filter(manager => Number((manager.ratings || {})[key]) === highestRatings[key]).length;
+            });
+
+            const recordRow = (label, meta, value, className = '') => `
+                <li class="season-record-row">
+                    <div>
+                        <div class="season-record-label">${escapeProfileHtml(label)}</div>
+                        <div class="season-record-meta">${escapeProfileHtml(meta)}</div>
+                    </div>
+                    <div class="season-record-value ${className}">${value}</div>
+                </li>`;
+
+            const transferValue = transfer => {
+                if (!transfer || !transfer.playerIn) return '—';
+                const difference = Number(transfer.difference) || 0;
+                const differenceClass = difference > 0 ? 'positive' : (difference < 0 ? 'negative' : '');
+                return `${escapeProfileHtml(transfer.playerOut)} → ${escapeProfileHtml(transfer.playerIn)}<span class="season-record-difference ${differenceClass}">${signedProfileValue(difference)} pts</span>`;
+            };
+
+            let carousel = `
+                <div class="profile-carousel-shell">
+                    <div class="profile-carousel-header">
+                        <button id="prevProfileBtn" class="carousel-nav-btn" onclick="moveProfileSlide(-1)" aria-label="Previous profile">‹ Prev</button>
+                        <div id="profileSlideTitle" class="profile-carousel-title">Season Records</div>
+                        <button id="nextProfileBtn" class="carousel-nav-btn" onclick="moveProfileSlide(1)" aria-label="Next profile">Next ›</button>
+                    </div>
+                    <div class="gw-progress" id="profile-progress">
+                        ${Array.from({ length: totalProfileSlides }, (_, index) => `<button class="gw-progress-dot" onclick="goToProfileSlide(${index})" aria-label="Go to ${index === 0 ? 'Season Records' : 'manager profile ' + index}"></button>`).join('')}
+                    </div>
+                    <div class="carousel-container profile-carousel-track" id="profile-carousel-track">
+                        <section class="card support-panel carousel-card profile-slide" id="profile-slide-0" data-profile-title="Season Records">
+                            <ul class="season-record-list">
+                                ${recordRow('Highest GW Score', `${highest.managerName || '—'}${highest.gameweek ? ` · GW${highest.gameweek}` : ''}`, highest.points !== undefined ? escapeProfileHtml(highest.points) : '—', 'record-gold')}
+                                ${recordRow('Lowest GW Score', `${lowest.managerName || '—'}${lowest.gameweek ? ` · GW${lowest.gameweek}` : ''}`, lowest.points !== undefined ? escapeProfileHtml(lowest.points) : '—', 'record-ice')}
+                                ${recordRow('Most Valuable Team', valuable.managerName || '—', valuable.teamValue ? `£${Number(valuable.teamValue).toFixed(1)}m` : '—', 'record-gold')}
+                                ${recordRow('Best Transfer', `${bestTransfer.managerName || '—'}${bestTransfer.gameweek ? ` · GW${bestTransfer.gameweek}` : ''}`, transferValue(bestTransfer), 'transfer')}
+                                ${recordRow('Worst Transfer', `${worstTransfer.managerName || '—'}${worstTransfer.gameweek ? ` · GW${worstTransfer.gameweek}` : ''}`, transferValue(worstTransfer), 'transfer')}
+                            </ul>
+                        </section>`;
+
+            managers.forEach((manager, managerIndex) => {
+                const slideIndex = managerIndex + 1;
+                const ratings = manager.ratings || {};
+                const stats = manager.stats || {};
+                const transferReturn = Number(stats.transferReturn) || 0;
+                const transferClass = transferReturn > 0 ? 'positive' : (transferReturn < 0 ? 'negative' : '');
+                const changes = manager.ratingChanges || {};
+                const ratingItems = [
+                    ['Attack', 'attack', ratings.attack], ['Defence', 'defence', ratings.defence],
+                    ['Scouting', 'scouting', ratings.scouting], ['Tactics', 'tactics', ratings.tactics],
+                    ['Determination', 'determination', ratings.determination], ['Leadership', 'leadership', ratings.leadership]
+                ];
+                const statItems = [
+                    ['Transfers', stats.transfers], ['Transfer pts', signedProfileValue(transferReturn), transferClass],
+                    ['Goals', stats.goals], ['Assists', stats.assists],
+                    ['Team value', `£${Number(stats.teamValue || 0).toFixed(1)}m`], ['Bench pts', stats.benchPoints],
+                    ['Own goals', stats.ownGoals], ['Red cards', stats.redCards]
+                ];
+
+                carousel += `
+                    <section class="card support-panel carousel-card profile-slide" id="profile-slide-${slideIndex}" data-profile-title="${escapeProfileHtml(manager.managerName)}">
+                        <div class="profile-card-header">
+                            <div class="profile-identity">
+                                <div class="profile-manager-name">${escapeProfileHtml(manager.managerName)}</div>
+                                <div class="profile-team-name">${escapeProfileHtml(manager.teamName)}</div>
+                                <div class="profile-formation">${escapeProfileHtml(manager.preferredFormation)}</div>
+                            </div>
+                            <div class="profile-title-block">
+                                <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
+                                <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
+                            </div>
+                            <div class="profile-overall">${escapeProfileHtml(manager.overallRating)}<span>MANAGER RATING</span></div>
+                        </div>
+                        <div class="profile-rating-grid">
+                            ${ratingItems.map(([label, key, value]) => {
+                                const change = Number(changes[key]) || 0;
+                                const changeHtml = change === 0 ? '' : `<span class="rating-change ${change > 0 ? 'up' : 'down'}">${change > 0 ? '▲' : '▼'}${Math.abs(change)}</span>`;
+                                const uniqueHighest = Number(value) === highestRatings[key] && highestRatingCounts[key] === 1;
+                                return `<div class="profile-rating ${uniqueHighest ? 'highest' : ''}"><span class="profile-rating-label">${label}</span><span class="profile-rating-value"><strong>${escapeProfileHtml(value)}</strong>${changeHtml}</span></div>`;
+                            }).join('')}
+                        </div>
+                        <div class="profile-stat-grid">
+                            ${statItems.map(([label, value, valueClass = '']) => `<div class="profile-stat"><div class="profile-stat-value ${valueClass}">${escapeProfileHtml(value)}</div><div class="profile-stat-label">${label}</div></div>`).join('')}
+                        </div>
+                    </section>`;
+            });
+
+            return carousel + '</div></div>';
+        }
+
         function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
             totalPeriodSlides = 0;
+            totalProfileSlides = 0;
 
             // 1. Gameweek Tracker Carousel Parsing with Deduplication
             gwDataStore = [];
@@ -1580,7 +2080,7 @@
 
                 if (activePeriods.length > 0) {
                     totalPeriodSlides = activePeriods.length;
-                    html += `<div class="card support-panel tracker-shell"><div class="section-title">Manager of the Month</div>`;
+                    html += `<div class="tracker-shell"><div class="section-title">Manager of the Month</div>`;
 
                     html += `
                         <div class="period-carousel-header ${activePeriods.length === 1 ? 'single-period' : ''}">
@@ -1604,29 +2104,34 @@
                             return str.startsWith('£') ? str : '£' + str;
                         };
 
+                        const rankedPeriodScores = (period.scores || [])
+                            .map(score => ({
+                                ...score,
+                                numericScore: Number(String(score.score === undefined || score.score === null ? 0 : score.score).replace(/[^0-9.-]/g, '')) || 0
+                            }))
+                            .sort((first, second) => second.numericScore - first.numericScore || String(first.name).localeCompare(String(second.name)));
+
                         html += `
-                            <div class="card carousel-card period-slide-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
+                            <div class="carousel-card period-slide-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
                                 <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
-                                    ${period.scores.map((s, idx, arr) => {
-                                        let scoreDisplay = String(s.score !== undefined && s.score !== null ? s.score : '0');
-                                        if (idx === arr.length - 1 && !scoreDisplay.includes('💩')) {
-                                            scoreDisplay += ' 💩';
-                                        }
+                                    ${rankedPeriodScores.map((s, idx) => {
+                                        const scoreDisplay = String(s.numericScore);
                                         const teamName = TEAM_NAMES[s.name] || '';
+                                        const scoreColour = idx === 0 ? 'var(--gold-color)' : (idx === 1 ? 'var(--silver-color)' : (idx === 2 ? '#a86f46' : '#9a5968'));
                                         return `
-                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border-subtle);">
+                                            <li class="period-standing-row rank-${idx + 1}" style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div>
                                                     <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">${s.name}</div>
                                                     ${teamName ? `<div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
                                                 </div>
-                                                <span style="font-weight: 700; font-size: 1rem; color: var(--primary-color);">${scoreDisplay}</span>
+                                                <span style="font-weight: 800; font-size: 1rem; color: ${scoreColour};">${scoreDisplay}</span>
                                             </li>
                                         `;
                                     }).join('')}
                                 </ul>
-                                <div style="font-size: 0.82rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                                    <div style="margin-bottom: 4px;">🏆 <strong style="color: #fff;">Winner:</strong> ${period.topScorer || 'TBD'} <span style="color: var(--gold-color); font-weight: 700;">(${formatPrize(period.winnerPrize)})</span></div>
-                                    <div>🥈 <strong style="color: #fff;">Runner-up:</strong> ${period.runnerName || 'TBD'} <span style="color: var(--silver-color); font-weight: 700;">(${formatPrize(period.runnerPrize)})</span></div>
+                                <div class="period-prize-grid">
+                                    <div class="period-prize winner"><strong>Winner</strong>${period.topScorer || 'TBD'} <span>– ${formatPrize(period.winnerPrize)}</span></div>
+                                    <div class="period-prize runner"><strong>Runner-up</strong>${period.runnerName || 'TBD'} <span>– ${formatPrize(period.runnerPrize)}</span></div>
                                 </div>
                             </div>
                         `;
@@ -1677,19 +2182,12 @@
                 });
 
                 html += `
-                    <div class="card support-panel" style="margin-top: 24px;">
+                    <div class="overall-standings-section">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;">
-                                        <th style="width: 27%; padding: 0 2px 10px 2px; font-weight: 700;">Manager</th>
-                                        <th style="width: 36%; padding: 0 2px 10px 2px; font-weight: 700; text-align: center;">Chips</th>
-                                        <th style="width: 21%; padding: 0 2px 10px 2px; font-weight: 700; text-align: center;">Points</th>
-                                        <th style="width: 16%; padding: 0 2px 10px 2px; font-weight: 700; text-align: right;">Prize</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                        <div class="overall-standings-head">
+                            <span>Manager</span><span>Chips</span><span>Points</span><span>Prize</span>
+                        </div>
+                        <div class="overall-standing-list">
                                     ${data.overall.rows.map((row, rIdx) => {
                                         const playerName = row[playerIdx] || '';
                                         const points = row[pointsIdx] !== undefined ? row[pointsIdx] : '';
@@ -1719,31 +2217,21 @@
                                         const chipsHtml = renderChipsHtml(chipMap[pKey], activeChipMap[pKey]);
 
                                         return `
-                                            <tr style="border-bottom: 1px solid var(--border-subtle);">
-                                                <td style="width: 27%; padding: 12px 2px; font-weight: 600; color: #ffffff; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                    ${playerName}
-                                                </td>
-                                                <td style="width: 36%; padding: 12px 2px; text-align: center;">
-                                                    ${chipsHtml}
-                                                </td>
-                                                <td style="width: 21%; padding: 12px 2px; font-weight: 800; color: var(--primary-color); font-size: 0.92rem; text-align: center; white-space: nowrap;">
-                                                    ${points} ${medal}
-                                                </td>
-                                                <td style="width: 16%; padding: 12px 2px; font-size: 0.85rem; text-align: right; white-space: nowrap;">
-                                                    ${prizeHtml}
-                                                </td>
-                                            </tr>
+                                            <div class="overall-standing-tile rank-${rIdx + 1}">
+                                                <div class="overall-tile-name">${playerName}</div>
+                                                <div class="overall-tile-chips">${chipsHtml}</div>
+                                                <div class="overall-tile-points">${points} ${medal}</div>
+                                                <div class="overall-tile-prize">${prizeHtml}</div>
+                                            </div>
                                         `;
                                     }).join('')}
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 `;
             }
 
             // 4. Transfer Market season totals
-            if (Array.isArray(data.transferMarket) && data.transferMarket.length > 0) {
+            if (false && Array.isArray(data.transferMarket) && data.transferMarket.length > 0) {
                 const signed = value => `${Number(value) > 0 ? '+' : ''}${Number(value) || 0}`;
                 const netColour = value => Number(value) > 0 ? 'var(--primary-color)' : (Number(value) < 0 ? 'var(--danger-color)' : 'var(--text-muted)');
                 html += `<div class="card support-panel" style="margin-top:24px;"><div class="section-title" style="margin-bottom:16px;">Transfer Market</div><div style="overflow-x:auto;"><table style="width:100%;table-layout:fixed;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid var(--border-subtle);color:var(--text-muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.7px;"><th style="width:34%;padding:0 2px 10px;text-align:left;">Manager</th><th style="width:18%;padding:0 2px 10px;text-align:center;">Transfers</th><th style="width:14%;padding:0 2px 10px;text-align:center;">Hits</th><th style="width:16%;padding:0 2px 10px;text-align:center;">Points</th><th style="width:18%;padding:0 2px 10px;text-align:right;">Net</th></tr></thead><tbody>${data.transferMarket.map(row => `<tr style="border-bottom:1px solid var(--border-subtle);font-size:.78rem;"><td style="padding:11px 2px;color:#fff;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${row.managerName}</td><td style="padding:11px 2px;text-align:center;">${Number(row.transfers)||0}</td><td style="padding:11px 2px;text-align:center;color:${Number(row.hits)>0?'var(--danger-color)':'var(--text-muted)'};">${Number(row.hits)>0?'-'+Number(row.hits):'0'}</td><td style="padding:11px 2px;text-align:center;">${signed(row.points)}</td><td style="padding:11px 2px;text-align:right;font-weight:900;color:${netColour(row.net)};">${signed(row.net)}</td></tr>`).join('')}</tbody></table></div></div>`;
@@ -1782,7 +2270,7 @@
             }
 
             // 5. Accolades Card
-            if (data.accolades || topWeeksWonPlayer || computedWeeksLostPlayer) {
+            if (false && (data.accolades || topWeeksWonPlayer || computedWeeksLostPlayer)) {
                 const acc = data.accolades || {};
 
                 const getAccObj = (keys) => {
@@ -1865,6 +2353,8 @@
                 `;
             }
 
+            html += buildManagerProfileCarousel(data);
+
             appDiv.innerHTML = html;
 
             document.querySelectorAll('.support-panel table:has(th:nth-child(5)) tbody tr').forEach(row => {
@@ -1883,14 +2373,44 @@
             if (totalPeriodSlides > 0) {
                 initPeriodCarousel();
             }
+
+            if (totalProfileSlides > 0) {
+                initProfileCarousel();
+            }
+        }
+
+        function enableEdgeWrapSwipe(track, getCurrentIndex, getTotalSlides, moveSlide) {
+            let touchStartX = null;
+
+            track.addEventListener('touchstart', event => {
+                touchStartX = event.touches && event.touches[0] ? event.touches[0].clientX : null;
+            }, { passive: true });
+
+            track.addEventListener('touchend', event => {
+                if (touchStartX === null || !event.changedTouches || !event.changedTouches[0]) return;
+                const distance = event.changedTouches[0].clientX - touchStartX;
+                touchStartX = null;
+                if (Math.abs(distance) < 45) return;
+
+                const currentIndex = getCurrentIndex();
+                const totalSlides = getTotalSlides();
+                if (distance > 0 && currentIndex === 0) moveSlide(-1);
+                if (distance < 0 && currentIndex === totalSlides - 1) moveSlide(1);
+            }, { passive: true });
         }
 
         function initGwCarousel() {
             const track = document.getElementById('gw-carousel-track');
             if (!track) return;
 
-            currentGwSlideIdx = totalGwSlides - 1;
+            if (!gwCarouselInitialized) {
+                currentGwSlideIdx = totalGwSlides - 1;
+                gwCarouselInitialized = true;
+            } else {
+                currentGwSlideIdx = Math.min(currentGwSlideIdx, totalGwSlides - 1);
+            }
             scrollGwCarousel(false);
+            enableEdgeWrapSwipe(track, () => currentGwSlideIdx, () => totalGwSlides, moveGwSlide);
 
             track.addEventListener('scroll', () => {
                 // Previous/Next already selected the destination slide.
@@ -1944,8 +2464,8 @@
             const statusEl = document.getElementById('gwSlideStatus');
             const dots = document.querySelectorAll('#gw-progress .gw-progress-dot');
 
-            if (prevBtn) prevBtn.disabled = (currentGwSlideIdx === 0);
-            if (nextBtn) nextBtn.disabled = (currentGwSlideIdx === totalGwSlides - 1);
+            if (prevBtn) prevBtn.disabled = totalGwSlides < 2;
+            if (nextBtn) nextBtn.disabled = totalGwSlides < 2;
 
             if (titleEl && gwDataStore[currentGwSlideIdx]) {
                 const gwInfo = gwDataStore[currentGwSlideIdx];
@@ -2016,11 +2536,9 @@
         }
 
         function moveGwSlide(direction) {
-            const nextIdx = currentGwSlideIdx + direction;
-            if (nextIdx >= 0 && nextIdx < totalGwSlides) {
-                currentGwSlideIdx = nextIdx;
-                scrollGwCarousel(true, true);
-            }
+            if (totalGwSlides < 1) return;
+            currentGwSlideIdx = (currentGwSlideIdx + direction + totalGwSlides) % totalGwSlides;
+            scrollGwCarousel(true, true);
         }
 
         function goToGwSlide(index) {
@@ -2034,8 +2552,14 @@
             const track = document.getElementById('period-carousel');
             if (!track) return;
 
-            currentPeriodSlideIdx = totalPeriodSlides - 1;
+            if (!periodCarouselInitialized) {
+                currentPeriodSlideIdx = totalPeriodSlides - 1;
+                periodCarouselInitialized = true;
+            } else {
+                currentPeriodSlideIdx = Math.min(currentPeriodSlideIdx, totalPeriodSlides - 1);
+            }
             scrollPeriodCarousel(false);
+            enableEdgeWrapSwipe(track, () => currentPeriodSlideIdx, () => totalPeriodSlides, movePeriodSlide);
 
             track.addEventListener('scroll', () => {
                 const slides = Array.from(track.querySelectorAll('.carousel-card'));
@@ -2066,8 +2590,8 @@
             const slide = document.getElementById(`period-slide-${currentPeriodSlideIdx}`);
             const dots = document.querySelectorAll('#period-progress .gw-progress-dot');
 
-            if (prevBtn) prevBtn.disabled = currentPeriodSlideIdx === 0;
-            if (nextBtn) nextBtn.disabled = currentPeriodSlideIdx === totalPeriodSlides - 1;
+            if (prevBtn) prevBtn.disabled = totalPeriodSlides < 2;
+            if (nextBtn) nextBtn.disabled = totalPeriodSlides < 2;
             if (titleEl && slide) titleEl.textContent = slide.dataset.periodTitle || `Period ${currentPeriodSlideIdx + 1}`;
 
             dots.forEach((dot, index) => {
@@ -2091,17 +2615,90 @@
         }
 
         function movePeriodSlide(direction) {
-            const nextIdx = currentPeriodSlideIdx + direction;
-            if (nextIdx >= 0 && nextIdx < totalPeriodSlides) {
-                currentPeriodSlideIdx = nextIdx;
-                scrollPeriodCarousel(true);
-            }
+            if (totalPeriodSlides < 1) return;
+            currentPeriodSlideIdx = (currentPeriodSlideIdx + direction + totalPeriodSlides) % totalPeriodSlides;
+            scrollPeriodCarousel(true);
         }
 
         function goToPeriodSlide(index) {
             if (index >= 0 && index < totalPeriodSlides) {
                 currentPeriodSlideIdx = index;
                 scrollPeriodCarousel(true);
+            }
+        }
+
+        function initProfileCarousel() {
+            const track = document.getElementById('profile-carousel-track');
+            if (!track) return;
+
+            if (!profileCarouselInitialized) {
+                currentProfileSlideIdx = 0;
+                profileCarouselInitialized = true;
+            } else {
+                currentProfileSlideIdx = Math.min(currentProfileSlideIdx, totalProfileSlides - 1);
+            }
+            scrollProfileCarousel(false);
+            enableEdgeWrapSwipe(track, () => currentProfileSlideIdx, () => totalProfileSlides, moveProfileSlide);
+
+            track.addEventListener('scroll', () => {
+                const slides = Array.from(track.querySelectorAll('.profile-slide'));
+                if (slides.length === 0) return;
+                const firstOffset = slides[0].offsetLeft;
+                let closestIndex = 0;
+                let closestDistance = Infinity;
+
+                slides.forEach((slide, index) => {
+                    const distance = Math.abs(track.scrollLeft - (slide.offsetLeft - firstOffset));
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestIndex = index;
+                    }
+                });
+
+                if (closestIndex !== currentProfileSlideIdx) {
+                    currentProfileSlideIdx = closestIndex;
+                    updateProfileCarouselHeader();
+                }
+            });
+        }
+
+        function updateProfileCarouselHeader() {
+            const prevBtn = document.getElementById('prevProfileBtn');
+            const nextBtn = document.getElementById('nextProfileBtn');
+            const titleEl = document.getElementById('profileSlideTitle');
+            const slide = document.getElementById(`profile-slide-${currentProfileSlideIdx}`);
+            const dots = document.querySelectorAll('#profile-progress .gw-progress-dot');
+
+            if (prevBtn) prevBtn.disabled = totalProfileSlides < 2;
+            if (nextBtn) nextBtn.disabled = totalProfileSlides < 2;
+            if (titleEl) titleEl.textContent = 'Season Records';
+            dots.forEach((dot, index) => dot.classList.toggle('active', index === currentProfileSlideIdx));
+        }
+
+        function scrollProfileCarousel(smooth = true) {
+            const track = document.getElementById('profile-carousel-track');
+            const slide = document.getElementById(`profile-slide-${currentProfileSlideIdx}`);
+            if (track && slide) {
+                const firstSlide = track.querySelector('.profile-slide');
+                const firstOffset = firstSlide ? firstSlide.offsetLeft : 0;
+                track.scrollTo({
+                    left: slide.offsetLeft - firstOffset,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
+            }
+            updateProfileCarouselHeader();
+        }
+
+        function moveProfileSlide(direction) {
+            if (totalProfileSlides < 1) return;
+            currentProfileSlideIdx = (currentProfileSlideIdx + direction + totalProfileSlides) % totalProfileSlides;
+            scrollProfileCarousel(true);
+        }
+
+        function goToProfileSlide(index) {
+            if (index >= 0 && index < totalProfileSlides) {
+                currentProfileSlideIdx = index;
+                scrollProfileCarousel(true);
             }
         }
 
