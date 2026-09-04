@@ -646,6 +646,22 @@
         .rank-down { color: var(--danger-color); }
         .rank-level { color: var(--text-muted); }
 
+        .standing-points-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .standing-movement {
+            min-width: 0;
+            font-size: 0.68rem;
+            font-weight: 850;
+            line-height: 1;
+            text-align: left;
+        }
+
         .manager-score {
             text-align: right;
         }
@@ -2151,7 +2167,7 @@
                             ? `<div class="players-left">${playersLeft} ${playersLeft === 1 ? 'player' : 'players'} left</div>`
                             : '';
                         const movementClass = meta.rankMovement > 0 ? 'rank-up' : (meta.rankMovement < 0 ? 'rank-down' : 'rank-level');
-                        const movementIcon = meta.rankMovement > 0 ? `▲ ${meta.rankMovement}` : (meta.rankMovement < 0 ? `▼ ${Math.abs(meta.rankMovement)}` : '—');
+                        const movementIcon = meta.rankMovement > 0 ? '▲' : (meta.rankMovement < 0 ? '▼' : '—');
                         const overallDisplay = meta.notParticipating
                             ? '–'
                             : `#${meta.overallRank || '–'} <span class="${movementClass}">${movementIcon}</span>`;
@@ -2264,6 +2280,44 @@
                             }))
                             .sort((first, second) => second.numericScore - first.numericScore || String(first.name).localeCompare(String(second.name)));
 
+                        const periodMovement = {};
+                        const periodWeekNumbers = (cleanTitle.match(/\d+/g) || []).map(Number);
+                        const periodStart = periodWeekNumbers[0];
+                        const periodEnd = periodWeekNumbers[1] || periodStart;
+                        const relevantGameweeks = Number.isFinite(periodStart)
+                            ? gwDataStore.filter(gameweek => {
+                                const number = Number(gameweek.gameweek !== undefined ? gameweek.gameweek : gameweek.gw);
+                                return number >= periodStart && number <= periodEnd && !gameweek.isUpcoming;
+                            })
+                            : [];
+
+                        rankedPeriodScores.forEach(score => {
+                            periodMovement[String(score.name || '').trim().toLowerCase()] = 0;
+                        });
+
+                        if (relevantGameweeks.length > 1) {
+                            const latestPeriodWeek = relevantGameweeks[relevantGameweeks.length - 1];
+                            const latestWeekPoints = {};
+                            (latestPeriodWeek.standings || []).forEach(manager => {
+                                latestWeekPoints[getManagerKey(manager)] = getManagerPoints(manager);
+                            });
+
+                            const keys = rankedPeriodScores.map(score => String(score.name || '').trim().toLowerCase());
+                            const currentScores = {};
+                            const previousScores = {};
+                            rankedPeriodScores.forEach(score => {
+                                const key = String(score.name || '').trim().toLowerCase();
+                                currentScores[key] = score.numericScore;
+                                previousScores[key] = score.numericScore - (latestWeekPoints[key] || 0);
+                            });
+
+                            const currentRanks = rankKeysByScore(keys, currentScores);
+                            const previousRanks = rankKeysByScore(keys, previousScores);
+                            keys.forEach(key => {
+                                periodMovement[key] = previousRanks[key] - currentRanks[key];
+                            });
+                        }
+
                         html += `
                             <div class="carousel-card period-slide-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
                                 <ul style="list-style: none; padding: 0; margin: 0 0 14px 0;">
@@ -2271,13 +2325,16 @@
                                         const scoreDisplay = String(s.numericScore);
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         const scoreColour = idx === 0 ? 'var(--gold-color)' : (idx === 1 ? 'var(--silver-color)' : 'var(--text-color)');
+                                        const movement = periodMovement[String(s.name || '').trim().toLowerCase()] || 0;
+                                        const movementClass = movement > 0 ? 'rank-up' : (movement < 0 ? 'rank-down' : 'rank-level');
+                                        const movementText = movement > 0 ? '▲' : (movement < 0 ? '▼' : '—');
                                         return `
                                             <li class="period-standing-row rank-${idx + 1}" style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div>
                                                     <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">${s.name}</div>
                                                     ${teamName ? `<div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
                                                 </div>
-                                                <span style="font-weight: 800; font-size: 1rem; color: ${scoreColour};">${scoreDisplay}</span>
+                                                <div class="standing-points-wrap"><span class="standing-movement ${movementClass}">${movementText}</span><span style="font-weight: 800; font-size: 1rem; color: ${scoreColour};">${scoreDisplay}</span></div>
                                             </li>
                                         `;
                                     }).join('')}
@@ -2315,12 +2372,17 @@
                 const chipMap = {};
                 const activeChipMap = {};
 
-                const latestStandings = gwDataStore.length > 0 ? gwDataStore[gwDataStore.length - 1].standings : [];
+                const latestPlayedGameweek = [...gwDataStore]
+                    .reverse()
+                    .find(gameweek => !gameweek.isUpcoming && Array.isArray(gameweek.standings) && gameweek.standings.length > 0);
+                const latestStandings = latestPlayedGameweek ? latestPlayedGameweek.standings : [];
+                const overallMovementMap = {};
                 if (latestStandings) {
                     latestStandings.forEach(m => {
                         const key = (m.managerName || m.name || '').trim().toLowerCase();
                         chipMap[key] = m.remainingChips;
                         activeChipMap[key] = m.activeChip;
+                        overallMovementMap[key] = Number((m.uiMeta || {}).rankMovement) || 0;
                     });
                 }
 
@@ -2351,11 +2413,14 @@
                                         const playerName = row[playerIdx] || '';
                                         const points = row[pointsIdx] !== undefined ? row[pointsIdx] : '';
                                         const teamName = TEAM_NAMES[playerName] || '';
+                                        const movement = overallMovementMap[String(playerName).trim().toLowerCase()] || 0;
+                                        const movementClass = movement > 0 ? 'rank-up' : (movement < 0 ? 'rank-down' : 'rank-level');
+                                        const movementText = movement > 0 ? '▲' : (movement < 0 ? '▼' : '—');
 
                                         return `
                                             <div class="overall-standing-tile rank-${rIdx + 1}">
                                                 <div><div class="overall-tile-name">${playerName}</div>${teamName ? `<div class="overall-tile-team">${teamName}</div>` : ''}</div>
-                                                <div class="overall-tile-points">${points}</div>
+                                                <div class="standing-points-wrap"><span class="standing-movement ${movementClass}">${movementText}</span><span class="overall-tile-points">${points}</span></div>
                                             </div>
                                         `;
                                     }).join('')}
