@@ -2150,6 +2150,17 @@
             gwDataStore.sort((a, b) => (Number(a.gameweek || a.gw || 0)) - (Number(b.gameweek || b.gw || 0)));
             decorateGameweekData(gwDataStore);
 
+            const latestPlayedGameweek = [...gwDataStore]
+                .reverse()
+                .find(gameweek => !gameweek.isUpcoming && Array.isArray(gameweek.standings) && gameweek.standings.length > 0);
+            const latestPlayedGameweekNumber = latestPlayedGameweek
+                ? Number(latestPlayedGameweek.gameweek !== undefined ? latestPlayedGameweek.gameweek : latestPlayedGameweek.gw)
+                : null;
+            const latestGameweekPointsMap = {};
+            ((latestPlayedGameweek && latestPlayedGameweek.standings) || []).forEach(manager => {
+                latestGameweekPointsMap[getManagerKey(manager)] = getManagerPoints(manager);
+            });
+
             if (gwDataStore.length > 0) {
                 totalGwSlides = gwDataStore.length;
                 html += `<div class="gw-shell">`;
@@ -2375,43 +2386,13 @@
                             }))
                             .sort((first, second) => second.numericScore - first.numericScore || String(first.name).localeCompare(String(second.name)));
 
-                        const periodMovement = {};
                         const periodWeekNumbers = (cleanTitle.match(/\d+/g) || []).map(Number);
                         const periodStart = periodWeekNumbers[0];
                         const periodEnd = periodWeekNumbers[1] || periodStart;
-                        const relevantGameweeks = Number.isFinite(periodStart)
-                            ? gwDataStore.filter(gameweek => {
-                                const number = Number(gameweek.gameweek !== undefined ? gameweek.gameweek : gameweek.gw);
-                                return number >= periodStart && number <= periodEnd && !gameweek.isUpcoming;
-                            })
-                            : [];
-
-                        rankedPeriodScores.forEach(score => {
-                            periodMovement[String(score.name || '').trim().toLowerCase()] = 0;
-                        });
-
-                        if (relevantGameweeks.length > 1) {
-                            const latestPeriodWeek = relevantGameweeks[relevantGameweeks.length - 1];
-                            const latestWeekPoints = {};
-                            (latestPeriodWeek.standings || []).forEach(manager => {
-                                latestWeekPoints[getManagerKey(manager)] = getManagerPoints(manager);
-                            });
-
-                            const keys = rankedPeriodScores.map(score => String(score.name || '').trim().toLowerCase());
-                            const currentScores = {};
-                            const previousScores = {};
-                            rankedPeriodScores.forEach(score => {
-                                const key = String(score.name || '').trim().toLowerCase();
-                                currentScores[key] = score.numericScore;
-                                previousScores[key] = score.numericScore - (latestWeekPoints[key] || 0);
-                            });
-
-                            const currentRanks = rankKeysByScore(keys, currentScores);
-                            const previousRanks = rankKeysByScore(keys, previousScores);
-                            keys.forEach(key => {
-                                periodMovement[key] = previousRanks[key] - currentRanks[key];
-                            });
-                        }
+                        const containsLatestGameweek = Number.isFinite(periodStart) &&
+                            Number.isFinite(latestPlayedGameweekNumber) &&
+                            latestPlayedGameweekNumber >= periodStart &&
+                            latestPlayedGameweekNumber <= periodEnd;
 
                         html += `
                             <div class="carousel-card period-slide-card" id="period-slide-${periodIndex}" data-period-title="${cleanTitle}">
@@ -2420,16 +2401,20 @@
                                         const scoreDisplay = String(s.numericScore);
                                         const teamName = TEAM_NAMES[s.name] || '';
                                         const scoreColour = idx === 0 ? 'var(--gold-color)' : (idx === 1 ? 'var(--silver-color)' : 'var(--text-color)');
-                                        const movement = periodMovement[String(s.name || '').trim().toLowerCase()] || 0;
-                                        const movementClass = movement > 0 ? 'rank-up' : (movement < 0 ? 'rank-down' : 'rank-level');
-                                        const movementText = movement > 0 ? '▲' : (movement < 0 ? '▼' : '—');
+                                        const gameweekPoints = containsLatestGameweek
+                                            ? latestGameweekPointsMap[String(s.name || '').trim().toLowerCase()]
+                                            : null;
+                                        const updateClass = gameweekPoints > 0 ? 'rank-up' : (gameweekPoints < 0 ? 'rank-down' : 'rank-level');
+                                        const updateText = gameweekPoints === null || gameweekPoints === undefined
+                                            ? '—'
+                                            : `${gameweekPoints >= 0 ? '+' : ''}${gameweekPoints}`;
                                         return `
                                             <li class="period-standing-row rank-${idx + 1}" style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div>
                                                     <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">${s.name}</div>
                                                     ${teamName ? `<div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
                                                 </div>
-                                                <div class="standing-points-wrap"><span class="standing-movement ${movementClass}">${movementText}</span><span style="font-weight: 800; font-size: 1rem; color: ${scoreColour};">${scoreDisplay}</span></div>
+                                                <div class="standing-points-wrap"><span class="standing-movement ${updateClass}">${updateText}</span><span style="font-weight: 800; font-size: 1rem; color: ${scoreColour};">${scoreDisplay}</span></div>
                                             </li>
                                         `;
                                     }).join('')}
@@ -2467,17 +2452,12 @@
                 const chipMap = {};
                 const activeChipMap = {};
 
-                const latestPlayedGameweek = [...gwDataStore]
-                    .reverse()
-                    .find(gameweek => !gameweek.isUpcoming && Array.isArray(gameweek.standings) && gameweek.standings.length > 0);
                 const latestStandings = latestPlayedGameweek ? latestPlayedGameweek.standings : [];
-                const overallMovementMap = {};
                 if (latestStandings) {
                     latestStandings.forEach(m => {
                         const key = (m.managerName || m.name || '').trim().toLowerCase();
                         chipMap[key] = m.remainingChips;
                         activeChipMap[key] = m.activeChip;
-                        overallMovementMap[key] = Number((m.uiMeta || {}).rankMovement) || 0;
                     });
                 }
 
@@ -2508,14 +2488,16 @@
                                         const playerName = row[playerIdx] || '';
                                         const points = row[pointsIdx] !== undefined ? row[pointsIdx] : '';
                                         const teamName = TEAM_NAMES[playerName] || '';
-                                        const movement = overallMovementMap[String(playerName).trim().toLowerCase()] || 0;
-                                        const movementClass = movement > 0 ? 'rank-up' : (movement < 0 ? 'rank-down' : 'rank-level');
-                                        const movementText = movement > 0 ? '▲' : (movement < 0 ? '▼' : '—');
+                                        const gameweekPoints = latestGameweekPointsMap[String(playerName).trim().toLowerCase()];
+                                        const updateClass = gameweekPoints > 0 ? 'rank-up' : (gameweekPoints < 0 ? 'rank-down' : 'rank-level');
+                                        const updateText = gameweekPoints === null || gameweekPoints === undefined
+                                            ? '—'
+                                            : `${gameweekPoints >= 0 ? '+' : ''}${gameweekPoints}`;
 
                                         return `
                                             <div class="overall-standing-tile rank-${rIdx + 1}">
                                                 <div><div class="overall-tile-name">${playerName}</div>${teamName ? `<div class="overall-tile-team">${teamName}</div>` : ''}</div>
-                                                <div class="standing-points-wrap"><span class="standing-movement ${movementClass}">${movementText}</span><span class="overall-tile-points">${points}</span></div>
+                                                <div class="standing-points-wrap"><span class="standing-movement ${updateClass}">${updateText}</span><span class="overall-tile-points">${points}</span></div>
                                             </div>
                                         `;
                                     }).join('')}
