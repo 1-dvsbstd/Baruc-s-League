@@ -123,6 +123,23 @@
             opacity: 0.8;
         }
 
+        .data-status-notice {
+            display: none;
+            margin: 0 auto 14px;
+            padding: 8px 11px;
+            border: 1px solid rgba(210, 176, 111, 0.42);
+            border-radius: 8px;
+            background: rgba(35, 27, 13, 0.82);
+            color: var(--text-warm);
+            font-size: 0.68rem;
+            font-weight: 700;
+            line-height: 1.35;
+            text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 5px 16px rgba(0,0,0,0.18);
+        }
+
+        .data-status-notice.visible { display: block; }
+
         /* Splash Screen Styling */
         #splash-screen {
             position: fixed;
@@ -1422,6 +1439,8 @@
 
     <h1>Baruc's League</h1>
 
+    <div id="data-status-notice" class="data-status-notice" role="status" aria-live="polite"></div>
+
     <div id="app">
         <div class="loading-text">Loading tracker data...</div>
     </div>
@@ -1430,6 +1449,65 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVQrIeCr5DL5HRBBH13eycceCb7l8VD0X3YnX3ZB0v321OBMAsSLCw5fgChvTQl8Emaw/exec';
+        const TRACKER_CACHE_KEY = 'barucsLeagueLastGoodDataV1';
+        let hasRenderedTrackerData = false;
+
+        function readLastGoodTrackerData() {
+            try {
+                const cached = JSON.parse(localStorage.getItem(TRACKER_CACHE_KEY) || 'null');
+                return cached && cached.data ? cached : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function saveLastGoodTrackerData(data) {
+            try {
+                localStorage.setItem(TRACKER_CACHE_KEY, JSON.stringify({
+                    savedAt: Date.now(),
+                    data: data
+                }));
+            } catch (error) {
+                console.log('Last-known-good tracker storage unavailable.');
+            }
+        }
+
+        function getHighestPayloadGameweek(data) {
+            return Math.max(0, ...((data && data.gameweeks) || []).map(gameweek =>
+                Number(gameweek.gameweek !== undefined ? gameweek.gameweek : gameweek.gw) || 0
+            ));
+        }
+
+        function isUsableTrackerPayload(data, cachedData) {
+            if (!data || data.error) return false;
+            const hasOverall = Boolean(data.overall && Array.isArray(data.overall.rows) && data.overall.rows.length > 0);
+            const hasGameweek = Boolean(Array.isArray(data.gameweeks) && data.gameweeks.some(gameweek =>
+                Array.isArray(gameweek.standings) && gameweek.standings.length > 0
+            ));
+            if (!hasOverall || !hasGameweek) return false;
+
+            // During FPL maintenance the API can return HTTP 200 while the
+            // backend silently falls back to GW1 with an empty live map.
+            if (cachedData && getHighestPayloadGameweek(data) < getHighestPayloadGameweek(cachedData)) {
+                return false;
+            }
+            return true;
+        }
+
+        function showSavedDataNotice(savedAt) {
+            const notice = document.getElementById('data-status-notice');
+            if (!notice) return;
+            const savedTime = savedAt ? new Date(savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'earlier';
+            notice.textContent = `FPL is updating — showing the last available scores from ${savedTime}.`;
+            notice.classList.add('visible');
+        }
+
+        function clearSavedDataNotice() {
+            const notice = document.getElementById('data-status-notice');
+            if (!notice) return;
+            notice.textContent = '';
+            notice.classList.remove('visible');
+        }
         
         /*
          * Anonymous background device tracking.
@@ -1793,6 +1871,7 @@
             const safetyTimer = setTimeout(() => {
                 hideSplash();
             }, 5000);
+            const cachedPayload = readLastGoodTrackerData();
 
             try {
                 const separator = SCRIPT_URL.includes('?') ? '&' : '?';
@@ -1804,8 +1883,8 @@
                 }
                 const data = await response.json();
 
-                if (data.error) {
-                    throw new Error(data.error);
+                if (!isUsableTrackerPayload(data, cachedPayload && cachedPayload.data)) {
+                    throw new Error(data && data.error ? data.error : 'FPL returned incomplete tracker data');
                 }
 
                 clearTimeout(safetyTimer);
@@ -1813,13 +1892,29 @@
                     document.getElementById('timestamp').innerText = `Updated: ${data.updated}`;
                 }
                 renderApp(data);
+                hasRenderedTrackerData = true;
+                saveLastGoodTrackerData(data);
+                clearSavedDataNotice();
             } catch (error) {
                 clearTimeout(safetyTimer);
                 console.error('Error fetching data:', error);
-                document.getElementById('app').innerHTML = `
-                    <div class="card">
-                        <p style="color: var(--danger-color); text-align: center; font-weight: 500;">Unable to load data. Please check your connection or Apps Script deployment.</p>
-                    </div>`;
+                if (cachedPayload && cachedPayload.data) {
+                    if (!hasRenderedTrackerData) {
+                        renderApp(cachedPayload.data);
+                        hasRenderedTrackerData = true;
+                        if (cachedPayload.data.updated) {
+                            document.getElementById('timestamp').innerText = `Updated: ${cachedPayload.data.updated}`;
+                        }
+                    }
+                    showSavedDataNotice(cachedPayload.savedAt);
+                } else if (!hasRenderedTrackerData) {
+                    document.getElementById('app').innerHTML = `
+                        <div class="card">
+                            <p style="color: var(--danger-color); text-align: center; font-weight: 500;">FPL is currently updating and no saved scores are available on this device yet.</p>
+                        </div>`;
+                } else {
+                    showSavedDataNotice(null);
+                }
             } finally {
                 hideSplash();
             }
