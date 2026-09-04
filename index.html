@@ -47,6 +47,8 @@
             --danger-color: #ff4b4b;        /* Crisp red for hits & low ranks */
             --gold-color: #ffc72c;          /* Refined gold for winners & 1st place */
             --silver-color: #d1d5db;        /* Metallic silver for runner-up prizes */
+            --rank-gold-edge: rgba(255, 199, 44, 0.78);
+            --rank-silver-edge: rgba(226, 232, 240, 0.72);
         }
 
         /* Optional palette previews. Rank and prize colours stay unchanged. */
@@ -250,10 +252,20 @@
         }
         
         .chip-pill.active {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-            background: rgba(0, 255, 135, 0.15);
-            box-shadow: 0 0 6px rgba(0, 255, 135, 0.3);
+            color: var(--gold-color);
+            border-color: var(--gold-color);
+            background: rgba(7, 22, 55, 0.58);
+            box-shadow: 0 0 9px rgba(255, 199, 44, 0.30), inset 0 0 8px rgba(255, 199, 44, 0.10), inset 0 1px 0 rgba(255,255,255,0.12);
+            text-shadow: 0 0 7px rgba(255, 199, 44, 0.36);
+            opacity: 1;
+        }
+
+        .chip-pill.available {
+            color: rgba(189, 203, 216, 0.64);
+            border-color: rgba(189, 203, 216, 0.14);
+            background: rgba(5, 9, 16, 0.32);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.38);
+            opacity: 0.72;
         }
         
         .chip-pill.used {
@@ -507,21 +519,21 @@
         }
 
         .manager-item.rank-card-1 {
-            --item-accent: rgba(255, 199, 44, 0.5);
+            --item-accent: var(--rank-gold-edge);
             background: linear-gradient(145deg, #22122d, #160b1f);
             box-shadow: 0 0 0 1px rgba(255, 199, 44, 0.08), 0 0 26px rgba(255, 199, 44, 0.14), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.rank-card-2 {
-            --item-accent: rgba(209, 213, 219, 0.38);
+            --item-accent: var(--rank-silver-edge);
             background: linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: 0 0 0 1px rgba(209, 213, 219, 0.06), 0 0 24px rgba(209, 213, 219, 0.09), 0 8px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 0 1px rgba(226, 232, 240, 0.12), 0 0 24px rgba(226, 232, 240, 0.13), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.rank-card-3 {
-            --item-accent: rgba(201, 130, 69, 0.42);
+            --item-accent: rgba(178, 103, 57, 0.58);
             background: linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: 0 0 0 1px rgba(201, 130, 69, 0.06), 0 0 24px rgba(201, 130, 69, 0.1), 0 8px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 0 1px rgba(178, 103, 57, 0.08), 0 0 22px rgba(178, 103, 57, 0.1), 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .manager-item.rank-card-4 {
@@ -558,8 +570,33 @@
         }
 
         .manager-item.glow-gold {
-            box-shadow: 0 0 22px rgba(255, 199, 44, 0.28), inset 0 0 20px rgba(255, 199, 44, 0.08);
+            border-color: var(--rank-gold-edge) !important;
+            background:
+                radial-gradient(circle at 50% -30%, rgba(255,199,44,0.42) 0%, rgba(255,199,44,0.13) 24%, transparent 46%),
+                linear-gradient(115deg, transparent 0 13%, rgba(255,199,44,0.10) 13.5% 14.5%, transparent 15% 84%, rgba(255,199,44,0.10) 84.5% 85.5%, transparent 86%),
+                linear-gradient(145deg, #071637, #0b3274 52%, #07132f);
+            box-shadow: 0 0 34px rgba(36, 112, 219, 0.36), 0 0 20px rgba(255, 199, 44, 0.22), inset 0 0 30px rgba(32, 104, 202, 0.22), inset 0 1px 0 rgba(255,238,178,0.30);
         }
+
+        .manager-item.glow-gold::before {
+            opacity: 1;
+            background:
+                conic-gradient(from 45deg at 50% 48%, transparent 0 10%, rgba(255,215,90,0.055) 10% 12%, transparent 12% 23%, rgba(255,255,255,0.035) 23% 25%, transparent 25% 100%),
+                radial-gradient(circle at 50% 50%, rgba(104,174,255,0.12), transparent 45%);
+        }
+
+        .manager-item.glow-gold::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            z-index: 0;
+            border: 1px solid rgba(255, 199, 44, 0.30);
+            border-radius: 9px;
+            background: linear-gradient(120deg, rgba(255,199,44,0.06), transparent 32%, rgba(255,199,44,0.025) 62%, transparent);
+            pointer-events: none;
+        }
+
+        .manager-item.glow-gold > * { position: relative; z-index: 1; }
 
         .manager-summary {
             position: relative;
@@ -910,20 +947,22 @@
 
         .profile-slide {
             min-height: 430px;
-            padding: 16px 14px;
+            padding: 0;
             margin-bottom: 0;
-            background: linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+            background: transparent;
+            box-shadow: none;
         }
+
+        .profile-slide::before { display: none; }
 
         .season-record-list {
             list-style: none;
             padding: 0;
             margin: 0;
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            overflow: hidden;
-            background: rgba(5, 1, 12, 0.2);
+            border: 0;
+            border-radius: 0;
+            overflow: visible;
+            background: transparent;
         }
 
         .season-record-row {
@@ -933,10 +972,14 @@
             gap: 12px;
             min-height: 79px;
             padding: 11px 13px;
-            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 8px;
+            border: 2px solid rgba(145, 163, 184, 0.28);
+            border-radius: 10px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.10), transparent 28%, rgba(255,255,255,0.02) 50%, transparent 72%), linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 7px 18px rgba(0,0,0,0.20);
         }
 
-        .season-record-row:last-child { border-bottom: 0; }
+        .season-record-row:last-child { margin-bottom: 0; }
         .season-record-label { color: #fff; font-size: 0.82rem; font-weight: 700; }
         .season-record-meta { color: var(--text-muted); font-size: 0.72rem; margin-top: 3px; }
         .season-record-value { color: #fff; font-size: 0.96rem; font-weight: 800; text-align: right; }
@@ -955,11 +998,15 @@
 
         .profile-card-header {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(110px, 1fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1fr) minmax(118px, 1.15fr) minmax(0, 0.8fr);
             align-items: center;
             gap: 10px;
-            padding: 5px 3px 12px;
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid rgba(145, 163, 184, 0.28);
+            border-radius: 10px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.10), transparent 28%, rgba(255,255,255,0.02) 50%, transparent 72%), linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 7px 18px rgba(0,0,0,0.20);
         }
 
         .profile-overall {
@@ -985,16 +1032,69 @@
         .profile-formation { color: #fff; font-size: 0.68rem; font-weight: 700; margin-top: 3px; }
 
         .profile-title-block {
-            margin: 0;
-            padding: 8px 9px;
-            border: 1px solid rgba(0, 255, 135, 0.2);
+            margin: 0 0 8px;
+            padding: 10px 12px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(0, 255, 135, 0.58);
             border-radius: 10px;
-            background: rgba(0, 255, 135, 0.045);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(78,255,174,0.28), transparent 48%),
+                linear-gradient(118deg, transparent 0 18%, rgba(0,255,135,0.08) 18.5% 20%, transparent 20.5% 79%, rgba(0,255,135,0.06) 79.5% 81%, transparent 81.5%),
+                linear-gradient(135deg, #07382d, #0a5a43 52%, #083b30);
+            box-shadow: 0 0 26px rgba(0,255,135,0.18), inset 0 0 24px rgba(0,255,135,0.08), inset 0 1px 0 rgba(171,255,216,0.16), 0 7px 18px rgba(0,0,0,0.24);
             text-align: center;
         }
 
-        .profile-title-name { color: var(--gold-color); font-size: 0.78rem; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; }
-        .profile-title-explanation { color: var(--text-muted); font-size: 0.62rem; line-height: 1.25; margin-top: 3px; }
+        .profile-title-block::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 82px;
+            height: 54px;
+            transform: translate(-50%, -50%);
+            clip-path: polygon(14% 0, 86% 0, 100% 50%, 86% 100%, 14% 100%, 0 50%);
+            background:
+                linear-gradient(145deg, rgba(102,255,184,0.16), rgba(8,83,60,0.08) 48%, rgba(0,0,0,0.12)),
+                #0b503d;
+            box-shadow: 0 0 28px rgba(0,255,135,0.18), inset 0 0 18px rgba(102,255,184,0.08);
+            pointer-events: none;
+        }
+
+        .profile-title-block::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px solid rgba(102,255,184,0.18);
+            border-radius: 6px;
+            background: none;
+            pointer-events: none;
+        }
+
+        .profile-chip-block { min-width: 0; text-align: center; }
+
+        .profile-chip-block .chip-inventory {
+            display: grid;
+            grid-template-columns: repeat(2, 42px);
+            justify-content: center;
+            gap: 4px;
+        }
+        .profile-chip-block .chip-pill {
+            display: inline-flex;
+            flex: none;
+            width: 42px;
+            height: 22px;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+            background-image: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,0,0,0.10));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+
+        .profile-title-name { position: relative; z-index: 1; color: #baffdc; font-size: 0.8rem; font-weight: 850; letter-spacing: 1.3px; text-shadow: 0 0 14px rgba(0,255,135,0.30); text-transform: uppercase; }
+        .profile-title-explanation { position: relative; z-index: 1; color: #b7d4c8; font-size: 0.62rem; line-height: 1.25; margin-top: 3px; }
 
         .profile-rating-grid {
             display: grid;
@@ -1009,9 +1109,10 @@
             justify-content: space-between;
             gap: 5px;
             padding: 8px 9px;
-            border: 1px solid var(--border-subtle);
+            border: 2px solid rgba(145, 163, 184, 0.24);
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.18);
+            background: linear-gradient(120deg, rgba(255,255,255,0.09), transparent 30%, rgba(255,255,255,0.018) 52%, transparent 74%), linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 5px 14px rgba(0,0,0,0.16);
         }
 
         .profile-rating strong { color: #fff; font-size: 1rem; }
@@ -1025,21 +1126,24 @@
         .profile-stat-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            overflow: hidden;
+            gap: 7px;
+            border: 0;
+            border-radius: 0;
+            overflow: visible;
         }
 
         .profile-stat {
             min-width: 0;
             padding: 9px 5px;
-            border-right: 1px solid var(--border-subtle);
-            border-bottom: 1px solid var(--border-subtle);
+            border: 2px solid rgba(145, 163, 184, 0.24);
+            border-radius: 8px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.09), transparent 30%, rgba(255,255,255,0.018) 52%, transparent 74%), linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 5px 14px rgba(0,0,0,0.16);
             text-align: center;
         }
 
-        .profile-stat:nth-child(4n) { border-right: 0; }
-        .profile-stat:nth-last-child(-n + 4) { border-bottom: 0; }
+        .profile-stat:nth-child(4n) { border-right: 2px solid rgba(145, 163, 184, 0.24); }
+        .profile-stat:nth-last-child(-n + 4) { border-bottom: 2px solid rgba(145, 163, 184, 0.24); }
         .profile-stat-value { color: #fff; font-size: 0.82rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .profile-stat-value.positive { color: var(--primary-color); }
         .profile-stat-value.negative { color: var(--danger-color); }
@@ -1048,27 +1152,26 @@
         @media (max-width: 390px) {
             .profile-slide { min-height: 448px; }
             .profile-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .profile-stat:nth-child(2n) { border-right: 0; }
-            .profile-stat:nth-child(4n) { border-right: 0; }
-            .profile-stat:nth-last-child(-n + 4) { border-bottom: 1px solid var(--border-subtle); }
-            .profile-stat:nth-last-child(-n + 2) { border-bottom: 0; }
+            .profile-stat:nth-child(2n),
+            .profile-stat:nth-child(4n) { border-right: 2px solid rgba(145, 163, 184, 0.24); }
+            .profile-stat:nth-last-child(-n + 2) { border-bottom: 2px solid rgba(145, 163, 184, 0.24); }
         }
 
         .period-standing-row {
             position: relative;
             margin: 0 0 8px;
             padding: 10px 11px !important;
-            border: 1px solid var(--border-subtle) !important;
+            border: 2px solid var(--border-subtle) !important;
             border-radius: 9px;
-            background: linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: 0 7px 18px rgba(0,0,0,0.22);
+            background: linear-gradient(120deg, rgba(255,255,255,0.10), transparent 28%, rgba(255,255,255,0.02) 50%, transparent 72%), linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 7px 18px rgba(0,0,0,0.22);
             overflow: hidden;
         }
 
-        .period-standing-row.rank-1 { border-color: rgba(255, 199, 44, 0.50) !important; }
-        .period-standing-row.rank-2 { border-color: rgba(209, 213, 219, 0.38) !important; }
-        .period-standing-row.rank-3 { border-color: rgba(201, 130, 69, 0.42) !important; }
-        .period-standing-row.rank-4 { border-color: rgba(169, 61, 85, 0.34) !important; }
+        .period-standing-row.rank-1 { border-color: var(--rank-gold-edge) !important; }
+        .period-standing-row.rank-2 { border-color: var(--rank-silver-edge) !important; }
+        .period-standing-row.rank-3,
+        .period-standing-row.rank-4 { border-color: rgba(145,163,184,0.28) !important; }
 
         .period-prize-grid {
             display: grid;
@@ -1079,7 +1182,7 @@
 
         .period-prize {
             padding: 10px 8px;
-            border: 1px solid var(--border-subtle);
+            border: 2px solid var(--border-subtle);
             border-radius: 8px;
             background: rgba(0,0,0,0.22);
             text-align: center;
@@ -1089,10 +1192,10 @@
         }
 
         .period-prize strong { display: block; margin-bottom: 3px; font-size: 0.75rem; }
-        .period-prize.winner { border-color: rgba(255,199,44,0.42); background: linear-gradient(145deg, rgba(255,199,44,0.11), rgba(0,0,0,0.12) 58%), #160b1f; }
+        .period-prize.winner { color: #f3e5bd; border-color: var(--rank-gold-edge); background: linear-gradient(120deg, rgba(255,255,255,0.18), transparent 28%, rgba(255,199,44,0.06) 52%, transparent 74%), linear-gradient(135deg, #483407, #89630d 52%, #503a08); box-shadow: inset 0 1px 0 rgba(255,199,44,0.28), 0 6px 18px rgba(0,0,0,0.22); }
         .period-prize.winner strong { color: var(--gold-color); }
-        .period-prize.runner { border-color: rgba(209,213,219,0.34); background: linear-gradient(145deg, rgba(209,213,219,0.10), rgba(0,0,0,0.12) 58%), #160b1f; }
-        .period-prize.runner strong { color: var(--silver-color); }
+        .period-prize.runner { color: #edf1f5; border-color: var(--rank-silver-edge); background: linear-gradient(120deg, rgba(255,255,255,0.24), transparent 28%, rgba(255,255,255,0.06) 52%, transparent 74%), linear-gradient(135deg, #343a43, #727d89 52%, #3b424b); box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 6px 18px rgba(0,0,0,0.22); }
+        .period-prize.runner strong { color: #ffffff; }
         .period-prize span { color: inherit; font-weight: 700; }
 
         .overall-standings-section {
@@ -1102,7 +1205,7 @@
         .overall-standings-head,
         .overall-standing-tile {
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(112px, 1.35fr) minmax(72px, 0.75fr) minmax(48px, 0.55fr);
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: center;
             gap: 8px;
         }
@@ -1116,7 +1219,7 @@
             text-transform: uppercase;
         }
 
-        .overall-standings-head span:nth-child(n + 2) { text-align: center; }
+        .overall-standings-head span:nth-child(n + 2) { text-align: right; }
         .overall-standings-head span:last-child { text-align: right; }
 
         .overall-standing-tile {
@@ -1125,14 +1228,14 @@
             padding: 11px 12px;
             border: 2px solid var(--overall-accent);
             border-radius: 12px;
-            background: linear-gradient(145deg, #22122d, #160b1f);
-            box-shadow: 0 7px 18px rgba(0,0,0,0.22);
+            background: linear-gradient(120deg, rgba(255,255,255,0.10), transparent 28%, rgba(255,255,255,0.02) 50%, transparent 72%), linear-gradient(145deg, #22122d, #160b1f);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 7px 18px rgba(0,0,0,0.22);
         }
 
-        .overall-standing-tile.rank-1 { --overall-accent: rgba(255,199,44,0.50); }
-        .overall-standing-tile.rank-2 { --overall-accent: rgba(209,213,219,0.38); }
-        .overall-standing-tile.rank-3 { --overall-accent: rgba(201,130,69,0.42); }
-        .overall-standing-tile.rank-4 { --overall-accent: rgba(169,61,85,0.34); }
+        .overall-standing-tile.rank-1 { --overall-accent: var(--rank-gold-edge); }
+        .overall-standing-tile.rank-2 { --overall-accent: var(--rank-silver-edge); }
+        .overall-standing-tile.rank-3,
+        .overall-standing-tile.rank-4 { --overall-accent: rgba(145,163,184,0.28); }
 
         .overall-tile-name {
             min-width: 0;
@@ -1144,18 +1247,17 @@
             white-space: nowrap;
         }
 
-        .overall-tile-chips { min-width: 0; text-align: center; }
-        .overall-tile-points { color: var(--text-color); font-size: 0.9rem; font-weight: 850; text-align: center; white-space: nowrap; }
+        .overall-tile-team { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; margin-top: 2px; }
+        .overall-tile-points { color: var(--text-color); font-size: 0.96rem; font-weight: 850; text-align: right; white-space: nowrap; }
         .overall-standing-tile.rank-1 .overall-tile-points { color: var(--gold-color); }
         .overall-standing-tile.rank-2 .overall-tile-points { color: var(--silver-color); }
-        .overall-standing-tile.rank-3 .overall-tile-points { color: #a86f46; }
-        .overall-standing-tile.rank-4 .overall-tile-points { color: #9a5968; }
-        .overall-tile-prize { font-size: 0.83rem; text-align: right; white-space: nowrap; }
+        .overall-standing-tile.rank-3 .overall-tile-points,
+        .overall-standing-tile.rank-4 .overall-tile-points { color: var(--text-color); }
 
         @media (max-width: 390px) {
             .overall-standings-head,
             .overall-standing-tile {
-                grid-template-columns: minmax(0, 1fr) minmax(94px, 1.1fr) 66px 42px;
+                grid-template-columns: minmax(0, 1fr) auto;
                 gap: 5px;
             }
             .overall-standing-tile { padding: 10px 9px; }
@@ -1755,6 +1857,33 @@
             const records = data.seasonRecords || {};
             const managers = orderedManagerProfiles(data.managerProfiles || []);
             if (managers.length === 0) return '';
+            const previewParams = new URLSearchParams(window.location.search);
+            const previewChip = previewParams.get('previewChip');
+            const previewSecondChip = previewParams.get('previewChip2') || (previewChip ? 'wc' : '');
+
+            const profileChipMap = {};
+            const profileActiveChipMap = {};
+            const latestProfileStandings = gwDataStore.length > 0
+                ? (gwDataStore[gwDataStore.length - 1].standings || [])
+                : [];
+            latestProfileStandings.forEach(manager => {
+                const key = String(manager.managerName || manager.name || '').trim().toLowerCase();
+                profileChipMap[key] = manager.remainingChips;
+                profileActiveChipMap[key] = manager.activeChip;
+            });
+
+            // Keep the visual chip preview consistent between the newest live-GW
+            // card and that same manager's season-record profile.
+            if (previewChip && latestProfileStandings.length > 0) {
+                const previewManager = latestProfileStandings[0];
+                const previewManagerKey = String(previewManager.managerName || previewManager.name || '').trim().toLowerCase();
+                profileActiveChipMap[previewManagerKey] = previewChip;
+            }
+            if (previewSecondChip && latestProfileStandings.length > 1) {
+                const secondPreviewManager = latestProfileStandings[1];
+                const secondPreviewManagerKey = String(secondPreviewManager.managerName || secondPreviewManager.name || '').trim().toLowerCase();
+                profileActiveChipMap[secondPreviewManagerKey] = previewSecondChip;
+            }
 
             const highest = records.highestScore || {};
             const lowest = records.lowestScore || {};
@@ -1797,7 +1926,7 @@
                         ${Array.from({ length: totalProfileSlides }, (_, index) => `<button class="gw-progress-dot" onclick="goToProfileSlide(${index})" aria-label="Go to ${index === 0 ? 'Season Records' : 'manager profile ' + index}"></button>`).join('')}
                     </div>
                     <div class="carousel-container profile-carousel-track" id="profile-carousel-track">
-                        <section class="card support-panel carousel-card profile-slide" id="profile-slide-0" data-profile-title="Season Records">
+                        <section class="carousel-card profile-slide" id="profile-slide-0" data-profile-title="Season Records">
                             <ul class="season-record-list">
                                 ${recordRow('Highest GW Score', `${highest.managerName || '—'}${highest.gameweek ? ` · GW${highest.gameweek}` : ''}`, highest.points !== undefined ? escapeProfileHtml(highest.points) : '—', 'record-gold')}
                                 ${recordRow('Lowest GW Score', `${lowest.managerName || '—'}${lowest.gameweek ? ` · GW${lowest.gameweek}` : ''}`, lowest.points !== undefined ? escapeProfileHtml(lowest.points) : '—', 'record-ice')}
@@ -1811,6 +1940,8 @@
                 const slideIndex = managerIndex + 1;
                 const ratings = manager.ratings || {};
                 const stats = manager.stats || {};
+                const managerKey = String(manager.managerName || '').trim().toLowerCase();
+                const managerChips = renderChipsHtml(profileChipMap[managerKey], profileActiveChipMap[managerKey]);
                 const transferReturn = Number(stats.transferReturn) || 0;
                 const transferClass = transferReturn > 0 ? 'positive' : (transferReturn < 0 ? 'negative' : '');
                 const changes = manager.ratingChanges || {};
@@ -1827,18 +1958,19 @@
                 ];
 
                 carousel += `
-                    <section class="card support-panel carousel-card profile-slide" id="profile-slide-${slideIndex}" data-profile-title="${escapeProfileHtml(manager.managerName)}">
+                    <section class="carousel-card profile-slide" id="profile-slide-${slideIndex}" data-profile-title="${escapeProfileHtml(manager.managerName)}">
                         <div class="profile-card-header">
                             <div class="profile-identity">
                                 <div class="profile-manager-name">${escapeProfileHtml(manager.managerName)}</div>
                                 <div class="profile-team-name">${escapeProfileHtml(manager.teamName)}</div>
                                 <div class="profile-formation">${escapeProfileHtml(manager.preferredFormation)}</div>
                             </div>
-                            <div class="profile-title-block">
-                                <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
-                                <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
-                            </div>
+                            <div class="profile-chip-block">${managerChips}</div>
                             <div class="profile-overall">${escapeProfileHtml(manager.overallRating)}<span>MANAGER RATING</span></div>
+                        </div>
+                        <div class="profile-title-block">
+                            <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
+                            <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
                         </div>
                         <div class="profile-rating-grid">
                             ${ratingItems.map(([label, key, value]) => {
@@ -1860,6 +1992,9 @@
         function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
+            const previewParams = new URLSearchParams(window.location.search);
+            const previewChip = previewParams.get('previewChip');
+            const previewSecondChip = previewParams.get('previewChip2') || (previewChip ? 'wc' : '');
             totalPeriodSlides = 0;
             totalProfileSlides = 0;
 
@@ -1927,11 +2062,21 @@
 
                     html += `<div class="carousel-card" id="gw-slide-${gwIdx}">`;
 
-                    standings.forEach(mgr => {
+                    standings.forEach((mgr, managerIndex) => {
                         const managerName = mgr.managerName || mgr.name || '';
                         const teamName = mgr.teamName || TEAM_NAMES[managerName] || '';
-                        const hasActiveChip = mgr.activeChip !== null && mgr.activeChip !== undefined && mgr.activeChip !== '' && mgr.activeChip !== 'None';
-                        const chipLabel = getChipDisplayName(mgr.activeChip || mgr.chipDisplay);
+                        // The query-string chip is only a visual preview for the newest
+                        // gameweek. Applying it to every rendered slide makes it appear
+                        // as though the manager played the chip in previous weeks too.
+                        const isLatestGameweek = gwIdx === gwDataStore.length - 1;
+                        let displayedActiveChip = mgr.activeChip;
+                        if (isLatestGameweek && managerIndex === 0 && previewChip) {
+                            displayedActiveChip = previewChip;
+                        } else if (isLatestGameweek && managerIndex === 1 && previewSecondChip) {
+                            displayedActiveChip = previewSecondChip;
+                        }
+                        const hasActiveChip = displayedActiveChip !== null && displayedActiveChip !== undefined && displayedActiveChip !== '' && displayedActiveChip !== 'None';
+                        const chipLabel = getChipDisplayName(displayedActiveChip || mgr.chipDisplay);
 
                         // Robustly resolve Star Performer data
                         const getPerformer = (m, keys) => {
@@ -2117,7 +2262,7 @@
                                     ${rankedPeriodScores.map((s, idx) => {
                                         const scoreDisplay = String(s.numericScore);
                                         const teamName = TEAM_NAMES[s.name] || '';
-                                        const scoreColour = idx === 0 ? 'var(--gold-color)' : (idx === 1 ? 'var(--silver-color)' : (idx === 2 ? '#a86f46' : '#9a5968'));
+                                        const scoreColour = idx === 0 ? 'var(--gold-color)' : (idx === 1 ? 'var(--silver-color)' : 'var(--text-color)');
                                         return `
                                             <li class="period-standing-row rank-${idx + 1}" style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div>
@@ -2181,11 +2326,18 @@
                     }
                 });
 
+                const overallWinnerRow = data.overall.rows[0] || [];
+                const overallRunnerRow = data.overall.rows[1] || [];
+                const overallPrizeText = row => {
+                    const rawPrize = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
+                    return String(rawPrize).startsWith('£') ? String(rawPrize) : '£' + rawPrize;
+                };
+
                 html += `
                     <div class="overall-standings-section">
                         <div class="section-title" style="margin-bottom: 16px;">Overall Standings</div>
                         <div class="overall-standings-head">
-                            <span>Manager</span><span>Chips</span><span>Points</span><span>Prize</span>
+                            <span>Manager</span><span>Points</span>
                         </div>
                         <div class="overall-standing-list">
                                     ${data.overall.rows.map((row, rIdx) => {
@@ -2195,36 +2347,21 @@
                                         if (!medal) {
                                             if (rIdx === 0) medal = '🥇';
                                             else if (rIdx === 1) medal = '🥈';
-                                            else if (rIdx === 2) medal = '🥉';
                                         }
-                                        if (rIdx === totalRows - 1 && !String(medal).includes('💩')) {
-                                            medal += ' 💩';
-                                        }
-                                        const prizeVal = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
-                                        const numericPrize = parseFloat(String(prizeVal).replace(/[^0-9.]/g, '')) || 0;
-                                        const prizeStr = String(prizeVal).startsWith('£') ? prizeVal : '£' + prizeVal;
-                                        
-                                        let prizeColor = 'var(--gold-color)';
-                                        if (rIdx === 1) {
-                                            prizeColor = 'var(--silver-color)';
-                                        }
-
-                                        const prizeHtml = numericPrize > 0 
-                                            ? `<span style="color: ${prizeColor}; font-weight: 700;">${prizeStr}</span>` 
-                                            : `<span style="color: rgba(255,255,255,0.25); font-weight: 500;">£0</span>`;
-
-                                        const pKey = String(playerName).trim().toLowerCase();
-                                        const chipsHtml = renderChipsHtml(chipMap[pKey], activeChipMap[pKey]);
+                                        if (rIdx >= 2) medal = '';
+                                        const teamName = TEAM_NAMES[playerName] || '';
 
                                         return `
                                             <div class="overall-standing-tile rank-${rIdx + 1}">
-                                                <div class="overall-tile-name">${playerName}</div>
-                                                <div class="overall-tile-chips">${chipsHtml}</div>
+                                                <div><div class="overall-tile-name">${playerName}</div>${teamName ? `<div class="overall-tile-team">${teamName}</div>` : ''}</div>
                                                 <div class="overall-tile-points">${points} ${medal}</div>
-                                                <div class="overall-tile-prize">${prizeHtml}</div>
                                             </div>
                                         `;
                                     }).join('')}
+                        </div>
+                        <div class="period-prize-grid">
+                            <div class="period-prize winner"><strong>Winner</strong>${overallWinnerRow[playerIdx] || 'TBD'} <span>– ${overallPrizeText(overallWinnerRow)}</span></div>
+                            <div class="period-prize runner"><strong>Runner-up</strong>${overallRunnerRow[playerIdx] || 'TBD'} <span>– ${overallPrizeText(overallRunnerRow)}</span></div>
                         </div>
                     </div>
                 `;
