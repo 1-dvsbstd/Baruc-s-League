@@ -1066,8 +1066,37 @@
 
         .profile-title-block {
             margin: 0 0 8px;
-            padding: 10px 12px;
+            padding: 0;
             position: relative;
+            overflow: visible;
+            text-align: center;
+            display: grid;
+            grid-template-columns: 58px minmax(0, 1fr) 58px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-title-block::before {
+            display: none;
+        }
+
+        .profile-title-block::after {
+            display: none;
+        }
+
+        .profile-title-copy,
+        .profile-honour-count {
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-title-copy {
+            min-width: 0;
+            min-height: 54px;
+            padding: 9px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             overflow: hidden;
             border: 2px solid rgba(0, 255, 135, 0.58);
             border-radius: 10px;
@@ -1076,33 +1105,36 @@
                 linear-gradient(118deg, transparent 0 18%, rgba(0,255,135,0.08) 18.5% 20%, transparent 20.5% 79%, rgba(0,255,135,0.06) 79.5% 81%, transparent 81.5%),
                 linear-gradient(135deg, #07382d, #0a5a43 52%, #083b30);
             box-shadow: 0 0 26px rgba(0,255,135,0.18), inset 0 0 24px rgba(0,255,135,0.08), inset 0 1px 0 rgba(171,255,216,0.16), 0 7px 18px rgba(0,0,0,0.24);
-            text-align: center;
         }
 
-        .profile-title-block::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 82px;
-            height: 54px;
-            transform: translate(-50%, -50%);
-            clip-path: polygon(14% 0, 86% 0, 100% 50%, 86% 100%, 14% 100%, 0 50%);
+        .profile-honour-count {
+            min-height: 54px;
+            padding: 5px 3px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(0, 255, 135, 0.58);
+            border-radius: 10px;
             background:
-                linear-gradient(145deg, rgba(102,255,184,0.16), rgba(8,83,60,0.08) 48%, rgba(0,0,0,0.12)),
-                #0b503d;
-            box-shadow: 0 0 28px rgba(0,255,135,0.18), inset 0 0 18px rgba(102,255,184,0.08);
-            pointer-events: none;
+                radial-gradient(circle at 50% 0%, rgba(78,255,174,0.24), transparent 58%),
+                linear-gradient(135deg, #07382d, #0a5a43 52%, #083b30);
+            box-shadow: 0 0 22px rgba(0,255,135,0.16), inset 0 1px 0 rgba(171,255,216,0.16), 0 7px 18px rgba(0,0,0,0.24);
         }
 
-        .profile-title-block::after {
-            content: '';
-            position: absolute;
-            inset: 5px;
-            border: 1px solid rgba(102,255,184,0.18);
-            border-radius: 6px;
-            background: none;
-            pointer-events: none;
+        .profile-honour-count strong {
+            color: #fff;
+            font-size: 0.92rem;
+            line-height: 1;
+        }
+
+        .profile-honour-count span {
+            margin-top: 4px;
+            color: #b7d4c8;
+            font-size: 0.48rem;
+            font-weight: 800;
+            letter-spacing: 0.45px;
+            white-space: nowrap;
         }
 
         .profile-chip-block {
@@ -1134,6 +1166,19 @@
 
         .profile-title-name { position: relative; z-index: 1; color: #baffdc; font-size: 0.8rem; font-weight: 850; letter-spacing: 1.3px; text-shadow: 0 0 14px rgba(0,255,135,0.30); text-transform: uppercase; }
         .profile-title-explanation { position: relative; z-index: 1; color: #b7d4c8; font-size: 0.62rem; line-height: 1.25; margin-top: 3px; }
+
+        @media (min-width: 560px) {
+            .profile-card-header { grid-template-columns: minmax(0, 1fr) 184px minmax(0, 1fr); }
+            .profile-chip-block .chip-inventory { grid-template-columns: repeat(4, 42px); }
+        }
+
+        @media (max-width: 390px) {
+            .profile-title-block {
+                grid-template-columns: 50px minmax(0, 1fr) 50px;
+                gap: 5px;
+            }
+            .profile-honour-count span { font-size: 0.43rem; letter-spacing: 0.2px; }
+        }
 
         .profile-rating-grid {
             display: grid;
@@ -1359,23 +1404,24 @@
         .manager-item .card-dropdown {
             position: relative;
             z-index: 1;
-            display: grid;
-            grid-template-rows: 0fr;
+            display: block;
+            max-height: 0;
             margin-top: 0;
-            padding-top: 0;
+            padding-top: 10px;
             overflow: hidden;
             border-top-color: transparent;
             opacity: 0;
-            transition: grid-template-rows 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease,
-                margin-top 0.32s ease, padding-top 0.32s ease;
+            transform: translateY(-4px);
+            transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease,
+                transform 0.22s ease, border-color 0.18s ease;
+            will-change: max-height, opacity, transform;
         }
 
         .manager-item.expanded .card-dropdown {
-            grid-template-rows: 1fr;
-            margin-top: 12px;
-            padding-top: 10px;
+            max-height: 240px;
             border-top-color: var(--border-subtle);
             opacity: 1;
+            transform: translateY(0);
         }
 
         .manager-item .card-dropdown > .detail-list {
@@ -1976,6 +2022,26 @@
             const records = data.seasonRecords || {};
             const managers = orderedManagerProfiles(data.managerProfiles || []);
             if (managers.length === 0) return '';
+            const honourMap = {};
+            const overallHeaders = (data.overall && data.overall.headers) || [];
+            const overallRows = (data.overall && data.overall.rows) || [];
+            const findOverallColumn = (terms, fallback = -1) => {
+                const index = overallHeaders.findIndex(header => {
+                    const value = String(header || '').trim().toLowerCase();
+                    return terms.every(term => value.includes(term));
+                });
+                return index >= 0 ? index : fallback;
+            };
+            const overallManagerIndex = findOverallColumn(['player'], findOverallColumn(['manager'], 0));
+            const weeksWonIndex = findOverallColumn(['weeks', 'won'], 4);
+            const motmAwardsIndex = findOverallColumn(['motm'], 5);
+            overallRows.forEach(row => {
+                const key = String(row[overallManagerIndex] || '').trim().toLowerCase();
+                honourMap[key] = {
+                    gwWins: Number(row[weeksWonIndex]) || 0,
+                    motmWins: Number(row[motmAwardsIndex]) || 0
+                };
+            });
             const previewParams = new URLSearchParams(window.location.search);
             const previewChip = previewParams.get('previewChip');
             const previewSecondChip = previewParams.get('previewChip2') || (previewChip ? 'wc' : '');
@@ -2061,6 +2127,7 @@
                 const stats = manager.stats || {};
                 const managerKey = String(manager.managerName || '').trim().toLowerCase();
                 const managerChips = renderChipsHtml(profileChipMap[managerKey], profileActiveChipMap[managerKey]);
+                const honours = honourMap[managerKey] || { gwWins: 0, motmWins: 0 };
                 const transferReturn = Number(stats.transferReturn) || 0;
                 const transferClass = transferReturn > 0 ? 'positive' : (transferReturn < 0 ? 'negative' : '');
                 const changes = manager.ratingChanges || {};
@@ -2088,8 +2155,12 @@
                             <div class="profile-overall">${escapeProfileHtml(manager.overallRating)}<span>MANAGER RATING</span></div>
                         </div>
                         <div class="profile-title-block">
-                            <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
-                            <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
+                            <div class="profile-honour-count"><strong>${honours.gwWins}</strong><span>GW WINS</span></div>
+                            <div class="profile-title-copy">
+                                <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
+                                <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
+                            </div>
+                            <div class="profile-honour-count"><strong>${honours.motmWins}</strong><span>MOTM WINS</span></div>
                         </div>
                         <div class="profile-rating-grid">
                             ${ratingItems.map(([label, key, value]) => {
