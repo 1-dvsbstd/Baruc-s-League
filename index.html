@@ -1334,8 +1334,9 @@
 
         .profile-rating strong { color: #fff; font-size: 0.98rem; line-height: 1; }
         .profile-rating.highest strong { color: #fff; }
-        .profile-rating-label { color: var(--text-violet); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.42px; text-transform: uppercase; }
-        .profile-rating-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-width: 42px; }
+        .profile-rating-label { min-width: 0; color: var(--text-violet); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.42px; text-transform: uppercase; white-space: nowrap; }
+        .profile-rating.rating-determination .profile-rating-label { font-size: 0.62rem; letter-spacing: 0.2px; }
+        .profile-rating-value { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 5px; min-width: 42px; }
         .rating-change { font-size: 0.56rem; font-weight: 900; line-height: 1; }
         .profile-rating .rating-change {
             display: inline-flex;
@@ -2360,7 +2361,7 @@
                                 const change = Number(changes[key]) || 0;
                                 const changeHtml = change === 0 ? '' : `<span class="rating-change ${change > 0 ? 'up' : 'down'}" title="${change > 0 ? 'Up' : 'Down'} ${Math.abs(change)}">${change > 0 ? '▲' : '▼'}</span>`;
                                 const uniqueHighest = Number(value) === highestRatings[key] && highestRatingCounts[key] === 1;
-                                return `<div class="profile-rating ${uniqueHighest ? 'highest' : ''}"><span class="profile-rating-label">${label}</span><span class="profile-rating-value">${changeHtml}<strong>${escapeProfileHtml(value)}</strong></span></div>`;
+                                return `<div class="profile-rating rating-${key} ${uniqueHighest ? 'highest' : ''}"><span class="profile-rating-label">${label}</span><span class="profile-rating-value">${changeHtml}<strong>${escapeProfileHtml(value)}</strong></span></div>`;
                             }).join('')}
                         </div>
                         </div>
