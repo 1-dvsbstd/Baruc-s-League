@@ -924,6 +924,8 @@
         .transfer-result.positive { color: var(--primary-color); }
         .transfer-result.negative { color: var(--danger-color); }
         .transfer-result.level { color: var(--text-muted); }
+        .transfer-return { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .transfer-return-label { color: var(--text-muted); font-size: 0.46rem; font-weight: 850; letter-spacing: 0.08em; }
 
         @media (max-width: 430px) {
             .support-panel table th:nth-child(2), .support-panel table td:nth-child(2) { padding-right: 8px !important; }
@@ -1048,15 +1050,19 @@
             align-items: center;
             gap: 10px;
             padding: 12px;
-            margin-bottom: 7px;
-            margin: 7px;
-            border: 1px solid rgba(145, 163, 184, 0.22);
-            border-radius: 9px;
+            margin: 0;
+        }
+
+        .profile-top-card {
+            margin: 7px 7px 8px;
+            overflow: hidden;
+            border: 1px solid rgba(145, 163, 184, 0.34);
+            border-radius: 10px;
             background:
-                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
+                linear-gradient(120deg, transparent 38%, rgba(255,255,255,0.15) 48%, transparent 58%),
                 repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px),
-                linear-gradient(145deg, rgba(34,18,45,0.78), rgba(13,12,28,0.78));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+                linear-gradient(145deg, rgba(34,18,45,0.82), rgba(13,12,28,0.84));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 7px 18px rgba(0,0,0,0.20);
         }
 
         .profile-fut-panel {
@@ -1085,6 +1091,9 @@
             text-align: right;
             margin: 0;
         }
+
+        .profile-overall-value { display: flex; align-items: center; justify-content: flex-end; gap: 7px; }
+        .profile-overall .rating-change { font-size: 0.72rem; letter-spacing: 0; }
 
         .profile-overall span {
             display: block;
@@ -1301,36 +1310,50 @@
         .profile-rating-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 7px;
-            margin: 0 7px 7px;
+            gap: 0;
+            margin: 0 10px 8px;
+            padding-top: 5px;
+            border-top: 1px solid rgba(145, 163, 184, 0.18);
         }
 
         .profile-rating {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             justify-content: space-between;
-            gap: 5px;
-            padding: 8px 9px;
-            border: 1px solid rgba(145, 163, 184, 0.22);
-            border-radius: 8px;
-            background:
-                linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.16) 49%, transparent 57%),
-                repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px),
-                rgba(4,9,25,0.34);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+            gap: 8px;
+            padding: 8px 10px;
+            border: 0;
+            border-bottom: 1px solid rgba(145, 163, 184, 0.14);
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
         }
 
-        .profile-rating strong { color: #fff; font-size: 1rem; }
-        .profile-rating.highest strong { color: var(--gold-color); }
-        .profile-rating-label { color: var(--text-violet); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
-        .profile-rating-value { display: flex; align-items: baseline; gap: 4px; }
-        .rating-change { font-size: 0.58rem; font-weight: 800; }
+        .profile-rating:nth-child(odd) { border-right: 1px solid rgba(145, 163, 184, 0.14); }
+        .profile-rating:nth-last-child(-n + 2) { border-bottom: 0; }
+
+        .profile-rating strong { color: #fff; font-size: 0.98rem; line-height: 1; }
+        .profile-rating.highest strong { color: #fff; }
+        .profile-rating-label { color: var(--text-violet); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.42px; text-transform: uppercase; }
+        .profile-rating-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-width: 42px; }
+        .rating-change { font-size: 0.56rem; font-weight: 900; line-height: 1; }
+        .profile-rating .rating-change {
+            display: inline-flex;
+            width: 0.7rem;
+            height: 1rem;
+            flex: 0 0 0.7rem;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.48rem;
+            line-height: 1;
+            transform: translateY(-0.5px);
+        }
         .rating-change.up { color: var(--primary-color); }
         .rating-change.down { color: var(--danger-color); }
 
         .profile-stat-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 7px;
             margin: 0 7px 7px;
             border: 0;
@@ -1360,7 +1383,10 @@
 
         @media (max-width: 430px) {
             .profile-slide { min-height: 0; }
-            .profile-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .profile-stat-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+            .profile-stat-grid .profile-stat:nth-child(-n + 2) { grid-column: span 3; }
+            .profile-stat-grid .profile-stat:nth-child(n + 3) { grid-column: span 2; }
+            .profile-stat-label { font-size: 0.57rem; letter-spacing: 0.25px; }
         }
 
         .season-record-row,
@@ -1390,8 +1416,7 @@
         .period-standing-row.rank-4 { border-color: rgba(145,163,184,0.28) !important; }
 
         /* Use the exact same base and overlay order as a normal Live GW card. */
-        .profile-card-header,
-        .profile-rating,
+        .profile-top-card,
         .profile-stat,
         .season-record-row,
         .period-standing-row,
@@ -1405,8 +1430,7 @@
                 linear-gradient(145deg, #22122d, #160b1f);
         }
 
-        .profile-card-header::before,
-        .profile-rating::before,
+        .profile-top-card::before,
         .profile-stat::before,
         .season-record-row::before,
         .period-standing-row::before,
@@ -1423,8 +1447,7 @@
                 repeating-linear-gradient(135deg, transparent 0 18px, rgba(255,255,255,0.035) 18px 19px);
         }
 
-        .profile-card-header > *,
-        .profile-rating > *,
+        .profile-top-card > *,
         .profile-stat > *,
         .season-record-row > *,
         .period-standing-row > *,
@@ -1580,23 +1603,21 @@
         .manager-item .card-dropdown {
             position: relative;
             z-index: 1;
-            display: block;
-            height: 0;
+            display: grid;
+            grid-template-rows: 0fr;
             margin-top: 0;
-            padding-top: 10px;
+            padding-top: 0;
             overflow: hidden;
             border-top-color: transparent;
             opacity: 0;
-            transform: translateY(-4px);
-            transition: height 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease,
-                transform 0.22s ease, border-color 0.18s ease;
-            will-change: height, opacity, transform;
+            transition: grid-template-rows 0.18s ease, opacity 0.14s ease, border-color 0.14s ease;
         }
 
         .manager-item.expanded .card-dropdown {
+            grid-template-rows: 1fr;
+            padding-top: 10px;
             border-top-color: var(--border-subtle);
             opacity: 1;
-            transform: translateY(0);
         }
 
         .manager-item .card-dropdown > .detail-list {
@@ -1955,7 +1976,7 @@
             
             if (ins.length === 0 && outs.length === 0) {
                 let res = String(rawText);
-                if (hits && hits > 0 && !res.includes('pt')) res += ` (-${hits} pts)`;
+                if (hits && hits > 0 && !res.includes('pt')) res += ` (-${hits} pts hit)`;
                 return res;
             }
             
@@ -1965,7 +1986,7 @@
             
             let finalStr = resultParts.join(' | ');
             if (hits && hits > 0 && !finalStr.includes('pt')) {
-                finalStr += ` (-${hits} pts)`;
+                finalStr += ` (-${hits} pts hit)`;
             }
             return finalStr;
         }
@@ -2142,12 +2163,9 @@
         }
 
         function toggleManagerCard(card) {
-            const dropdown = card.querySelector('.card-dropdown');
             const isExpanded = !card.classList.contains('expanded');
             card.classList.toggle('expanded', isExpanded);
             card.setAttribute('aria-expanded', String(isExpanded));
-            if (!dropdown) return;
-            dropdown.style.height = isExpanded ? `${dropdown.scrollHeight}px` : '0px';
         }
 
         function handleManagerCardKey(event, card) {
@@ -2312,6 +2330,8 @@
                 const transferReturn = Number(stats.transferReturn) || 0;
                 const transferClass = transferReturn > 0 ? 'positive' : (transferReturn < 0 ? 'negative' : '');
                 const changes = manager.ratingChanges || {};
+                const overallChange = Number(manager.overallRatingChange) || 0;
+                const overallChangeHtml = overallChange === 0 ? '' : `<span class="rating-change ${overallChange > 0 ? 'up' : 'down'}" title="${overallChange > 0 ? 'Up' : 'Down'} ${Math.abs(overallChange)}">${overallChange > 0 ? '▲' : '▼'}</span>`;
                 const ratingItems = [
                     ['Attack', 'attack', ratings.attack], ['Defence', 'defence', ratings.defence],
                     ['Scouting', 'scouting', ratings.scouting], ['Tactics', 'tactics', ratings.tactics],
@@ -2319,12 +2339,13 @@
                 ];
                 const statItems = [
                     ['Transfers', stats.transfers], ['Transfer pts', signedProfileValue(transferReturn), transferClass],
-                    ['Goals', stats.goals], ['Assists', stats.assists]
+                    ['Goals', stats.goals], ['Assists', stats.assists], ['Clean sheets', stats.cleanSheets]
                 ];
 
                 carousel += `
                     <section class="carousel-card profile-slide" id="profile-slide-${slideIndex}" data-profile-title="${escapeProfileHtml(manager.managerName)}">
                         <div class="profile-fut-panel ${hasProfileActiveChip ? 'chip-active' : ''}">
+                        <div class="profile-top-card">
                         <div class="profile-card-header">
                             <div class="profile-identity">
                                 <div class="profile-manager-name">${escapeProfileHtml(manager.managerName)}</div>
@@ -2332,7 +2353,16 @@
                                 <div class="profile-formation">${escapeProfileHtml(manager.preferredFormation)}</div>
                             </div>
                             <div class="profile-chip-block">${managerChips}</div>
-                            <div class="profile-overall">${escapeProfileHtml(manager.overallRating)}<span>MANAGER RATING</span></div>
+                            <div class="profile-overall"><div class="profile-overall-value">${overallChangeHtml}<strong>${escapeProfileHtml(manager.overallRating)}</strong></div><span>MANAGER RATING</span></div>
+                        </div>
+                        <div class="profile-rating-grid">
+                            ${ratingItems.map(([label, key, value]) => {
+                                const change = Number(changes[key]) || 0;
+                                const changeHtml = change === 0 ? '' : `<span class="rating-change ${change > 0 ? 'up' : 'down'}" title="${change > 0 ? 'Up' : 'Down'} ${Math.abs(change)}">${change > 0 ? '▲' : '▼'}</span>`;
+                                const uniqueHighest = Number(value) === highestRatings[key] && highestRatingCounts[key] === 1;
+                                return `<div class="profile-rating ${uniqueHighest ? 'highest' : ''}"><span class="profile-rating-label">${label}</span><span class="profile-rating-value">${changeHtml}<strong>${escapeProfileHtml(value)}</strong></span></div>`;
+                            }).join('')}
+                        </div>
                         </div>
                         <div class="profile-title-block">
                             <div class="profile-honour-count"><strong>${honours.gwWins}</strong><span>GW WINS</span></div>
@@ -2341,14 +2371,6 @@
                                 <div class="profile-title-explanation">${escapeProfileHtml(manager.titleExplanation)}</div>
                             </div>
                             <div class="profile-honour-count"><strong>${honours.motmWins}</strong><span>MotM</span></div>
-                        </div>
-                        <div class="profile-rating-grid">
-                            ${ratingItems.map(([label, key, value]) => {
-                                const change = Number(changes[key]) || 0;
-                                const changeHtml = change === 0 ? '' : `<span class="rating-change ${change > 0 ? 'up' : 'down'}">${change > 0 ? '▲' : '▼'}${Math.abs(change)}</span>`;
-                                const uniqueHighest = Number(value) === highestRatings[key] && highestRatingCounts[key] === 1;
-                                return `<div class="profile-rating ${uniqueHighest ? 'highest' : ''}"><span class="profile-rating-label">${label}</span><span class="profile-rating-value"><strong>${escapeProfileHtml(value)}</strong>${changeHtml}</span></div>`;
-                            }).join('')}
                         </div>
                         <div class="profile-stat-grid">
                             ${statItems.map(([label, value, valueClass = '']) => `<div class="profile-stat"><div class="profile-stat-value ${valueClass}">${escapeProfileHtml(value)}</div><div class="profile-stat-label">${label}</div></div>`).join('')}
@@ -2518,8 +2540,8 @@
                         const hasTransferResult = mgr.transferEffectiveness !== null && mgr.transferEffectiveness !== undefined;
                         const transferResultClass = transferEffect > 0 ? 'positive' : (transferEffect < 0 ? 'negative' : 'level');
                         const transferResultText = hasTransferResult
-                            ? `<span class="transfer-result ${transferResultClass}">Result ${transferEffect > 0 ? '+' : ''}${transferEffect} pts</span>`
-                            : '';
+                            ? `<span class="transfer-result ${transferResultClass}">${transferEffect > 0 ? '+' : ''}${transferEffect} pts</span><span class="transfer-return-label">RETURN</span>`
+                            : '<span class="transfer-result level">—</span><span class="transfer-return-label">RETURN</span>';
                         const playersLeft = mgr.playersLeft !== null && mgr.playersLeft !== undefined ? Number(mgr.playersLeft) : null;
                         const playersLeftHtml = Boolean(gwGroup.isLive) && playersLeft !== null && !hasNoEntry
                             ? `<div class="players-left">${playersLeft} ${playersLeft === 1 ? 'player' : 'players'} left</div>`
@@ -2576,7 +2598,7 @@
                                         <div class="detail-row transfer">
                                             <div class="detail-row-label">🔄 Transfers</div>
                                             <div class="detail-row-name">${transfersHtml}</div>
-                                            <div class="detail-row-points">${Number(mgr.hits) > 0 ? `-${Number(mgr.hits)} pts` : 'No hit'}</div>
+                                            <div class="detail-row-points transfer-return">${transferResultText}</div>
                                         </div>
                                     </div>
                                 </div>
