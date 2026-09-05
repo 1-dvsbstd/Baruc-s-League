@@ -2231,12 +2231,40 @@
             };
             const overallManagerIndex = findOverallColumn(['player'], findOverallColumn(['manager'], 0));
             const weeksWonIndex = findOverallColumn(['weeks', 'won'], 4);
-            const motmAwardsIndex = findOverallColumn(['motm'], 5);
+            const completedGameweeks = (data.gameweeks || [])
+                .filter(gameweek => !gameweek.isLive && !gameweek.isUpcoming)
+                .map(gameweek => Number(gameweek.gameweek) || 0)
+                .filter(Boolean);
+            const latestCompletedGameweek = completedGameweeks.length
+                ? Math.max(...completedGameweeks)
+                : 0;
+            const completedMotmWins = {};
+
+            (data.monthly || []).forEach(period => {
+                const title = String(period.title || '');
+                const rangeText = (title.match(/\(([^)]*)\)/) || [])[1] || '';
+                const rangeGameweeks = (rangeText.match(/\d+/g) || []).map(Number);
+                const periodEndGameweek = rangeGameweeks.length
+                    ? rangeGameweeks[rangeGameweeks.length - 1]
+                    : 0;
+                const winner = String(period.topScorer || '').trim();
+
+                if (
+                    periodEndGameweek > 0 &&
+                    periodEndGameweek <= latestCompletedGameweek &&
+                    winner &&
+                    winner !== '-'
+                ) {
+                    const winnerKey = winner.toLowerCase();
+                    completedMotmWins[winnerKey] = (completedMotmWins[winnerKey] || 0) + 1;
+                }
+            });
+
             overallRows.forEach(row => {
                 const key = String(row[overallManagerIndex] || '').trim().toLowerCase();
                 honourMap[key] = {
                     gwWins: Number(row[weeksWonIndex]) || 0,
-                    motmWins: Number(row[motmAwardsIndex]) || 0
+                    motmWins: completedMotmWins[key] || 0
                 };
             });
             const previewParams = new URLSearchParams(window.location.search);
