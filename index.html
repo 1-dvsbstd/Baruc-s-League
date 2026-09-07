@@ -2928,9 +2928,12 @@
                             : '';
                         const liveSquad = Array.isArray(mgr.liveSquad) ? mgr.liveSquad : [];
                         const livePlayers = liveSquad.filter(player => player.status === 'live');
-                        const liveSquadHtml = Boolean(gwGroup.isLive) && liveSquad.length
+                        const squadStatusText = Boolean(gwGroup.isLive)
+                            ? `${livePlayers.length} live · GW${Number(gwGroup.gameweek) || ''}`
+                            : `Final squad · GW${Number(gwGroup.gameweek) || ''}`;
+                        const liveSquadHtml = liveSquad.length
                             ? `<div class="live-squad-panel">
-                                <div class="live-squad-heading"><span>Squad</span><span>${livePlayers.length} live · GW${Number(gwGroup.gameweek) || ''}</span></div>
+                                <div class="live-squad-heading"><span>Squad</span><span>${squadStatusText}</span></div>
                                 ${renderSquadPitch(liveSquad, starName)}
                             </div>`
                             : '';
