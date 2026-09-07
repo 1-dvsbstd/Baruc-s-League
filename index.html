@@ -156,9 +156,36 @@
         }
 
         #splash-screen img {
+            position: relative;
+            z-index: 1;
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        @media (min-width: 700px) {
+            #splash-screen {
+                overflow: hidden;
+                background: #070510;
+            }
+
+            #splash-screen::before {
+                content: '';
+                position: absolute;
+                inset: -22px;
+                background:
+                    linear-gradient(rgba(5,3,12,0.55), rgba(5,3,12,0.7)),
+                    url('splash-bg.png') center center / cover no-repeat;
+                filter: blur(14px);
+                transform: scale(1.04);
+            }
+
+            #splash-screen img {
+                width: auto;
+                max-width: 100%;
+                object-fit: contain;
+                box-shadow: 0 0 55px rgba(0,0,0,0.7);
+            }
         }
 
         .fade-out {
@@ -935,6 +962,142 @@
         .detail-row.worst .detail-row-points { color: var(--danger-color); }
         .detail-row.star .detail-row-points { color: var(--gold-color); }
 
+        .live-squad-panel { padding: 10px 1px 2px; }
+        .live-squad-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 7px;
+            color: #fff;
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .remaining-player-list { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+        .remaining-player-pill {
+            padding: 5px 7px;
+            border: 1px solid rgba(145,163,184,0.22);
+            border-radius: 6px;
+            color: #fff;
+            background: rgba(0,0,0,0.18);
+            font-size: 0.59rem;
+            font-weight: 750;
+        }
+        .remaining-player-pill small { color: var(--text-muted); font-size: 0.5rem; font-weight: 700; }
+        .live-player-list { border-top: 1px solid rgba(255,255,255,0.07); }
+        .live-player-row {
+            display: grid;
+            grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr) auto;
+            align-items: center;
+            gap: 7px;
+            min-height: 31px;
+            padding: 5px 2px;
+            border-bottom: 1px solid rgba(255,255,255,0.055);
+        }
+        .live-player-row:last-child { border-bottom: 0; }
+        .live-player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 0.66rem; font-weight: 800; }
+        .live-player-name .captain-mark { color: var(--gold-color); }
+        .live-player-events { min-width: 0; color: var(--text-muted); font-size: 0.57rem; line-height: 1.25; }
+        .live-player-points { color: #fff; font-size: 0.72rem; font-weight: 900; text-align: right; }
+        .live-player-status { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: rgba(145,163,184,0.58); vertical-align: 1px; }
+        .live-player-status.live { background: var(--primary-color); box-shadow: 0 0 7px rgba(0,255,135,0.65); }
+        .live-player-status.finished { background: rgba(145,163,184,0.48); }
+
+        .squad-pitch {
+            position: relative;
+            overflow: hidden;
+            min-height: 510px;
+            padding: 17px 7px 0;
+            border: 1px solid rgba(124,255,196,0.3);
+            border-radius: 13px;
+            background:
+                repeating-linear-gradient(180deg, rgba(255,255,255,0.035) 0 70px, rgba(0,0,0,0.025) 70px 140px),
+                linear-gradient(180deg, #08724f 0%, #055d43 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .pitch-markings {
+            position: absolute;
+            inset: 9px 4px 9px;
+            z-index: 3;
+            border: 2px solid rgba(255,255,255,0.88);
+            background: linear-gradient(180deg, transparent calc(68% - 1px), rgba(255,255,255,0.88) calc(68% - 1px) calc(68% + 1px), transparent calc(68% + 1px));
+            pointer-events: none;
+        }
+        .pitch-markings::before { content: ''; position: absolute; left: 43%; top: -10px; width: 14%; height: 9px; border: 2px solid rgba(255,255,255,0.86); border-bottom: 0; background: repeating-linear-gradient(90deg, transparent 0 5px, rgba(255,255,255,0.2) 5px 6px); }
+        .pitch-markings::after { display: none; }
+        .pitch-box {
+            position: absolute;
+            top: -2px;
+            left: 28%;
+            width: 44%;
+            height: 17%;
+            border: 2px solid rgba(255,255,255,0.88);
+            border-top: 0;
+            background: radial-gradient(circle at 50% 69%, #fff 0 2px, transparent 2.5px);
+        }
+        .pitch-box::before { content: ''; position: absolute; top: 0; left: 27%; width: 46%; height: 37%; border: 2px solid rgba(255,255,255,0.86); border-top: 0; }
+        .pitch-box::after { content: ''; position: absolute; left: 50%; bottom: -22px; width: 58px; height: 21px; border: 2px solid rgba(255,255,255,0.84); border-top: 0; border-radius: 0 0 50px 50px; transform: translateX(-50%); }
+        .pitch-circle { position: absolute; left: 50%; top: 68%; width: 104px; height: 104px; border: 2px solid rgba(255,255,255,0.88); border-radius: 50%; transform: translate(-50%,-50%); }
+        .pitch-circle::before { content: ''; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; border-radius: 50%; background: #fff; transform: translate(-50%,-50%); }
+        .pitch-circle::after { display: none; }
+        .pitch-row { position: relative; z-index: 4; display: flex; align-items: flex-start; justify-content: space-evenly; min-height: 89px; gap: 1px; }
+        .pitch-player { position: relative; width: min(18%, 72px); min-width: 0; padding: 0; border: 0; color: #fff; background: transparent; font: inherit; cursor: pointer; }
+        .pitch-kit-wrap { position: relative; display: block; width: 43px; height: 48px; margin: 0 auto -4px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.45)); }
+        .pitch-kit { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: contain; }
+        .pitch-kit-fallback { position: absolute; inset: 5px 3px 1px; z-index: 1; display: grid; place-items: center; clip-path: polygon(28% 0,42% 9%,58% 9%,72% 0,100% 20%,84% 39%,75% 32%,75% 100%,25% 100%,25% 32%,16% 39%,0 20%); background: linear-gradient(135deg,#18a0fb,#071f57); color: rgba(255,255,255,0.34); font-size: 0.65rem; }
+        .pitch-player-name, .pitch-player-points, .pitch-player-fixture { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pitch-player-card { display: block; overflow: hidden; border: 1px solid transparent; border-radius: 4px; transition: border-color 150ms ease, box-shadow 150ms ease; }
+        .pitch-player-name { position: relative; z-index: 3; padding: 3px 2px; border-radius: 3px 3px 0 0; color: #18021d; background: #fff; font-size: 0.49rem; font-weight: 900; }
+        .pitch-player-points { padding: 2px; border-radius: 0 0 3px 3px; background: #27002d; color: #fff; font-size: 0.52rem; font-weight: 900; }
+        .pitch-player-fixture { min-height: 12px; padding-top: 2px; color: rgba(255,255,255,0.72); font-size: 0.38rem; font-weight: 750; }
+        .pitch-player.is-live .pitch-player-card { border-color: #00e89a; box-shadow: 0 0 5px rgba(0,232,154,0.9), 0 0 14px rgba(0,217,145,0.58), 0 0 24px rgba(0,169,117,0.3); }
+        .pitch-player.is-live .pitch-player-points { color: #00ff87; }
+        .pitch-player.is-star .pitch-player-card { border-color: #ffd34e; box-shadow: 0 0 5px rgba(255,211,78,0.94), 0 0 15px rgba(239,198,77,0.62), 0 0 25px rgba(185,132,20,0.32); }
+        .pitch-player.is-star.is-live .pitch-player-card { border-color: #ffd34e; box-shadow: 0 0 0 1px rgba(0,232,154,0.94), 0 0 8px rgba(255,211,78,0.9), 0 0 18px rgba(0,217,145,0.46), 0 0 27px rgba(239,198,77,0.34); }
+        .pitch-player.is-upcoming { opacity: 0.7; }
+        .pitch-captain { position: absolute; top: 1px; left: 1px; z-index: 5; display: grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; color: #1d0828; background: var(--gold-color); font-size: 0.42rem; font-weight: 950; }
+        .pitch-bench { position: relative; z-index: 4; margin: 4px 3px 0; padding: 8px 4px 7px; border-top: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.06); }
+        .pitch-bench-label { margin-bottom: 4px; color: rgba(255,255,255,0.78); font-size: 0.48rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+        .pitch-bench-row { display: flex; justify-content: space-evenly; }
+        .pitch-bench .pitch-player { width: 23%; opacity: 1; }
+
+        .player-sheet-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: flex-end; justify-content: center; padding: 14px; visibility: hidden; opacity: 0; background: rgba(0,0,0,0.68); transition: opacity 180ms ease, visibility 180ms ease; }
+        .player-sheet-overlay.open { visibility: visible; opacity: 1; }
+        .player-sheet { position: relative; width: min(100%, 500px); max-height: min(86vh, 720px); overflow-y: auto; padding: 11px 18px 20px; border: 1px solid rgba(194,162,70,0.62); border-radius: 18px; background: linear-gradient(145deg,#21102c,#0b1422); box-shadow: 0 -12px 46px rgba(0,0,0,0.55); transform: translateY(18px); transition: transform 180ms ease; }
+        .player-sheet-overlay.open .player-sheet { transform: translateY(0); }
+        .player-sheet-handle { width: 40px; height: 4px; margin: 0 auto 13px; border-radius: 9px; background: rgba(255,255,255,0.24); }
+        .player-sheet-close { position: absolute; top: 12px; right: 14px; border: 0; color: #fff; background: transparent; font-size: 1.25rem; cursor: pointer; }
+        .player-sheet-header { display: grid; grid-template-columns: 54px minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 2px 0 15px; }
+        .player-sheet-kit { position: relative; display: block; width: 52px; height: 58px; filter: drop-shadow(0 5px 6px rgba(0,0,0,0.42)); }
+        .player-sheet-kit img { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: contain; }
+        .player-sheet-title { display: block; color: #fff; font-size: 1.08rem; font-weight: 900; }
+        .player-sheet-title em { color: var(--gold-color); font-style: normal; }
+        .player-sheet-fixture { display: block; margin-top: 3px; color: var(--text-muted); font-size: 0.66rem; }
+        .player-sheet-total { display: flex; flex-direction: column; align-items: center; padding-right: 4px; }
+        .player-sheet-total strong { color: var(--gold-color); font-size: 1.45rem; line-height: 1; }
+        .player-sheet-total span { color: var(--text-muted); font-size: 0.48rem; font-weight: 800; text-transform: uppercase; }
+        .breakdown-title { margin: 2px 0 8px; color: #fff; font-size: 0.86rem; font-weight: 900; }
+        .breakdown-table { overflow: hidden; border: 1px solid rgba(255,255,255,0.09); border-radius: 11px; background: rgba(12,2,18,0.34); }
+        .breakdown-head, .breakdown-row { display: grid; grid-template-columns: minmax(0,1fr) 54px 64px; align-items: center; column-gap: 8px; }
+        .breakdown-head { padding: 9px 11px 7px; color: #aa9caf; font-size: 0.64rem; font-weight: 850; }
+        .breakdown-head span:nth-child(n+2), .breakdown-row span:nth-child(2), .breakdown-row strong { text-align: right; }
+        .breakdown-row { min-height: 39px; padding: 7px 11px; border-top: 1px solid rgba(255,255,255,0.085); color: #fff; font-size: 0.52rem; }
+        .breakdown-row > span:first-child { font-weight: 720; }
+        .breakdown-row > span:nth-child(2) { color: #d7cfda; }
+        .breakdown-row strong { color: #fff; font-size: 0.52rem; white-space: nowrap; }
+        .breakdown-row strong.negative { color: #ff6573; }
+        .breakdown-multiplier { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; padding: 10px 12px; border: 1px solid rgba(239,198,77,0.38); border-radius: 9px; color: #e8dcae; background: rgba(239,198,77,0.07); font-size: 0.62rem; font-weight: 800; }
+        .breakdown-multiplier strong { color: var(--gold-color); font-size: 0.76rem; }
+
+        @media (min-width: 700px) {
+            .squad-pitch { min-height: 570px; padding-inline: 20px; }
+            .pitch-row { min-height: 101px; }
+            .pitch-player { max-width: 86px; }
+            .pitch-kit-wrap { width: 51px; height: 57px; }
+            .pitch-player-name { font-size: 0.56rem; }
+        }
+
         .support-panel {
             position: relative;
             overflow: hidden;
@@ -1686,6 +1849,9 @@
     <div id="app">
         <div class="loading-text">Loading tracker data...</div>
     </div>
+    <div id="livePlayerOverlay" class="player-sheet-overlay" onclick="closeLivePlayerBreakdown(event)">
+        <div id="livePlayerOverlayBody" class="player-sheet" onclick="event.stopPropagation()"></div>
+    </div>
 
     <div id="timestamp" class="update-timestamp" style="margin-top: 20px; margin-bottom: 0;"></div>
 
@@ -2166,6 +2332,23 @@
             const isExpanded = !card.classList.contains('expanded');
             card.classList.toggle('expanded', isExpanded);
             card.setAttribute('aria-expanded', String(isExpanded));
+            const cardKey = card.dataset.cardKey;
+            if (cardKey) {
+                const expandedKeys = getExpandedManagerCardKeys();
+                if (isExpanded) expandedKeys.add(cardKey);
+                else expandedKeys.delete(cardKey);
+                try {
+                    sessionStorage.setItem('barucsLeagueExpandedCards', JSON.stringify(Array.from(expandedKeys)));
+                } catch (error) {}
+            }
+        }
+
+        function getExpandedManagerCardKeys() {
+            try {
+                return new Set(JSON.parse(sessionStorage.getItem('barucsLeagueExpandedCards') || '[]'));
+            } catch (error) {
+                return new Set();
+            }
         }
 
         function handleManagerCardKey(event, card) {
@@ -2187,6 +2370,137 @@
         function signedProfileValue(value) {
             const number = Number(value) || 0;
             return number > 0 ? `+${number}` : String(number);
+        }
+
+        function formatLiveKickoff(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleString('en-GB', {
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function livePlayerEvents(player) {
+            const tags = [];
+            const goals = Number(player.goals) || 0;
+            const assists = Number(player.assists) || 0;
+            const cleanSheets = Number(player.cleanSheets) || 0;
+            const saves = Number(player.saves) || 0;
+            const yellowCards = Number(player.yellowCards) || 0;
+            const redCards = Number(player.redCards) || 0;
+            const bonus = Number(player.bonus) || 0;
+            const defensiveContributions = Number(player.defensiveContributions) || 0;
+            const defensiveTarget = Number(player.defensiveTarget) || 0;
+
+            if (goals) tags.push(`⚽${goals > 1 ? goals : ''}`);
+            if (assists) tags.push(`A${assists}`);
+            if (cleanSheets) tags.push('CS');
+            if (saves) tags.push(`SV ${saves}`);
+            if (yellowCards) tags.push('YC');
+            if (redCards) tags.push('RC');
+            if (bonus) tags.push(`B${bonus}`);
+            if (defensiveTarget) tags.push(`DEF ${defensiveContributions}/${defensiveTarget}`);
+
+            return tags.length ? tags.join(' · ') : `${Number(player.minutes) || 0}′`;
+        }
+
+        function liveKitUrl(player) {
+            const code = Number(player.teamCode) || 0;
+            return code ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${code}-110.webp` : '';
+        }
+
+        function renderPitchPlayer(player) {
+            const encodedPlayer = encodeURIComponent(JSON.stringify(player));
+            const statusClass = player.status === 'live' ? 'is-live' : (player.status === 'upcoming' ? 'is-upcoming' : 'is-finished');
+            const starClass = player.isStar ? 'is-star' : '';
+            const captain = player.isCaptain ? '<span class="pitch-captain">C</span>' : '';
+            const points = Number(player.multiplier) > 0 ? Number(player.points) || 0 : Number(player.rawPoints) || 0;
+            const kitUrl = liveKitUrl(player);
+            return `<button class="pitch-player ${statusClass} ${starClass}" type="button" data-player="${encodedPlayer}" onclick="openLivePlayerBreakdown(event, this)">
+                <span class="pitch-kit-wrap">${captain}<span class="pitch-kit-fallback">◆</span>${kitUrl ? `<img class="pitch-kit" src="${kitUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>
+                <span class="pitch-player-card"><span class="pitch-player-name">${escapeProfileHtml(player.name)}</span><span class="pitch-player-points">${points} pts</span></span>
+                <span class="pitch-player-fixture">${escapeProfileHtml(player.opponent || formatLiveKickoff(player.kickoff) || '')}</span>
+            </button>`;
+        }
+
+        function renderSquadPitch(players, starName) {
+            const cleanStarName = String(starName || '').replace(/\s*\(C\)\s*$/, '').trim().toLowerCase();
+            const ordered = players.map(player => ({
+                ...player,
+                isStar: cleanStarName && String(player.name || '').trim().toLowerCase() === cleanStarName
+            })).sort((a, b) => Number(a.squadPosition || 99) - Number(b.squadPosition || 99));
+            const activeCount = ordered.filter(player => Number(player.multiplier) > 0).length;
+            const isBenchBoost = activeCount > 11;
+            const starters = ordered.filter(player => isBenchBoost
+                ? Number(player.squadPosition || 0) <= 11
+                : Number(player.multiplier) > 0);
+            const starterIds = new Set(starters.map(player => Number(player.id)));
+            const bench = ordered.filter(player => !starterIds.has(Number(player.id)));
+            const row = (type, label) => {
+                const rowPlayers = starters.filter(player => Number(player.position) === type);
+                return rowPlayers.length ? `<div class="pitch-row pitch-row-${type}" aria-label="${label}">${rowPlayers.map(renderPitchPlayer).join('')}</div>` : '';
+            };
+            return `<div class="squad-pitch">
+                <div class="pitch-markings" aria-hidden="true"><span class="pitch-box"></span><span class="pitch-circle"></span></div>
+                ${row(1, 'Goalkeepers')}${row(2, 'Defenders')}${row(3, 'Midfielders')}${row(4, 'Forwards')}
+                <div class="pitch-bench"><div class="pitch-bench-label">Bench</div><div class="pitch-bench-row">${bench.map(renderPitchPlayer).join('')}</div></div>
+            </div>`;
+        }
+
+        function openLivePlayerBreakdown(event, button) {
+            event.stopPropagation();
+            const player = JSON.parse(decodeURIComponent(button.dataset.player || ''));
+            const overlay = document.getElementById('livePlayerOverlay');
+            const body = document.getElementById('livePlayerOverlayBody');
+            if (!overlay || !body) return;
+            const position = Number(player.position) || 0;
+            const minutes = Number(player.minutes) || 0;
+            const rows = [];
+            const addRow = (label, value, points, always) => {
+                if (always || Number(value) !== 0 || Number(points) !== 0) rows.push([label, value, points]);
+            };
+            addRow('Minutes played', minutes, minutes >= 60 ? 2 : (minutes > 0 ? 1 : 0), true);
+            addRow('Goals scored', Number(player.goals) || 0, (Number(player.goals) || 0) * (position <= 2 ? 6 : (position === 3 ? 5 : 4)));
+            addRow('Assists', Number(player.assists) || 0, (Number(player.assists) || 0) * 3);
+            addRow('Clean sheets', Number(player.cleanSheets) || 0, minutes >= 60 ? (Number(player.cleanSheets) || 0) * (position <= 2 ? 4 : (position === 3 ? 1 : 0)) : 0);
+            addRow('Saves', Number(player.saves) || 0, position === 1 ? Math.floor((Number(player.saves) || 0) / 3) : 0);
+            addRow('Goals conceded', Number(player.goalsConceded) || 0, position <= 2 ? -Math.floor((Number(player.goalsConceded) || 0) / 2) : 0);
+            addRow('Penalties saved', Number(player.penaltiesSaved) || 0, (Number(player.penaltiesSaved) || 0) * 5);
+            addRow('Penalties missed', Number(player.penaltiesMissed) || 0, (Number(player.penaltiesMissed) || 0) * -2);
+            addRow('Own goals', Number(player.ownGoals) || 0, (Number(player.ownGoals) || 0) * -2);
+            addRow('Yellow cards', Number(player.yellowCards) || 0, (Number(player.yellowCards) || 0) * -1);
+            addRow('Red cards', Number(player.redCards) || 0, (Number(player.redCards) || 0) * -3);
+            addRow('Bonus', Number(player.bonus) || 0, Number(player.bonus) || 0);
+            const defensiveTarget = Number(player.defensiveTarget) || 0;
+            if (defensiveTarget) addRow('Defensive contribution', Number(player.defensiveContributions) || 0, Number(player.defensiveContributions) >= defensiveTarget ? 2 : 0, true);
+            const rawPoints = Number(player.rawPoints) || 0;
+            const calculatedPoints = rows.reduce((total, row) => total + (Number(row[2]) || 0), 0);
+            if (rawPoints !== calculatedPoints) rows.push(['Other adjustment', '—', rawPoints - calculatedPoints]);
+            const multiplier = Number(player.multiplier) || 0;
+            const displayPoints = multiplier > 0 ? Number(player.points) || 0 : rawPoints;
+            const kitUrl = liveKitUrl(player);
+            body.innerHTML = `<div class="player-sheet-handle"></div><button class="player-sheet-close" type="button" onclick="closeLivePlayerBreakdown(event)" aria-label="Close">×</button>
+                <div class="player-sheet-header">
+                    <span class="player-sheet-kit"><span class="pitch-kit-fallback">◆</span>${kitUrl ? `<img src="${kitUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>
+                    <span><span class="player-sheet-title">${escapeProfileHtml(player.name)}${player.isCaptain ? ' <em>(C)</em>' : ''}</span><span class="player-sheet-fixture">${escapeProfileHtml(player.opponent || formatLiveKickoff(player.kickoff) || '')}</span></span>
+                    <span class="player-sheet-total"><strong>${displayPoints}</strong><span>points</span></span>
+                </div>
+                <div class="breakdown-title">Points breakdown</div>
+                <div class="breakdown-table">
+                    <div class="breakdown-head"><span>Statistic</span><span>Value</span><span>Points</span></div>
+                    ${rows.map(([label, value, points]) => `<div class="breakdown-row"><span>${escapeProfileHtml(label)}</span><span>${escapeProfileHtml(value)}</span><strong class="${Number(points) < 0 ? 'negative' : ''}">${Number(points) > 0 ? '+' : ''}${escapeProfileHtml(points)} pts</strong></div>`).join('')}
+                </div>
+                ${multiplier > 1 ? `<div class="breakdown-multiplier"><span>${player.isCaptain ? 'Captain' : 'Chip'} multiplier ×${multiplier}</span><strong>${displayPoints} pts</strong></div>` : ''}`;
+            overlay.classList.add('open');
+        }
+
+        function closeLivePlayerBreakdown(event) {
+            if (event) event.stopPropagation();
+            const overlay = document.getElementById('livePlayerOverlay');
+            if (overlay) overlay.classList.remove('open');
         }
 
         function orderedManagerProfiles(profiles) {
@@ -2270,6 +2584,7 @@
             const previewParams = new URLSearchParams(window.location.search);
             const previewChip = previewParams.get('previewChip');
             const previewSecondChip = previewParams.get('previewChip2') || (previewChip ? 'wc' : '');
+            const previewLive = previewParams.get('previewLive') === '1';
 
             const profileChipMap = {};
             const profileActiveChipMap = {};
@@ -2413,9 +2728,11 @@
         function renderApp(data) {
             const appDiv = document.getElementById('app');
             let html = '';
+            const expandedManagerCardKeys = getExpandedManagerCardKeys();
             const previewParams = new URLSearchParams(window.location.search);
             const previewChip = previewParams.get('previewChip');
             const previewSecondChip = previewParams.get('previewChip2') || (previewChip ? 'wc' : '');
+            const previewLive = previewParams.get('previewLive') === '1';
             totalPeriodSlides = 0;
             totalProfileSlides = 0;
 
@@ -2450,6 +2767,41 @@
                 }
             });
             gwDataStore.sort((a, b) => (Number(a.gameweek || a.gw || 0)) - (Number(b.gameweek || b.gw || 0)));
+
+            // Local-only visual preview for the live player breakdown when no match is active.
+            // It changes the in-memory response only; spreadsheet and published data are untouched.
+            if (previewLive && gwDataStore.length) {
+                const previewGameweek = gwDataStore[gwDataStore.length - 1];
+                previewGameweek.isLive = true;
+                previewGameweek.isUpcoming = false;
+                const samplePlayers = [
+                    { id: 9001, squadPosition: 1, name: 'Raya', position: 1, teamCode: 3, status: 'finished', opponent: 'CHE (H)', rawPoints: 3, points: 3, minutes: 90, saves: 2, goals: 0, assists: 0, cleanSheets: 0, bonus: 0, bps: 14, multiplier: 1 },
+                    { id: 9002, squadPosition: 2, name: 'Gabriel', position: 2, teamCode: 3, status: 'live', opponent: 'CHE (H)', rawPoints: 6, points: 6, minutes: 67, goals: 0, assists: 0, cleanSheets: 1, bonus: 1, bps: 24, defensiveContributions: 7, defensiveTarget: 10, multiplier: 1 },
+                    { id: 9003, squadPosition: 3, name: 'Konsa', position: 2, teamCode: 7, status: 'finished', opponent: 'SUN (A)', rawPoints: 4, points: 4, minutes: 90, goals: 0, assists: 0, cleanSheets: 0, bonus: 0, bps: 17, defensiveContributions: 10, defensiveTarget: 10, multiplier: 1 },
+                    { id: 9004, squadPosition: 4, name: 'De Cuyper', position: 2, teamCode: 36, status: 'live', opponent: 'COV (A)', rawPoints: 4, points: 4, minutes: 67, goals: 0, assists: 1, cleanSheets: 0, bonus: 0, bps: 19, defensiveContributions: 5, defensiveTarget: 10, multiplier: 1 },
+                    { id: 9005, squadPosition: 5, name: 'Salah', position: 3, teamCode: 14, status: 'upcoming', opponent: 'NEW (A)', kickoff: '2026-09-07T18:30:00Z', rawPoints: 0, points: 0, minutes: 0, goals: 0, assists: 0, cleanSheets: 0, bonus: 0, bps: 0, multiplier: 1 },
+                    { id: 9006, squadPosition: 6, name: 'Palmer', position: 3, teamCode: 8, status: 'live', opponent: 'ARS (A)', rawPoints: 8, points: 8, minutes: 67, goals: 1, assists: 0, cleanSheets: 0, bonus: 2, bps: 29, defensiveContributions: 4, defensiveTarget: 12, multiplier: 1 },
+                    { id: 9007, squadPosition: 7, name: 'B. Fernandes', position: 3, teamCode: 1, status: 'finished', opponent: 'MCI (H)', rawPoints: 5, points: 5, minutes: 90, goals: 0, assists: 1, cleanSheets: 0, bonus: 1, bps: 22, defensiveContributions: 8, defensiveTarget: 12, multiplier: 1 },
+                    { id: 9008, squadPosition: 8, name: 'Mbeumo', position: 3, teamCode: 1, status: 'finished', opponent: 'MCI (H)', rawPoints: 4, points: 4, minutes: 90, goals: 0, assists: 0, cleanSheets: 1, bonus: 0, bps: 15, defensiveContributions: 12, defensiveTarget: 12, multiplier: 1 },
+                    { id: 9009, squadPosition: 9, name: 'Szoboszlai', position: 3, teamCode: 14, status: 'live', opponent: 'FUL (H)', rawPoints: 3, points: 3, minutes: 67, goals: 0, assists: 0, cleanSheets: 0, bonus: 0, bps: 12, defensiveContributions: 6, defensiveTarget: 12, multiplier: 1 },
+                    { id: 9010, squadPosition: 10, name: 'Haaland', position: 4, teamCode: 43, status: 'finished', opponent: 'FUL (H)', rawPoints: 13, points: 26, minutes: 90, goals: 2, assists: 0, cleanSheets: 0, bonus: 3, bps: 48, multiplier: 2, isCaptain: true },
+                    { id: 9011, squadPosition: 11, name: 'João Pedro', position: 4, teamCode: 8, status: 'live', opponent: 'HUL (H)', rawPoints: 1, points: 1, minutes: 67, goals: 0, assists: 0, cleanSheets: 0, bonus: 0, bps: 7, multiplier: 1 },
+                    { id: 9012, squadPosition: 12, name: 'Kinsky', position: 1, teamCode: 6, status: 'finished', opponent: 'EVE (H)', rawPoints: 3, points: 0, minutes: 90, saves: 3, multiplier: 0 },
+                    { id: 9013, squadPosition: 13, name: 'Greaves', position: 2, teamCode: 40, status: 'finished', opponent: 'CRY (A)', rawPoints: 2, points: 0, minutes: 90, multiplier: 0 },
+                    { id: 9014, squadPosition: 14, name: 'Maguire', position: 2, teamCode: 1, status: 'finished', opponent: 'MCI (H)', rawPoints: 2, points: 0, minutes: 90, multiplier: 0 },
+                    { id: 9015, squadPosition: 15, name: 'Thomas-Asante', position: 4, teamCode: 31, status: 'upcoming', opponent: 'BHA (H)', kickoff: '2026-09-07T19:00:00Z', rawPoints: 0, points: 0, minutes: 0, multiplier: 0 }
+                ];
+                (previewGameweek.standings || []).forEach((manager, index) => {
+                    manager.liveSquad = samplePlayers.map((player, playerIndex) => ({
+                        ...player,
+                        id: player.id + (index * 100),
+                        rawPoints: Math.max(0, Number(player.rawPoints) - (index && playerIndex % 2 ? 1 : 0)),
+                        points: Math.max(0, Number(player.points) - (index && playerIndex % 2 ? 1 : 0))
+                    }));
+                    manager.playersLeft = samplePlayers.filter(player => player.status === 'upcoming').length;
+                    manager.starPerformer = { name: 'Haaland (C)', points: 26 };
+                });
+            }
             decorateGameweekData(gwDataStore);
 
             const latestPlayedGameweek = [...gwDataStore]
@@ -2574,6 +2926,14 @@
                         const playersLeftHtml = Boolean(gwGroup.isLive) && playersLeft !== null && !hasNoEntry
                             ? `<div class="players-left">${playersLeft} ${playersLeft === 1 ? 'player' : 'players'} left</div>`
                             : '';
+                        const liveSquad = Array.isArray(mgr.liveSquad) ? mgr.liveSquad : [];
+                        const livePlayers = liveSquad.filter(player => player.status === 'live');
+                        const liveSquadHtml = Boolean(gwGroup.isLive) && liveSquad.length
+                            ? `<div class="live-squad-panel">
+                                <div class="live-squad-heading"><span>Squad</span><span>${livePlayers.length} live · GW${Number(gwGroup.gameweek) || ''}</span></div>
+                                ${renderSquadPitch(liveSquad, starName)}
+                            </div>`
+                            : '';
                         const movementClass = meta.rankMovement > 0 ? 'rank-up' : (meta.rankMovement < 0 ? 'rank-down' : 'rank-level');
                         const movementIcon = meta.rankMovement > 0 ? '▲' : (meta.rankMovement < 0 ? '▼' : '—');
                         const overallDisplay = meta.notParticipating
@@ -2586,11 +2946,14 @@
                         const averageDisplay = meta.notParticipating || meta.fiveGwAverage === null
                             ? '–'
                             : Number(meta.fiveGwAverage || 0).toFixed(1);
-                        const cardClass = `fut-card manager-item ${rankClass} ${hasActiveChip ? 'glow-gold' : ''}`;
+                        const gameweekNumber = Number(gwGroup.gameweek !== undefined ? gwGroup.gameweek : gwGroup.gw) || 0;
+                        const cardStateKey = `${gameweekNumber}:${String(managerName).trim().toLowerCase()}`;
+                        const cardIsExpanded = expandedManagerCardKeys.has(cardStateKey);
+                        const cardClass = `fut-card manager-item ${rankClass} ${hasActiveChip ? 'glow-gold' : ''} ${cardIsExpanded ? 'expanded' : ''}`;
 
                         html += `
                             <div class="manager-glow-wrap ${hitClass}">
-                              <div class="${cardClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Show details for ${managerName}" onclick="toggleManagerCard(this)" onkeydown="handleManagerCardKey(event, this)">
+                              <div class="${cardClass}" data-card-key="${escapeProfileHtml(cardStateKey)}" role="button" tabindex="0" aria-expanded="${cardIsExpanded}" aria-label="Show details for ${managerName}" onclick="toggleManagerCard(this)" onkeydown="handleManagerCardKey(event, this)">
                                 <div class="manager-summary">
                                     <div>
                                         <div class="manager-name-line"><span class="manager-name">${managerName}</span><span class="compact-overall">${overallDisplay}</span></div>
@@ -2613,21 +2976,12 @@
                                 
                                 <div class="card-dropdown">
                                     <div class="detail-list">
-                                        <div class="detail-row star">
-                                            <div class="detail-row-label">⭐ Star</div>
-                                            <div class="detail-row-name">${starName || 'None'}</div>
-                                            <div class="detail-row-points">${starPts} pts</div>
-                                        </div>
-                                        <div class="detail-row worst">
-                                            <div class="detail-row-label">💩 Worst</div>
-                                            <div class="detail-row-name">${worstName || 'None'}</div>
-                                            <div class="detail-row-points">${worstPts} pts</div>
-                                        </div>
                                         <div class="detail-row transfer">
                                             <div class="detail-row-label">🔄 Transfers</div>
                                             <div class="detail-row-name">${transfersHtml}</div>
                                             <div class="detail-row-points transfer-return">${transferResultText}</div>
                                         </div>
+                                        ${liveSquadHtml}
                                     </div>
                                 </div>
                               </div>
