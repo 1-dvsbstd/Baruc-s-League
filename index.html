@@ -596,21 +596,26 @@
             content: '';
             display: block;
             position: absolute;
-            top: 27%;
-            right: -12px;
-            bottom: 27%;
-            left: -12px;
+            top: 20%;
+            right: -13px;
+            bottom: 20%;
+            left: -13px;
             z-index: 0;
             pointer-events: none;
-            filter: blur(10px);
+            border-radius: 40%;
+            filter: blur(9px);
         }
 
         .manager-glow-wrap.transfer-positive::before {
-            background: linear-gradient(90deg, rgba(20, 255, 118, 0.34) 0, transparent 13%, transparent 87%, rgba(20, 255, 118, 0.34) 100%);
+            border: 0;
+            background: linear-gradient(90deg, rgba(0,255,126,0.88) 0, rgba(0,255,126,0.34) 7%, transparent 18%, transparent 82%, rgba(0,255,126,0.34) 93%, rgba(0,255,126,0.88) 100%);
+            box-shadow: none;
         }
 
         .manager-glow-wrap.transfer-negative::before {
-            background: linear-gradient(90deg, rgba(255, 24, 48, 0.38) 0, transparent 13%, transparent 87%, rgba(255, 24, 48, 0.38) 100%);
+            border: 0;
+            background: linear-gradient(90deg, rgba(255,28,58,0.9) 0, rgba(255,28,58,0.36) 7%, transparent 18%, transparent 82%, rgba(255,28,58,0.36) 93%, rgba(255,28,58,0.9) 100%);
+            box-shadow: none;
         }
 
         .manager-item.glow-gold {
@@ -1043,9 +1048,8 @@
         .pitch-circle::after { display: none; }
         .pitch-row { position: relative; z-index: 4; display: flex; align-items: flex-start; justify-content: space-evenly; min-height: 89px; gap: 1px; }
         .pitch-player { position: relative; width: min(18%, 72px); min-width: 0; padding: 0; border: 0; color: #fff; background: transparent; font: inherit; cursor: pointer; }
-        .pitch-kit-wrap { position: relative; display: block; width: 43px; height: 48px; margin: 0 auto -4px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.45)); }
+        .pitch-kit-wrap { position: relative; display: block; width: 43px; height: 41px; margin: 0 auto 0; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.42)); }
         .pitch-kit { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: contain; }
-        .pitch-kit-fallback { position: absolute; inset: 5px 3px 1px; z-index: 1; display: grid; place-items: center; clip-path: polygon(28% 0,42% 9%,58% 9%,72% 0,100% 20%,84% 39%,75% 32%,75% 100%,25% 100%,25% 32%,16% 39%,0 20%); background: linear-gradient(135deg,#18a0fb,#071f57); color: rgba(255,255,255,0.34); font-size: 0.65rem; }
         .pitch-player-name, .pitch-player-points, .pitch-player-fixture { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .pitch-player-card { display: block; overflow: hidden; border: 1px solid transparent; border-radius: 4px; transition: border-color 150ms ease, box-shadow 150ms ease; }
         .pitch-player-name { position: relative; z-index: 3; padding: 3px 2px; border-radius: 3px 3px 0 0; color: #18021d; background: #fff; font-size: 0.49rem; font-weight: 900; }
@@ -1090,11 +1094,20 @@
         .breakdown-multiplier { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; padding: 10px 12px; border: 1px solid rgba(239,198,77,0.38); border-radius: 9px; color: #e8dcae; background: rgba(239,198,77,0.07); font-size: 0.62rem; font-weight: 800; }
         .breakdown-multiplier strong { color: var(--gold-color); font-size: 0.76rem; }
 
+        @media (max-width: 430px) {
+            .squad-pitch { min-height: 448px; }
+            .pitch-kit-wrap { width: 39px; height: 35px; }
+            .pitch-row { min-height: 76px; }
+            .pitch-box { left: 22%; width: 56%; height: 13%; }
+            .pitch-box::before { left: 29%; width: 42%; height: 40%; }
+            .pitch-box::after { bottom: -18px; width: 54px; height: 17px; }
+        }
+
         @media (min-width: 700px) {
             .squad-pitch { min-height: 570px; padding-inline: 20px; }
             .pitch-row { min-height: 101px; }
             .pitch-player { max-width: 86px; }
-            .pitch-kit-wrap { width: 51px; height: 57px; }
+            .pitch-kit-wrap { width: 49px; height: 47px; }
             .pitch-player-name { font-size: 0.56rem; }
         }
 
@@ -2330,22 +2343,28 @@
 
         function toggleManagerCard(card) {
             const isExpanded = !card.classList.contains('expanded');
+            if (isExpanded) {
+                document.querySelectorAll('.manager-item.expanded').forEach(openCard => {
+                    if (openCard !== card) {
+                        openCard.classList.remove('expanded');
+                        openCard.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
             card.classList.toggle('expanded', isExpanded);
             card.setAttribute('aria-expanded', String(isExpanded));
             const cardKey = card.dataset.cardKey;
             if (cardKey) {
-                const expandedKeys = getExpandedManagerCardKeys();
-                if (isExpanded) expandedKeys.add(cardKey);
-                else expandedKeys.delete(cardKey);
                 try {
-                    sessionStorage.setItem('barucsLeagueExpandedCards', JSON.stringify(Array.from(expandedKeys)));
+                    sessionStorage.setItem('barucsLeagueExpandedCards', JSON.stringify(isExpanded ? [cardKey] : []));
                 } catch (error) {}
             }
         }
 
         function getExpandedManagerCardKeys() {
             try {
-                return new Set(JSON.parse(sessionStorage.getItem('barucsLeagueExpandedCards') || '[]'));
+                const savedKeys = JSON.parse(sessionStorage.getItem('barucsLeagueExpandedCards') || '[]');
+                return new Set(Array.isArray(savedKeys) && savedKeys.length ? [savedKeys[savedKeys.length - 1]] : []);
             } catch (error) {
                 return new Set();
             }
@@ -2409,7 +2428,9 @@
 
         function liveKitUrl(player) {
             const code = Number(player.teamCode) || 0;
-            return code ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${code}-110.webp` : '';
+            if (!code) return '';
+            const goalkeeperSuffix = Number(player.position) === 1 ? '_1' : '';
+            return `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${code}${goalkeeperSuffix}-110.png`;
         }
 
         function renderPitchPlayer(player) {
@@ -2420,7 +2441,7 @@
             const points = Number(player.multiplier) > 0 ? Number(player.points) || 0 : Number(player.rawPoints) || 0;
             const kitUrl = liveKitUrl(player);
             return `<button class="pitch-player ${statusClass} ${starClass}" type="button" data-player="${encodedPlayer}" onclick="openLivePlayerBreakdown(event, this)">
-                <span class="pitch-kit-wrap">${captain}<span class="pitch-kit-fallback">◆</span>${kitUrl ? `<img class="pitch-kit" src="${kitUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>
+                <span class="pitch-kit-wrap">${captain}${kitUrl ? `<img class="pitch-kit" src="${kitUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>
                 <span class="pitch-player-card"><span class="pitch-player-name">${escapeProfileHtml(player.name)}</span><span class="pitch-player-points">${points} pts</span></span>
                 <span class="pitch-player-fixture">${escapeProfileHtml(player.opponent || formatLiveKickoff(player.kickoff) || '')}</span>
             </button>`;
@@ -2484,7 +2505,7 @@
             const kitUrl = liveKitUrl(player);
             body.innerHTML = `<div class="player-sheet-handle"></div><button class="player-sheet-close" type="button" onclick="closeLivePlayerBreakdown(event)" aria-label="Close">×</button>
                 <div class="player-sheet-header">
-                    <span class="player-sheet-kit"><span class="pitch-kit-fallback">◆</span>${kitUrl ? `<img src="${kitUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>
+                    <span class="player-sheet-kit">${kitUrl ? `<img src="${kitUrl}" alt="" onerror="this.style.display='none'">` : ''}</span>
                     <span><span class="player-sheet-title">${escapeProfileHtml(player.name)}${player.isCaptain ? ' <em>(C)</em>' : ''}</span><span class="player-sheet-fixture">${escapeProfileHtml(player.opponent || formatLiveKickoff(player.kickoff) || '')}</span></span>
                     <span class="player-sheet-total"><strong>${displayPoints}</strong><span>points</span></span>
                 </div>
