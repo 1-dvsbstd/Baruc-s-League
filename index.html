@@ -1470,6 +1470,31 @@
         .profile-title-name { position: relative; z-index: 1; color: #d9ffeb; font-size: 0.86rem; font-weight: 900; letter-spacing: 1.4px; text-shadow: 0 0 15px rgba(0,255,135,0.46), 0 1px 0 rgba(0,0,0,0.55); text-transform: uppercase; }
         .profile-title-explanation { position: relative; z-index: 1; color: #b7d4c8; font-size: 0.62rem; line-height: 1.25; margin-top: 3px; }
 
+        .profile-title-block.banner-negative {
+            --achievement-art:
+                radial-gradient(ellipse at 50% -20%, rgba(255,190,200,0.34), transparent 45%),
+                conic-gradient(from 248deg at 50% 50%, transparent 0 8%, rgba(255,92,118,0.10) 8.5% 10%, transparent 10.5% 19%, rgba(255,255,255,0.05) 19.5% 21%, transparent 21.5% 100%),
+                linear-gradient(118deg, transparent 0 17%, rgba(255,84,110,0.12) 17.5% 19.5%, transparent 20% 80%, rgba(255,84,110,0.10) 80.5% 82.5%, transparent 83%),
+                linear-gradient(135deg, #360816, #8b1732 49%, #5b0d24 72%, #25050f);
+        }
+        .profile-title-block.banner-negative .profile-title-copy,
+        .profile-title-block.banner-negative .profile-honour-count {
+            border-color: rgba(255,58,91,0.78);
+            box-shadow: 0 0 22px rgba(255,30,68,0.24), inset 0 0 24px rgba(255,71,104,0.09), 0 7px 18px rgba(0,0,0,0.24);
+        }
+        .profile-title-block.banner-negative .profile-title-copy::before {
+            background:
+                linear-gradient(145deg, rgba(255,205,211,0.18) 0 12%, transparent 13% 43%, rgba(40,0,10,0.22) 44% 62%, rgba(255,70,103,0.15) 63% 100%),
+                linear-gradient(35deg, #9a1a39, #550b20 58%, #7c142f);
+            box-shadow: 0 0 30px rgba(255,35,74,0.3), inset 0 0 0 1px rgba(255,178,190,0.25), inset 8px 0 18px rgba(255,88,116,0.1), inset -10px -8px 18px rgba(35,0,9,0.3);
+        }
+        .profile-title-block.banner-negative .profile-title-name {
+            color: var(--gold-color);
+            text-shadow: 0 0 15px rgba(255,199,44,0.38), 0 1px 0 rgba(0,0,0,0.6);
+        }
+        .profile-title-block.banner-negative .profile-title-explanation,
+        .profile-title-block.banner-negative .profile-honour-count span { color: #e4bcc5; }
+
         @media (min-width: 560px) {
             .profile-card-header { grid-template-columns: minmax(0, 1fr) 184px minmax(0, 1fr); }
             .profile-chip-block .chip-inventory { grid-template-columns: repeat(4, 42px); }
@@ -2606,6 +2631,7 @@
             const previewChip = previewParams.get('previewChip');
             const previewSecondChip = previewParams.get('previewChip2') || (previewChip ? 'wc' : '');
             const previewLive = previewParams.get('previewLive') === '1';
+            const previewRubyBanner = previewParams.get('previewBanner') === 'ruby';
 
             const profileChipMap = {};
             const profileActiveChipMap = {};
@@ -2728,7 +2754,7 @@
                             }).join('')}
                         </div>
                         </div>
-                        <div class="profile-title-block">
+                        <div class="profile-title-block ${(manager.bannerTone === 'negative' || (previewRubyBanner && managerIndex === 0)) ? 'banner-negative' : ''}">
                             <div class="profile-honour-count"><strong>${honours.gwWins}</strong><span>GW WINS</span></div>
                             <div class="profile-title-copy">
                                 <div class="profile-title-name">${escapeProfileHtml(manager.title)}</div>
