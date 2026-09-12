@@ -1058,7 +1058,8 @@
         .pitch-player.is-live .pitch-player-card { border-color: #00e89a; box-shadow: 0 0 5px rgba(0,232,154,0.9), 0 0 14px rgba(0,217,145,0.58), 0 0 24px rgba(0,169,117,0.3); }
         .pitch-player.is-live .pitch-player-points { color: #00ff87; }
         .pitch-player.is-star .pitch-player-card { border-color: #ffd34e; box-shadow: 0 0 5px rgba(255,211,78,0.94), 0 0 15px rgba(239,198,77,0.62), 0 0 25px rgba(185,132,20,0.32); }
-        .pitch-player.is-star.is-live .pitch-player-card { border-color: #ffd34e; box-shadow: 0 0 0 1px rgba(0,232,154,0.94), 0 0 8px rgba(255,211,78,0.9), 0 0 18px rgba(0,217,145,0.46), 0 0 27px rgba(239,198,77,0.34); }
+        .pitch-player.is-star.is-live .pitch-player-card { border-color: #ffd34e; box-shadow: 0 0 5px rgba(255,211,78,0.94), 0 0 15px rgba(239,198,77,0.62), 0 0 25px rgba(185,132,20,0.32); }
+        .pitch-player.is-star.is-live .pitch-player-points { color: var(--gold-color); }
         .pitch-player.is-finished .pitch-player-card { border-color: rgba(220,232,240,0.42); box-shadow: 0 0 3px rgba(220,232,240,0.24); }
         .pitch-player.is-finished.is-star .pitch-player-card { border-color: rgba(255,211,78,0.62); box-shadow: 0 0 4px rgba(255,211,78,0.22); }
         .pitch-player.is-upcoming { opacity: 0.62; filter: grayscale(0.18); }
@@ -2497,7 +2498,7 @@
             const bench = ordered.filter(player => !starterIds.has(Number(player.id)));
             const row = (type, label) => {
                 const rowPlayers = starters.filter(player => Number(player.position) === type);
-                return rowPlayers.length ? `<div class="pitch-row pitch-row-${type}" aria-label="${label}">${rowPlayers.map(renderPitchPlayer).join('')}</div>` : '';
+                return rowPlayers.length ? `<div class="pitch-row pitch-row-${type}" aria-label="${label}">${rowPlayers.map(player => renderPitchPlayer(player)).join('')}</div>` : '';
             };
             return `<div class="squad-pitch">
                 <div class="pitch-markings" aria-hidden="true"><span class="pitch-box"></span><span class="pitch-circle"></span></div>
