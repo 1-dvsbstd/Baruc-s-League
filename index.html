@@ -2638,13 +2638,19 @@
 
             const profileChipMap = {};
             const profileActiveChipMap = {};
-            const latestProfileStandings = gwDataStore.length > 0
-                ? (gwDataStore[gwDataStore.length - 1].standings || [])
+            const latestProfileGameweek = gwDataStore[gwDataStore.length - 1];
+            const latestProfileStandings = latestProfileGameweek
+                ? (latestProfileGameweek.standings || [])
                 : [];
             latestProfileStandings.forEach(manager => {
                 const key = String(manager.managerName || manager.name || '').trim().toLowerCase();
-                profileChipMap[key] = manager.remainingChips;
-                profileActiveChipMap[key] = manager.activeChip;
+                profileChipMap[key] = { ...(manager.remainingChips || {}) };
+                // A chip attached to a completed gameweek is used, not still active.
+                if (!latestProfileGameweek.isLive && !latestProfileGameweek.isUpcoming && manager.activeChip) {
+                    profileChipMap[key][manager.activeChip] = false;
+                }
+                profileActiveChipMap[key] = (latestProfileGameweek.isLive || latestProfileGameweek.isUpcoming)
+                    ? manager.activeChip : null;
             });
 
             // Keep the visual chip preview consistent between the newest live-GW
