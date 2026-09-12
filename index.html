@@ -305,17 +305,17 @@
         }
 
         .chip-pill.available {
-            color: rgba(189, 203, 216, 0.64);
-            border-color: rgba(189, 203, 216, 0.14);
-            background: rgba(5, 9, 16, 0.32);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.38);
-            opacity: 0.72;
+            color: #b9d9f5;
+            border-color: rgba(82, 175, 255, 0.42);
+            background: rgba(22, 75, 126, 0.30);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.28), 0 0 5px rgba(82,175,255,0.12);
+            opacity: 0.92;
         }
         
         .chip-pill.used {
             color: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.03);
-            background: transparent;
+            border-color: rgba(255, 255, 255, 0.10);
+            background: rgba(0, 0, 0, 0.20);
             text-decoration: line-through;
             opacity: 0.5;
         }
@@ -1664,6 +1664,7 @@
             gap: 8px;
             margin-top: 12px;
         }
+        .period-prize-grid > :only-child { grid-column: 1 / -1; }
 
         .period-prize {
             padding: 10px 8px;
@@ -2153,7 +2154,8 @@
                     state = 'used';
                 }
 
-                return `<span class="chip-pill ${state}"><span>${chip.label}</span></span>`;
+                const stateLabel = state === 'active' ? 'In use' : (state === 'used' ? 'Used' : 'Unused');
+                return `<span class="chip-pill ${state}" title="${chip.label}: ${stateLabel}" aria-label="${chip.label}: ${stateLabel}"><span>${chip.label}</span></span>`;
             }).join('') + `</div>`;
         }
 
