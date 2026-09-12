@@ -1611,10 +1611,11 @@
             overflow: hidden;
         }
 
-        .period-standing-row.rank-1 { border-color: var(--rank-gold-edge) !important; }
-        .period-standing-row.rank-2 { border-color: var(--rank-silver-edge) !important; }
+        .period-standing-row.rank-1 { border-color: rgba(145,163,184,0.28) !important; }
+        .period-standing-row.rank-2 { border-color: rgba(145,163,184,0.28) !important; }
         .period-standing-row.rank-3,
         .period-standing-row.rank-4 { border-color: rgba(145,163,184,0.28) !important; }
+        .period-standing-row.prize-winner { border-color: var(--rank-gold-edge) !important; }
 
         /* Use the exact same base and overlay order as a normal Live GW card. */
         .profile-top-card,
@@ -1716,8 +1717,8 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 7px 18px rgba(0,0,0,0.22);
         }
 
-        .overall-standing-tile.rank-1 { --overall-accent: var(--rank-gold-edge); }
-        .overall-standing-tile.rank-2 { --overall-accent: var(--rank-silver-edge); }
+        .overall-standing-tile.rank-1 { --overall-accent: rgba(145,163,184,0.28); }
+        .overall-standing-tile.rank-2 { --overall-accent: rgba(145,163,184,0.28); }
         .overall-standing-tile.rank-3,
         .overall-standing-tile.rank-4 { --overall-accent: rgba(145,163,184,0.28); }
 
@@ -1733,8 +1734,8 @@
 
         .overall-tile-team { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; margin-top: 2px; }
         .overall-tile-points { color: var(--text-color); font-size: 0.96rem; font-weight: 850; text-align: right; white-space: nowrap; }
-        .overall-standing-tile.rank-1 .overall-tile-points { color: var(--gold-color); }
-        .overall-standing-tile.rank-2 .overall-tile-points { color: var(--silver-color); }
+        .overall-standing-tile.prize-winner { --overall-accent: var(--rank-gold-edge); }
+        .overall-standing-tile.prize-winner .overall-tile-points { color: var(--gold-color); }
         .overall-standing-tile.rank-3 .overall-tile-points,
         .overall-standing-tile.rank-4 .overall-tile-points { color: var(--text-color); }
 
@@ -3091,6 +3092,7 @@
                             }))
                             .sort((first, second) => second.numericScore - first.numericScore || String(first.name).localeCompare(String(second.name)));
 
+                        const periodPrizeWinnerName = rankedPeriodScores.find(score => String(score.name || '').trim().toLowerCase() !== 'carl')?.name || '';
                         const periodWeekNumbers = (cleanTitle.match(/\d+/g) || []).map(Number);
                         const periodStart = periodWeekNumbers[0];
                         const periodEnd = periodWeekNumbers[1] || periodStart;
@@ -3105,7 +3107,8 @@
                                     ${rankedPeriodScores.map((s, idx) => {
                                         const scoreDisplay = String(s.numericScore);
                                         const teamName = TEAM_NAMES[s.name] || '';
-                                        const scoreColour = idx === 0 ? 'var(--gold-color)' : (idx === 1 ? 'var(--silver-color)' : 'var(--text-color)');
+                                        const isPrizeWinner = String(s.name || '').trim().toLowerCase() === String(periodPrizeWinnerName).trim().toLowerCase();
+                                        const scoreColour = isPrizeWinner ? 'var(--gold-color)' : 'var(--text-color)';
                                         const gameweekPoints = containsLatestGameweek
                                             ? latestGameweekPointsMap[String(s.name || '').trim().toLowerCase()]
                                             : null;
@@ -3114,7 +3117,7 @@
                                             ? '—'
                                             : `${gameweekPoints >= 0 ? '+' : ''}${gameweekPoints}`;
                                         return `
-                                            <li class="period-standing-row rank-${idx + 1}" style="display: flex; justify-content: space-between; align-items: center;">
+                                            <li class="period-standing-row rank-${idx + 1}${isPrizeWinner ? ' prize-winner' : ''}" style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div>
                                                     <div style="font-weight: 600; font-size: 0.9rem; color: #ffffff;">${s.name}</div>
                                                     ${teamName ? `<div style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; margin-top: 1px;">${teamName}</div>` : ''}
@@ -3126,7 +3129,6 @@
                                 </ul>
                                 <div class="period-prize-grid">
                                     <div class="period-prize winner"><strong>Winner</strong>${period.topScorer || 'TBD'} <span>– ${formatPrize(period.winnerPrize)}</span></div>
-                                    <div class="period-prize runner"><strong>Runner-up</strong>${period.runnerName || 'TBD'} <span>– ${formatPrize(period.runnerPrize)}</span></div>
                                 </div>
                             </div>
                         `;
@@ -3175,8 +3177,7 @@
                     }
                 });
 
-                const overallWinnerRow = data.overall.rows[0] || [];
-                const overallRunnerRow = data.overall.rows[1] || [];
+                const overallWinnerRow = data.overall.rows.find(row => Number(row[prizeIdx]) > 0) || data.overall.rows[0] || [];
                 const overallPrizeText = row => {
                     const rawPrize = row[prizeIdx] !== undefined ? row[prizeIdx] : 0;
                     return String(rawPrize).startsWith('£') ? String(rawPrize) : '£' + rawPrize;
@@ -3200,7 +3201,7 @@
                                             : `${gameweekPoints >= 0 ? '+' : ''}${gameweekPoints}`;
 
                                         return `
-                                            <div class="overall-standing-tile rank-${rIdx + 1}">
+                                            <div class="overall-standing-tile rank-${rIdx + 1}${Number(row[prizeIdx]) > 0 ? ' prize-winner' : ''}">
                                                 <div><div class="overall-tile-name">${playerName}</div>${teamName ? `<div class="overall-tile-team">${teamName}</div>` : ''}</div>
                                                 <div class="standing-points-wrap"><span class="standing-movement ${updateClass}">${updateText}</span><span class="overall-tile-points">${points}</span></div>
                                             </div>
@@ -3209,7 +3210,6 @@
                         </div>
                         <div class="period-prize-grid">
                             <div class="period-prize winner"><strong>Winner</strong>${overallWinnerRow[playerIdx] || 'TBD'} <span>– ${overallPrizeText(overallWinnerRow)}</span></div>
-                            <div class="period-prize runner"><strong>Runner-up</strong>${overallRunnerRow[playerIdx] || 'TBD'} <span>– ${overallPrizeText(overallRunnerRow)}</span></div>
                         </div>
                     </div>
                 `;
