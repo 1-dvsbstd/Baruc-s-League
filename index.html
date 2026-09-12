@@ -3389,21 +3389,43 @@
 
         function enableEdgeWrapSwipe(track, getCurrentIndex, getTotalSlides, moveSlide) {
             let touchStartX = null;
+            let touchStartY = null;
+            let startIndex = 0;
 
             track.addEventListener('touchstart', event => {
                 touchStartX = event.touches && event.touches[0] ? event.touches[0].clientX : null;
+                touchStartY = event.touches && event.touches[0] ? event.touches[0].clientY : null;
+                startIndex = getCurrentIndex();
             }, { passive: true });
 
             track.addEventListener('touchend', event => {
                 if (touchStartX === null || !event.changedTouches || !event.changedTouches[0]) return;
                 const distance = event.changedTouches[0].clientX - touchStartX;
+                const verticalDistance = event.changedTouches[0].clientY - touchStartY;
                 touchStartX = null;
-                if (Math.abs(distance) < 45) return;
+                if (Math.abs(distance) < 45 || Math.abs(distance) <= Math.abs(verticalDistance)) return;
 
                 const currentIndex = getCurrentIndex();
                 const totalSlides = getTotalSlides();
-                if (distance > 0 && currentIndex === 0) moveSlide(-1);
-                if (distance < 0 && currentIndex === totalSlides - 1) moveSlide(1);
+                if (distance > 0 && startIndex === 0 && currentIndex === 0) moveSlide(-1);
+                if (distance < 0 && startIndex === totalSlides - 1 && currentIndex === totalSlides - 1) moveSlide(1);
+            }, { passive: true });
+
+            // Native scrolling (including trackpads) can land on the end copy
+            // without going through the Previous/Next button handlers.
+            let settleTimer;
+            const settle = () => {
+                const clone = track.querySelector('.gw-loop-clone, .period-loop-clone, .profile-loop-clone');
+                const first = track.firstElementChild;
+                if (!clone || !first || getTotalSlides() < 2) return;
+                if (Math.abs(track.scrollLeft - (clone.offsetLeft - first.offsetLeft)) < 3) {
+                    track.scrollTo({ left: 0, behavior: 'instant' });
+                }
+            };
+            track.addEventListener('scrollend', settle);
+            track.addEventListener('scroll', () => {
+                clearTimeout(settleTimer);
+                settleTimer = setTimeout(settle, 180);
             }, { passive: true });
         }
 
