@@ -2141,7 +2141,7 @@
                     const normKey = normalize(k);
                     const val = chipsData[k];
                     if (val === false || val === 'used') statusMap[normKey] = 'used';
-                    else if (val === true || val === 'available') statusMap[normKey] = 'available';
+                    else if ((val === true || val === 'available') && statusMap[normKey] !== 'used') statusMap[normKey] = 'available';
                 });
             }
 
@@ -2645,6 +2645,21 @@
             latestProfileStandings.forEach(manager => {
                 const key = String(manager.managerName || manager.name || '').trim().toLowerCase();
                 profileChipMap[key] = { ...(manager.remainingChips || {}) };
+                // The live history request can fail and return all chips available.
+                // Preserve confirmed usage from the saved gameweek squads.
+                gwDataStore.forEach(gameweek => {
+                    if (gameweek === latestProfileGameweek || gameweek.isUpcoming) return;
+                    const pastManager = (gameweek.standings || []).find(entry =>
+                        String(entry.managerName || entry.name || '').trim().toLowerCase() === key
+                    );
+                    if (!pastManager) return;
+                    Object.entries(pastManager.remainingChips || {}).forEach(([chip, state]) => {
+                        if (state === false || state === 'used') profileChipMap[key][chip] = false;
+                    });
+                    if (pastManager.activeChip && String(pastManager.activeChip).toLowerCase() !== 'none') {
+                        profileChipMap[key][pastManager.activeChip] = false;
+                    }
+                });
                 // A chip attached to a completed gameweek is used, not still active.
                 if (!latestProfileGameweek.isLive && !latestProfileGameweek.isUpcoming && manager.activeChip) {
                     profileChipMap[key][manager.activeChip] = false;
